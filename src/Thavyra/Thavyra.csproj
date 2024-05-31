@@ -62,4 +62,8 @@
       <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap\LICENSE" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="MassTransit" Version="8.2.2" />
+    </ItemGroup>
+
 </Project>
