@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 using OpenIddict.Abstractions;
-using Thavyra.Oidc.Models;
+using Thavyra.Oidc.Models.Internal;
 
 namespace Thavyra.Oidc.Stores;
 

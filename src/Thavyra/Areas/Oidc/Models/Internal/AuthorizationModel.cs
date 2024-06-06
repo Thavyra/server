@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace Thavyra.Oidc.Models;
+namespace Thavyra.Oidc.Models.Internal;
 
 public class AuthorizationModel
 {

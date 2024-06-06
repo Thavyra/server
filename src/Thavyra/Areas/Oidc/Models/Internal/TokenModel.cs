@@ -1,4 +1,4 @@
-namespace Thavyra.Oidc.Models;
+namespace Thavyra.Oidc.Models.Internal;
 
 public class TokenModel
 {

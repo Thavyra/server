@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using MassTransit;
 using Thavyra.Contracts;
 using Thavyra.Contracts.Scope;
-using Thavyra.Oidc.Models;
+using Thavyra.Oidc.Models.Internal;
 
 namespace Thavyra.Oidc.Stores;
 

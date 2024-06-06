@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Text.Json;
 using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Abstractions;
-using Thavyra.Oidc.Models;
+using Thavyra.Oidc.Models.Internal;
 
 namespace Thavyra.Oidc.Stores;
 
@@ -33,12 +33,28 @@ public abstract class BaseApplicationStore : IOpenIddictApplicationStore<Applica
 
     public abstract IAsyncEnumerable<ApplicationModel> FindByRedirectUriAsync(string uri, CancellationToken cancellationToken);
     
-    // Manage redirects, post-logout uris and setting is not supported
+    // Manage redirects, permissions and requirements
     
     public abstract ValueTask<ImmutableArray<string>> GetRedirectUrisAsync(ApplicationModel application,
         CancellationToken cancellationToken);
 
     public virtual ValueTask SetRedirectUrisAsync(ApplicationModel application, ImmutableArray<string> uris,
+        CancellationToken cancellationToken)
+        => throw new NotSupportedException();
+
+
+    public abstract ValueTask<ImmutableArray<string>> GetPermissionsAsync(ApplicationModel application,
+        CancellationToken cancellationToken);
+    
+    public ValueTask SetPermissionsAsync(ApplicationModel application, ImmutableArray<string> permissions,
+        CancellationToken cancellationToken)
+        => throw new NotSupportedException();
+    
+    
+    public abstract ValueTask<ImmutableArray<string>> GetRequirementsAsync(ApplicationModel application,
+        CancellationToken cancellationToken);
+
+    public ValueTask SetRequirementsAsync(ApplicationModel application, ImmutableArray<string> requirements,
         CancellationToken cancellationToken)
         => throw new NotSupportedException();
     
@@ -159,31 +175,13 @@ public abstract class BaseApplicationStore : IOpenIddictApplicationStore<Applica
         CancellationToken cancellationToken)
         => throw new NotSupportedException();
 
-
-    public ValueTask<ImmutableArray<string>> GetPermissionsAsync(ApplicationModel application,
-        CancellationToken cancellationToken)
-        => throw new NotSupportedException();
     
-    public ValueTask SetPermissionsAsync(ApplicationModel application, ImmutableArray<string> permissions,
-        CancellationToken cancellationToken)
-        => throw new NotSupportedException();
-    
-
     public ValueTask<ImmutableDictionary<string, JsonElement>> GetPropertiesAsync(ApplicationModel application,
         CancellationToken cancellationToken)
         => throw new NotSupportedException();
     
     public ValueTask SetPropertiesAsync(ApplicationModel application,
         ImmutableDictionary<string, JsonElement> properties,
-        CancellationToken cancellationToken)
-        => throw new NotSupportedException();
-
-
-    public ValueTask<ImmutableArray<string>> GetRequirementsAsync(ApplicationModel application,
-        CancellationToken cancellationToken)
-        => throw new NotSupportedException();
-    
-    public ValueTask SetRequirementsAsync(ApplicationModel application, ImmutableArray<string> requirements,
         CancellationToken cancellationToken)
         => throw new NotSupportedException();
 

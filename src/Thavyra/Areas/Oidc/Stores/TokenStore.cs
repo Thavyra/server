@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 using MassTransit;
 using Thavyra.Contracts;
 using Thavyra.Contracts.Token;
-using Thavyra.Oidc.Models;
+using Thavyra.Oidc.Models.Internal;
 
 namespace Thavyra.Oidc.Stores;
 

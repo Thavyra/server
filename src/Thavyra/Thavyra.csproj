@@ -67,4 +67,8 @@
       <PackageReference Include="OpenIddict.AspNetCore" Version="5.6.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Areas\" />
+    </ItemGroup>
+
 </Project>

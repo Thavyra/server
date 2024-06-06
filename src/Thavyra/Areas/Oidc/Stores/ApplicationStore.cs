@@ -1,9 +1,11 @@
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using MassTransit;
+using OpenIddict.Abstractions;
 using Thavyra.Contracts;
 using Thavyra.Contracts.Application;
-using Thavyra.Oidc.Models;
+using Thavyra.Contracts.Scope;
+using Thavyra.Oidc.Models.Internal;
 
 namespace Thavyra.Oidc.Stores;
 
@@ -120,6 +122,52 @@ public class ApplicationStore : BaseApplicationStore
         return response.Message.Items
             .Select(x => x.Uri)
             .ToImmutableArray();
+    }
+
+    public override ValueTask<ImmutableArray<string>> GetRequirementsAsync(ApplicationModel application, CancellationToken cancellationToken)
+    {
+        // Require PKCE for public clients 
+        
+        if (application.ClientType == OpenIddictConstants.ClientTypes.Public)
+        {
+            return new ValueTask<ImmutableArray<string>>([
+                OpenIddictConstants.Requirements.Features.ProofKeyForCodeExchange
+            ]);
+        }
+        
+        return new ValueTask<ImmutableArray<string>>([]);
+    }
+
+    public override async ValueTask<ImmutableArray<string>> GetPermissionsAsync(ApplicationModel application, CancellationToken cancellationToken)
+    {
+        var client = _clientFactory.CreateRequestClient<Scope_GetByApplication>();
+
+        var response = await client.GetResponse<Multiple<Scope>>(new Scope_GetByApplication
+        {
+            ApplicationId = application.Id
+        }, cancellationToken);
+
+        var permissions = response.Message.Items
+            .Select(scope => OpenIddictConstants.Permissions.Prefixes.Scope + scope.Name)
+            .ToList();
+        
+        permissions.AddRange([
+            OpenIddictConstants.Permissions.Endpoints.Authorization,
+            OpenIddictConstants.Permissions.Endpoints.Token,
+            
+            OpenIddictConstants.Permissions.Endpoints.Logout,
+            OpenIddictConstants.Permissions.Endpoints.Revocation,
+            
+            OpenIddictConstants.Permissions.ResponseTypes.Code,
+            OpenIddictConstants.Permissions.ResponseTypes.Token,
+            
+            OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
+            OpenIddictConstants.Permissions.GrantTypes.ClientCredentials,
+            OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
+            OpenIddictConstants.Permissions.GrantTypes.Implicit
+        ]);
+
+        return permissions.ToImmutableArray();
     }
 
     public override ValueTask<ApplicationModel> InstantiateAsync(CancellationToken cancellationToken)
