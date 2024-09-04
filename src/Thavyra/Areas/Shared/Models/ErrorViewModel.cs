@@ -1,4 +1,4 @@
-namespace Thavyra.Models;
+namespace Thavyra.Shared.Models;
 
 public class ErrorViewModel
 {

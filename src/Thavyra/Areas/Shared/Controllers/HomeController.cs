@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Thavyra.Models;
+using Thavyra.Shared.Models;
 
-namespace Thavyra.Controllers;
+namespace Thavyra.Shared.Controllers;
 
 public class HomeController : Controller
 {
