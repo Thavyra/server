@@ -1,0 +1,36 @@
+@model Thavyra.Oidc.Models.View.LoginViewModel
+
+<h2 class="text-3xl font-extralight mb-7 text-center">Log In</h2>
+
+<form method="post">
+
+    <div class="my-3">
+        <label class="block text-md mb-1.5"
+               asp-for="Username">
+            Username
+        </label>
+        <input class="form-control"
+               type="text" asp-for="Username"/>
+        <span class="text-sm text-negative"
+              asp-validation-for="Username"></span>
+    </div>
+
+    <div class="my-3">
+        <label class="block text-md mb-1.5"
+               asp-for="Password">
+            Password
+        </label>
+        <input class="form-control"
+               type="password" asp-for="Password"/>
+        <span class="text-sm text-negative" asp-validation-for="Password"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary my-3 w-full">Log In</button>
+
+    <p>Don't have an account? <a class="link" asp-controller="Login" asp-action="Register" asp-route-ReturnUrl="@Model.ReturnUrl">Register</a></p>
+</form>
+
+@section Scripts
+{
+    <partial name="../../Shared/Views/Shared/_ValidationScriptsPartial"/>
+}
