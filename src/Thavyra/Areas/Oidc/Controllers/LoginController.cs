@@ -10,14 +10,13 @@ using Thavyra.Oidc.Models.View;
 
 namespace Thavyra.Oidc.Controllers;
 
+[Area("Oidc")]
 public class LoginController : Controller
 {
-    private readonly ILoginManager _loginManager;
     private readonly IUserManager _userManager;
 
-    public LoginController(ILoginManager loginManager, IUserManager userManager)
+    public LoginController(IUserManager userManager)
     {
-        _loginManager = loginManager;
         _userManager = userManager;
     }
 
@@ -62,10 +61,13 @@ public class LoginController : Controller
         ArgumentException.ThrowIfNullOrEmpty(model.Username);
         ArgumentException.ThrowIfNullOrEmpty(model.Password);
 
-        var authenticationResult =
-            await _loginManager.AuthenticateAsync(model.Username, model.Password, cancellationToken);
+        var user = await _userManager.FindByLoginAsync(new PasswordLoginModel
+        {
+            Username = model.Username,
+            Password = model.Password
+        }, cancellationToken);
 
-        if (authenticationResult is null)
+        if (user is null)
         {
             const string message = "Username or password incorrect.";
 
@@ -78,9 +80,7 @@ public class LoginController : Controller
             });
         }
 
-        await SignInAsync(authenticationResult.UserId);
-
-        return Redirect(ReturnUrl);
+        return SignIn(user.Id);
     }
 
     [HttpGet("/register")]
@@ -122,15 +122,13 @@ public class LoginController : Controller
         ArgumentException.ThrowIfNullOrEmpty(model.Username);
         ArgumentException.ThrowIfNullOrEmpty(model.Password);
 
-        var login = await _loginManager.RegisterAsync(new RegisterModel
+        var user = await _userManager.RegisterAsync(new PasswordRegisterModel
         {
             Username = model.Username,
             Password = model.Password
         }, cancellationToken);
 
-        await SignInAsync(login.UserId);
-
-        return Redirect(ReturnUrl);
+        return SignIn(user.Id);
     }
 
     [HttpPost("/register/check-username")]
@@ -145,12 +143,10 @@ public class LoginController : Controller
     [HttpGet("/logout")]
     public IActionResult Logout()
     {
-        SignOut(CookieAuthenticationDefaults.AuthenticationScheme);
-
-        return Redirect(ReturnUrl);
+        return SignOut(CookieAuthenticationDefaults.AuthenticationScheme);
     }
 
-    private Task SignInAsync(Guid userId)
+    private SignInResult SignIn(Guid userId)
     {
         var identity = new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, userId.ToString())],
             CookieAuthenticationDefaults.AuthenticationScheme);
@@ -160,9 +156,7 @@ public class LoginController : Controller
             ExpiresUtc = DateTimeOffset.UtcNow.AddMonths(6),
             IsPersistent = true
         };
-
-        SignIn(new ClaimsPrincipal(identity), properties, CookieAuthenticationDefaults.AuthenticationScheme);
         
-        return Task.CompletedTask;
+        return SignIn(new ClaimsPrincipal(identity), properties, CookieAuthenticationDefaults.AuthenticationScheme);
     }
 }

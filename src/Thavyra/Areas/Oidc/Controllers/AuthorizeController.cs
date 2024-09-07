@@ -95,8 +95,7 @@ public class AuthorizeController : Controller
         };
     }
 
-    [HttpPost]
-    [FormValueRequired("submit.Accept"), ValidateAntiForgeryToken]
+    [HttpPostWithField("submit.Accept"), ValidateAntiForgeryToken]
     public async Task<IActionResult> AcceptAsync(CancellationToken cancellationToken)
     {
         var request = HttpContext.GetOpenIddictServerRequest() ??
@@ -138,8 +137,7 @@ public class AuthorizeController : Controller
             cancellationToken);
     }
 
-    [HttpPost]
-    [FormValueRequired("submit.Cancel"), ValidateAntiForgeryToken]
+    [HttpPostWithField("submit.Cancel"), ValidateAntiForgeryToken]
     public IActionResult CancelAsync()
     {
         return Forbid(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);

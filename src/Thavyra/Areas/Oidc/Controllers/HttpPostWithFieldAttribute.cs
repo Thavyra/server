@@ -3,11 +3,14 @@ using Microsoft.AspNetCore.Mvc.ActionConstraints;
 
 namespace Thavyra.Oidc.Controllers;
 
-public class FormValueRequiredAttribute : ActionMethodSelectorAttribute
+/// <summary>
+/// Identifies an action that supports the HTTP POST method, requiring the specified form field be present.
+/// </summary>
+public class HttpPostWithFieldAttribute : ActionMethodSelectorAttribute
 {
     private readonly string _name;
 
-    public FormValueRequiredAttribute(string name)
+    public HttpPostWithFieldAttribute(string name)
     {
         _name = name;
     }
