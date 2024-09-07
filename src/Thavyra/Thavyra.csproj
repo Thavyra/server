@@ -17,8 +17,8 @@
       <PackageReference Include="FluentValidation" Version="11.9.1" />
       <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
       <PackageReference Include="MassTransit" Version="8.2.2" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
       <PackageReference Include="OpenIddict.AspNetCore" Version="5.6.0" />
-      <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="5.6.0" />
       <PackageReference Include="Tailwind.Extensions.AspNetCore" Version="1.0.0" />
     </ItemGroup>
 
@@ -30,10 +30,6 @@
       <AdditionalFiles Include="Areas\Shared\Views\Shared\_ValidationScriptsPartial.cshtml" />
       <AdditionalFiles Include="Areas\Shared\Views\_ViewImports.cshtml" />
       <AdditionalFiles Include="Areas\Shared\Views\_ViewStart.cshtml" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Data\" />
     </ItemGroup>
 
 </Project>

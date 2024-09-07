@@ -1,6 +1,8 @@
 using MassTransit;
 using Tailwind;
-using Thavyra.Mocks;
+using Thavyra.Data.Configuration;
+using Thavyra.Data.Contexts;
+using Thavyra.Data.Seeds;
 using Thavyra.Oidc.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,8 +12,6 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddMassTransit(x =>
 {
-    x.AddConsumer<ApplicationConsumer>();
-    x.AddConsumer<UserConsumer>();
     
     x.UsingInMemory((context, cfg) =>
     {
@@ -29,12 +29,24 @@ foreach (var section in builder.Configuration.GetChildren())
             builder.Services.AddOidcAuthorizationServer(section);
             authenticationBuilder.AddOidcAuthentication(section);
             break;
+        case "Data":
+            builder.Services.AddEntityFramework(section);
+            break;
     }
 }
 
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    var context = services.GetRequiredService<ThavyraDbContext>();
+    context.Database.EnsureCreated();
+    DbInitializer.Initialize(context);
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
