@@ -62,9 +62,14 @@ public class ApplicationStore : BaseApplicationStore
     {
         var client = _clientFactory.CreateRequestClient<Application_GetById>();
 
+        if (!Guid.TryParse(identifier, out var guid))
+        {
+            return null;
+        }
+
         Response response = await client.GetResponse<Application, NotFound>(new Application_GetById
         {
-            Id = identifier
+            Id = guid
         }, cancellationToken);
 
         return response switch

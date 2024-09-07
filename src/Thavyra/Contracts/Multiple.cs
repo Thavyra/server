@@ -1,6 +1,3 @@
 namespace Thavyra.Contracts;
 
-public record Multiple<T>
-{
-    public required IReadOnlyList<T> Items { get; set; }
-}
+public record Multiple<T>(IReadOnlyList<T> Items);
