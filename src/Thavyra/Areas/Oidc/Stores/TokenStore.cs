@@ -213,27 +213,29 @@ public class TokenStore : BaseTokenStore
     {
         var client = _clientFactory.CreateRequestClient<Token_Prune>();
 
-        var response = await client.GetResponse<Value<long>>(new Token_Prune
+        var response = await client.GetResponse<Count>(new Token_Prune
         {
             Threshold = threshold.UtcDateTime
         }, cancellationToken);
 
-        return response.Message.Item;
+        return response.Message.Value;
     }
 
     public override async ValueTask<long> CountAsync(CancellationToken cancellationToken)
     {
         var client = _clientFactory.CreateRequestClient<Token_Count>();
 
-        var response = await client.GetResponse<Value<long>>(new Token_Count(), cancellationToken);
+        var response = await client.GetResponse<Count>(new Token_Count(), cancellationToken);
 
-        return response.Message.Item;
+        return response.Message.Value;
     }
 
     public override async ValueTask UpdateAsync(TokenModel token, CancellationToken cancellationToken)
     {
         await _publishEndpoint.Publish(new Token_Update
         {
+            Id = token.Id,
+            
             ReferenceId = token.ReferenceId,
             Type = token.Type,
             Status = token.Status,
@@ -249,11 +251,11 @@ public class TokenStore : BaseTokenStore
     {
         var client = _clientFactory.CreateRequestClient<Token_RevokeByAuthorization>();
 
-        var response = await client.GetResponse<Value<long>>(new Token_RevokeByAuthorization
+        var response = await client.GetResponse<Count>(new Token_RevokeByAuthorization
         {
             AuthorizationId = identifier
         }, cancellationToken);
 
-        return response.Message.Item;
+        return response.Message.Value;
     }
 }

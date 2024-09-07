@@ -35,9 +35,9 @@ public class ApplicationStore : BaseApplicationStore
     {
         var client = _clientFactory.CreateRequestClient<Application_Count>();
 
-        var response = await client.GetResponse<Value<long>>(new Application_Count(), cancellationToken);
+        var response = await client.GetResponse<Count>(new Application_Count(), cancellationToken);
 
-        return response.Message.Item;
+        return response.Message.Value;
     }
 
     public override async IAsyncEnumerable<ApplicationModel> ListAsync(int? count, int? offset,
@@ -119,9 +119,10 @@ public class ApplicationStore : BaseApplicationStore
             ApplicationId = application.Id
         }, cancellationToken);
 
-        return response.Message.Items
-            .Select(x => x.Uri)
-            .ToImmutableArray();
+        return [
+            ..response.Message.Items
+                .Select(x => x.Uri)
+        ];
     }
 
     public override ValueTask<ImmutableArray<string>> GetRequirementsAsync(ApplicationModel application, CancellationToken cancellationToken)
@@ -167,7 +168,7 @@ public class ApplicationStore : BaseApplicationStore
             OpenIddictConstants.Permissions.GrantTypes.Implicit
         ]);
 
-        return permissions.ToImmutableArray();
+        return [..permissions];
     }
 
     public override ValueTask<ApplicationModel> InstantiateAsync(CancellationToken cancellationToken)

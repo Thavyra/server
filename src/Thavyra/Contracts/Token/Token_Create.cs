@@ -1,5 +1,9 @@
 namespace Thavyra.Contracts.Token;
 
+/// <summary>
+/// Creates a new token.
+/// </summary>
+/// <returns><see cref="Token"/></returns>
 public record Token_Create
 {
     public required Guid Id { get; init; }

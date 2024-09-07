@@ -11,10 +11,10 @@ namespace Thavyra.Oidc.Managers;
 
 public class ApplicationManager : OpenIddictApplicationManager<ApplicationModel>
 {
-    private readonly IRequestClient<Application_ValidateClientSecret> _client;
+    private readonly IRequestClient<Application_CheckClientSecret> _client;
 
     public ApplicationManager(
-        IRequestClient<Application_ValidateClientSecret> client,
+        IRequestClient<Application_CheckClientSecret> client,
         IOpenIddictApplicationCache<ApplicationModel> cache,
         ILogger<ApplicationManager> logger,
         IOptionsMonitor<OpenIddictCoreOptions> options,
@@ -27,12 +27,17 @@ public class ApplicationManager : OpenIddictApplicationManager<ApplicationModel>
     public override async ValueTask<bool> ValidateClientSecretAsync(ApplicationModel application, string secret,
         CancellationToken cancellationToken = new())
     {
-        var response = await _client.GetResponse<Value<bool>>(new Application_ValidateClientSecret
+        Response response = await _client.GetResponse<Correct, Incorrect>(new Application_CheckClientSecret
         {
             ApplicationId = application.Id,
             Secret = secret
         }, cancellationToken);
 
-        return response.Message.Item;
+        return response switch
+        {
+            (_, Correct) => true,
+            (_, Incorrect) => false,
+            _ => throw new InvalidOperationException()
+        };
     }
 }

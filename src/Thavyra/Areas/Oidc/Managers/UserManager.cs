@@ -80,7 +80,7 @@ public class UserManager : IUserManager
 
         var loginClient = _clientFactory.CreateRequestClient<PasswordLogin_Check>();
 
-        Response loginResponse = await loginClient.GetResponse<PasswordCorrect, PasswordIncorrect>(new PasswordLogin_Check
+        Response loginResponse = await loginClient.GetResponse<Correct, Incorrect>(new PasswordLogin_Check
         {
             UserId = user.Message.Id,
             Password = login.Password
@@ -88,7 +88,7 @@ public class UserManager : IUserManager
 
         return loginResponse switch
         {
-            (_, PasswordCorrect) => new UserModel
+            (_, Correct) => new UserModel
             {
                 Id = user.Message.Id,
                 Username = user.Message.Username,

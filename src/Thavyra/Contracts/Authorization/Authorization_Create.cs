@@ -1,5 +1,9 @@
 namespace Thavyra.Contracts.Authorization;
 
+/// <summary>
+/// Creates a new OIDC authorization.
+/// </summary>
+/// <returns><see cref="Authorization"/></returns>
 public record Authorization_Create
 {
     public required Guid Id { get; init; }

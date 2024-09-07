@@ -98,9 +98,9 @@ public class ScopeStore : BaseScopeStore
     {
         var client = _clientFactory.CreateRequestClient<Scope_Count>();
 
-        var response = await client.GetResponse<Value<long>>(new Scope_Count(), cancellationToken);
+        var response = await client.GetResponse<Count>(new Scope_Count(), cancellationToken);
 
-        return response.Message.Item;
+        return response.Message.Value;
     }
 
     public override ValueTask<ScopeModel> InstantiateAsync(CancellationToken cancellationToken)

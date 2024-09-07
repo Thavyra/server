@@ -37,7 +37,7 @@ public class AuthorizationStore : BaseAuthorizationStore
             Type = authorization.Type,
             Status = authorization.Status,
 
-            Scopes = authorization.Scopes.ToImmutableArray(),
+            Scopes = [..authorization.Scopes],
 
             CreationDate = authorization.CreatedAt
         };
@@ -189,21 +189,21 @@ public class AuthorizationStore : BaseAuthorizationStore
     {
         var client = _clientFactory.CreateRequestClient<Authorization_Prune>();
 
-        var response = await client.GetResponse<Value<long>>(new Authorization_Prune
+        var response = await client.GetResponse<Count>(new Authorization_Prune
         {
             Threshold = threshold.UtcDateTime
         }, cancellationToken);
 
-        return response.Message.Item;
+        return response.Message.Value;
     }
 
     public override async ValueTask<long> CountAsync(CancellationToken cancellationToken)
     {
         var client = _clientFactory.CreateRequestClient<Authorization_Count>();
 
-        var response = await client.GetResponse<Value<long>>(new Authorization_Count(), cancellationToken);
+        var response = await client.GetResponse<Count>(new Authorization_Count(), cancellationToken);
 
-        return response.Message.Item;
+        return response.Message.Value;
     }
 
     public override async ValueTask UpdateAsync(AuthorizationModel authorization, CancellationToken cancellationToken)

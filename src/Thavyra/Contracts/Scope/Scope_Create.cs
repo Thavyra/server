@@ -1,5 +1,9 @@
 namespace Thavyra.Contracts.Scope;
 
+/// <summary>
+/// Creates a new authorization scope.
+/// </summary>
+/// <returns><see cref="Scope"/></returns>
 public record Scope_Create
 {
     public Guid? Id { get; init; }
