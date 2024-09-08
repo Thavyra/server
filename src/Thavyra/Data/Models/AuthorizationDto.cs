@@ -23,6 +23,6 @@ public class AuthorizationDto
     
     public ApplicationDto Application { get; set; } = default!;
     public UserDto User { get; set; } = default!;
-    public ICollection<TokenDto> Tokens { get; set; } = default!;
-    public ICollection<ScopeDto> Scopes { get; set; } = default!;
+    public ICollection<TokenDto> Tokens { get; set; } = [];
+    public ICollection<ScopeDto> Scopes { get; set; } = [];
 }

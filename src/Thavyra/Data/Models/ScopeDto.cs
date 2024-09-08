@@ -17,4 +17,6 @@ public class ScopeDto
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
+
+    public ICollection<AuthorizationDto> Authorizations { get; set; } = [];
 }

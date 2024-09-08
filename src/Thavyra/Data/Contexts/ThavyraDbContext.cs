@@ -22,14 +22,11 @@ public class ThavyraDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<ApplicationDto>().ToTable("applications");
-        modelBuilder.Entity<RedirectDto>().ToTable("redirects");
-        
-        modelBuilder.Entity<ScopeDto>().ToTable("scopes");
-        modelBuilder.Entity<AuthorizationDto>().ToTable("authorizations");
-        modelBuilder.Entity<TokenDto>().ToTable("tokens");
-        
-        modelBuilder.Entity<UserDto>().ToTable("users");
-        modelBuilder.Entity<PasswordLoginDto>().ToTable("passwords");
+        modelBuilder.Entity<ScopeDto>()
+            .HasMany(e => e.Authorizations)
+            .WithMany(e => e.Scopes)
+            .UsingEntity<AuthorizationScopeDto>(
+                l => l.HasOne<AuthorizationDto>().WithMany().HasForeignKey(e => e.AuthorizationId),
+                r => r.HasOne<ScopeDto>().WithMany().HasForeignKey(e => e.ScopeId));
     }
 }
