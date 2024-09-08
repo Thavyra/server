@@ -10,10 +10,12 @@ using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using Thavyra.Oidc.Managers;
 using Thavyra.Oidc.Models.Internal;
+using Thavyra.Oidc.Models.View;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Thavyra.Oidc.Controllers;
 
+[Area("Oidc")]
 [Route("/oauth/authorize")]
 [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
 public class AuthorizeController : Controller
@@ -21,15 +23,18 @@ public class AuthorizeController : Controller
     private readonly IUserManager _userManager;
     private readonly IOpenIddictApplicationManager _applicationManager;
     private readonly IOpenIddictAuthorizationManager _authorizationManager;
+    private readonly IOpenIddictScopeManager _scopeManager;
 
     public AuthorizeController(
         IUserManager userManager,
         IOpenIddictApplicationManager applicationManager,
-        IOpenIddictAuthorizationManager authorizationManager)
+        IOpenIddictAuthorizationManager authorizationManager,
+        IOpenIddictScopeManager scopeManager)
     {
         _userManager = userManager;
         _applicationManager = applicationManager;
         _authorizationManager = authorizationManager;
+        _scopeManager = scopeManager;
     }
 
     [HttpGet]
@@ -43,7 +48,7 @@ public class AuthorizeController : Controller
             return Challenge();
         }
 
-        string subject = User.GetClaim(Claims.Subject)
+        string subject = User.GetClaim(ClaimTypes.NameIdentifier)
                          ?? throw new InvalidOperationException("Could not retrieve subject claim.");
 
         var user = await _userManager.FindByIdAsync(subject, cancellationToken);
@@ -53,55 +58,79 @@ public class AuthorizeController : Controller
             throw new InvalidOperationException("Could not retrieve user details.");
         }
 
-        string client = request.ClientId
+        string clientId = request.ClientId
                         ?? throw new InvalidOperationException("Could not retrieve client from request.");
 
-        object? application = await _applicationManager.FindByIdAsync(client, cancellationToken);
+        object? client = await _applicationManager.FindByClientIdAsync(clientId, cancellationToken);
 
-        if (application is null)
+        if (client is null)
         {
             throw new InvalidOperationException("Could not retrieve application details.");
         }
 
-        var scopes = request.GetScopes();
+        string? applicationId = await _applicationManager.GetIdAsync(client, cancellationToken);
+
+        if (applicationId is null)
+        {
+            throw new InvalidOperationException();
+        }
+
+        var application = new ApplicationModel
+        {
+            Id = new Guid(applicationId),
+            ClientId = clientId,
+            ClientType = await _applicationManager.GetClientTypeAsync(client, cancellationToken),
+            ConsentType = await _applicationManager.GetConsentTypeAsync(client, cancellationToken),
+            ApplicationType = await _applicationManager.GetApplicationTypeAsync(client, cancellationToken),
+            DisplayName = await _applicationManager.GetDisplayNameAsync(client, cancellationToken),
+        };
+
+        var scopeNames = request.GetScopes();
+        
+        var scopes = await GetScopesAsync(scopeNames, cancellationToken);
 
         var permanentAuthorizations = await GetPermanentAuthorizationsAsync(
             subject,
-            client,
-            scopes,
+            clientId,
+            scopeNames,
             cancellationToken);
 
         // Implicitly authorize when enabled/application already accepted
-        
-        string? consentType = await _applicationManager.GetConsentTypeAsync(application, cancellationToken);
 
         return request.HasPrompt(Prompts.Consent) switch
         {
             false when permanentAuthorizations.Any() => await AuthorizeAsync(
                 user, 
-                client, 
-                scopes,
+                clientId, 
+                scopeNames,
                 authorization: permanentAuthorizations.LastOrDefault(), 
                 cancellationToken),
             
-            false when consentType == ConsentTypes.Implicit => await AuthorizeAsync(
+            false when application.ConsentType == ConsentTypes.Implicit => await AuthorizeAsync(
                 user, 
-                client, 
-                scopes,
+                clientId, 
+                scopeNames,
                 authorization: null, 
                 cancellationToken),
             
-            _ => View()
+            _ => View(new AuthorizeViewModel
+            {
+                Subject = user,
+                Client = application,
+                Scopes = scopes.AsReadOnly(),
+                ReturnUrl = HttpContext.Request.Path + HttpContext.Request.QueryString
+            })
         };
     }
 
-    [HttpPostWithField("submit.Accept"), ValidateAntiForgeryToken]
+    [HttpPostWithField("submit.Accept")]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> AcceptAsync(CancellationToken cancellationToken)
     {
         var request = HttpContext.GetOpenIddictServerRequest() ??
                       throw new InvalidOperationException("Could not retrieve OpenID Connect request.");
         
-        string subject = User.GetClaim(Claims.Subject)
+        string subject = User.GetClaim(ClaimTypes.NameIdentifier)
                          ?? throw new InvalidOperationException("Could not retrieve subject claim.");
 
         var user = await _userManager.FindByIdAsync(subject, cancellationToken);
@@ -111,16 +140,23 @@ public class AuthorizeController : Controller
             throw new InvalidOperationException("Could not retrieve user details.");
         }
 
-        string client = request.ClientId
+        string clientId = request.ClientId
                         ?? throw new InvalidOperationException("Could not retrieve client from request.");
 
-        object? application = await _applicationManager.FindByIdAsync(client, cancellationToken);
+        object? application = await _applicationManager.FindByClientIdAsync(clientId, cancellationToken);
 
         if (application is null)
         {
             throw new InvalidOperationException("Could not retrieve application details.");
         }
+        
+        string? client = await _applicationManager.GetIdAsync(application, cancellationToken);
 
+        if (client is null)
+        {
+            throw new InvalidOperationException();
+        }
+        
         var scopes = request.GetScopes();
 
         var permanentAuthorizations = await GetPermanentAuthorizationsAsync(
@@ -137,7 +173,8 @@ public class AuthorizeController : Controller
             cancellationToken);
     }
 
-    [HttpPostWithField("submit.Cancel"), ValidateAntiForgeryToken]
+    [HttpPostWithField("submit.Cancel")]
+    [ValidateAntiForgeryToken]
     public IActionResult CancelAsync()
     {
         return Forbid(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
@@ -156,6 +193,32 @@ public class AuthorizeController : Controller
             type: AuthorizationTypes.Permanent,
             scopes: scopes,
             cancellationToken: ct).ToListAsync(cancellationToken: ct);
+    }
+
+    private async Task<IList<ScopeModel>> GetScopesAsync(ImmutableArray<string> scopes,
+        CancellationToken cancellationToken)
+    {
+        List<ScopeModel> result = [];
+
+        await foreach (object scope in _scopeManager.FindByNamesAsync(scopes, cancellationToken))
+        {
+            string? id = await _scopeManager.GetIdAsync(scope, cancellationToken);
+
+            if (id is null)
+            {
+                throw new InvalidOperationException();
+            }
+            
+            result.Add(new ScopeModel
+            {
+                Id = new Guid(id),
+                Name = await _scopeManager.GetNameAsync(scope, cancellationToken),
+                DisplayName = await _scopeManager.GetDisplayNameAsync(scope, cancellationToken),
+                Description = await _scopeManager.GetDescriptionAsync(scope, cancellationToken)
+            });
+        }
+
+        return result;
     }
 
     private async Task<IActionResult> AuthorizeAsync(

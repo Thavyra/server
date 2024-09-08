@@ -22,7 +22,7 @@ public static class Services
         services.AddTransient<IOpenIddictTokenStore<TokenModel>, TokenStore>();
 
         services.AddTransient<IUserManager, UserManager>();
-        
+
         var builder = services.AddOpenIddict()
             .AddCore(options =>
             {
@@ -54,6 +54,19 @@ public static class Services
                             .SetUserinfoEndpointUris("connect/userinfo")
                             .SetIssuer(section["Issuer"] ??
                                        throw new Exception("OIDC issuer not provided."));
+
+                        options
+                            .AllowAuthorizationCodeFlow()
+                            .AllowClientCredentialsFlow()
+                            .AllowRefreshTokenFlow();
+
+                        options
+                            .AddDevelopmentEncryptionCertificate()
+                            .AddDevelopmentSigningCertificate();
+                        
+                        options.UseAspNetCore()
+                            .EnableAuthorizationEndpointPassthrough()
+                            .DisableTransportSecurityRequirement();
                     });
                     
                     break;
