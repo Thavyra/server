@@ -6,5 +6,5 @@ namespace Thavyra.Contracts.Application;
 /// <returns><see cref="Application"/>, <see cref="NotFound"/></returns>
 public record Application_GetById
 {
-    public required string Id { get; init; }
+    public required Guid Id { get; init; }
 }

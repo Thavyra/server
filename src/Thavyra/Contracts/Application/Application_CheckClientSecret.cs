@@ -3,7 +3,7 @@ namespace Thavyra.Contracts.Application;
 /// <summary>
 /// Checks the specified application's client secret.
 /// </summary>
-/// <returns><see cref="Correct"/>, <see cref="Incorrect"/></returns>
+/// <returns><see cref="Correct"/>, <see cref="Incorrect"/>, <see cref="NotFound"/></returns>
 public record Application_CheckClientSecret
 {
     public required Guid ApplicationId { get; init; }
