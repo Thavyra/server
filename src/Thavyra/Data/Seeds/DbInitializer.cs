@@ -13,6 +13,20 @@ public static class DbInitializer
             return;
         }
 
+        var scopes = new[]
+        {
+            new ScopeDto
+            {
+                Id = Guid.NewGuid(),
+                Name = "identify",
+                DisplayName = "Account Data",
+                Description = "View your account balance and roles."
+            }
+        };
+        
+        context.Scopes.AddRange(scopes);
+        context.SaveChanges();
+        
         var users = new[]
         {
             new UserDto
@@ -35,6 +49,7 @@ public static class DbInitializer
                 OwnerId = Guid.Parse("d6c0de21-8579-44e5-8e08-c45bc03a4227"),
 
                 ClientId = "KD1l6XfcD5rL1b7des0IUzJ69xZ4JTYF",
+                ClientSecret = "KD1l6XfcD5rL1b7des0IUzJ69xZ4JTYF",
                 ClientType = OpenIddictConstants.ClientTypes.Confidential,
                 ConsentType = OpenIddictConstants.ConsentTypes.Explicit,
 
@@ -76,8 +91,22 @@ public static class DbInitializer
             new RedirectDto
             {
                 Id = Guid.NewGuid(),
+                ApplicationId = Guid.Parse("5276f543-60f5-40ff-9bef-631f4649714a"),
+                Uri = "https://oauth.pstmn.io/v1/callback",
+                CreatedAt = DateTime.UtcNow
+            },
+            new RedirectDto
+            {
+                Id = Guid.NewGuid(),
                 ApplicationId = Guid.Parse("dab3902c-499a-4e56-afd0-6c44736d1593"),
                 Uri = "http://localhost:5700",
+                CreatedAt = DateTime.UtcNow
+            },
+            new RedirectDto
+            {
+                Id = Guid.NewGuid(),
+                ApplicationId = Guid.Parse("dab3902c-499a-4e56-afd0-6c44736d1593"),
+                Uri = "https://oauth.pstmn.io/v1/callback",
                 CreatedAt = DateTime.UtcNow
             }
         };
