@@ -12,6 +12,7 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddMassTransit(x =>
 {
+    x.AddDataConsumers();
     
     x.UsingInMemory((context, cfg) =>
     {
