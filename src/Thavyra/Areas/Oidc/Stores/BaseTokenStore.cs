@@ -184,9 +184,9 @@ public abstract class BaseTokenStore : IOpenIddictTokenStore<TokenModel>
 
     public ValueTask<ImmutableDictionary<string, JsonElement>> GetPropertiesAsync(TokenModel token,
         CancellationToken cancellationToken)
-        => throw new NotSupportedException();
+        => new(ImmutableDictionary<string, JsonElement>.Empty);
 
     public ValueTask SetPropertiesAsync(TokenModel token, ImmutableDictionary<string, JsonElement> properties,
         CancellationToken cancellationToken)
-        => throw new NotSupportedException();
+        => new();
 }

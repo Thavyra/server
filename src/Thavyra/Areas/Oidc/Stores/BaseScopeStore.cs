@@ -85,16 +85,16 @@ public abstract class BaseScopeStore : IOpenIddictScopeStore<ScopeModel>
 
     public ValueTask<ImmutableDictionary<CultureInfo, string>> GetDescriptionsAsync(ScopeModel scope,
         CancellationToken cancellationToken)
-        => throw new NotSupportedException();
+        => new(ImmutableDictionary<CultureInfo, string>.Empty);
 
     public ValueTask SetDescriptionsAsync(ScopeModel scope, ImmutableDictionary<CultureInfo, string> descriptions,
         CancellationToken cancellationToken)
         => throw new NotSupportedException();
-    
-    
+
+
     public ValueTask<ImmutableDictionary<CultureInfo, string>> GetDisplayNamesAsync(ScopeModel scope,
         CancellationToken cancellationToken)
-        => throw new NotSupportedException();
+        => new(ImmutableDictionary<CultureInfo, string>.Empty);
 
     public ValueTask SetDisplayNamesAsync(ScopeModel scope, ImmutableDictionary<CultureInfo, string> names,
         CancellationToken cancellationToken)
@@ -103,7 +103,7 @@ public abstract class BaseScopeStore : IOpenIddictScopeStore<ScopeModel>
 
     public ValueTask<ImmutableDictionary<string, JsonElement>> GetPropertiesAsync(ScopeModel scope,
         CancellationToken cancellationToken)
-        => throw new NotSupportedException();
+        => new(ImmutableDictionary<string, JsonElement>.Empty);
 
     public ValueTask SetPropertiesAsync(ScopeModel scope, ImmutableDictionary<string, JsonElement> properties,
         CancellationToken cancellationToken)
@@ -112,7 +112,7 @@ public abstract class BaseScopeStore : IOpenIddictScopeStore<ScopeModel>
 
     public ValueTask<ImmutableArray<string>> GetResourcesAsync(ScopeModel scope,
         CancellationToken cancellationToken)
-        => throw new NotSupportedException();
+        => new(ImmutableArray<string>.Empty);
 
     public ValueTask SetResourcesAsync(ScopeModel scope, ImmutableArray<string> resources,
         CancellationToken cancellationToken)

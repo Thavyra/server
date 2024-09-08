@@ -57,11 +57,11 @@ public abstract class BaseApplicationStore : IOpenIddictApplicationStore<Applica
     public ValueTask SetRequirementsAsync(ApplicationModel application, ImmutableArray<string> requirements,
         CancellationToken cancellationToken)
         => throw new NotSupportedException();
-    
-    
+
+
     public virtual ValueTask<ImmutableArray<string>> GetPostLogoutRedirectUrisAsync(ApplicationModel application,
         CancellationToken cancellationToken)
-        => throw new NotSupportedException();
+        => new(ImmutableArray<string>.Empty);
     
     public virtual ValueTask SetPostLogoutRedirectUrisAsync(ApplicationModel application, ImmutableArray<string> uris,
         CancellationToken cancellationToken)
@@ -161,34 +161,34 @@ public abstract class BaseApplicationStore : IOpenIddictApplicationStore<Applica
     public virtual ValueTask<ImmutableDictionary<CultureInfo, string>> GetDisplayNamesAsync(ApplicationModel application,
         CancellationToken cancellationToken)
         => new(ImmutableDictionary.Create<CultureInfo, string>());
-    
+
     public ValueTask SetDisplayNamesAsync(ApplicationModel application, ImmutableDictionary<CultureInfo, string> names,
         CancellationToken cancellationToken)
-        => throw new NotSupportedException();
+        => new();
 
 
     public ValueTask<JsonWebKeySet?> GetJsonWebKeySetAsync(ApplicationModel application,
         CancellationToken cancellationToken)
         => throw new NotSupportedException();
-    
+
     public ValueTask SetJsonWebKeySetAsync(ApplicationModel application, JsonWebKeySet? set,
         CancellationToken cancellationToken)
         => throw new NotSupportedException();
 
-    
+
     public ValueTask<ImmutableDictionary<string, JsonElement>> GetPropertiesAsync(ApplicationModel application,
         CancellationToken cancellationToken)
-        => throw new NotSupportedException();
+        => new(ImmutableDictionary<string, JsonElement>.Empty);
     
     public ValueTask SetPropertiesAsync(ApplicationModel application,
         ImmutableDictionary<string, JsonElement> properties,
         CancellationToken cancellationToken)
-        => throw new NotSupportedException();
+        => new();
 
 
     public ValueTask<ImmutableDictionary<string, string>> GetSettingsAsync(ApplicationModel application,
         CancellationToken cancellationToken)
-        => throw new NotSupportedException();
+        => new(ImmutableDictionary<string, string>.Empty);
 
     public ValueTask SetSettingsAsync(ApplicationModel application, ImmutableDictionary<string, string> settings,
         CancellationToken cancellationToken)

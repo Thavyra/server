@@ -147,5 +147,5 @@ public abstract class BaseAuthorizationStore : IOpenIddictAuthorizationStore<Aut
     public ValueTask SetPropertiesAsync(AuthorizationModel authorization,
         ImmutableDictionary<string, JsonElement> properties,
         CancellationToken cancellationToken)
-        => throw new NotSupportedException();
+        => new();
 }
