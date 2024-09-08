@@ -63,12 +63,22 @@ public class AuthorizationStore : BaseAuthorizationStore
     private async IAsyncEnumerable<AuthorizationModel> GetAsync(string subject, string client, string? status = null,
         string? type = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
+        if (!Guid.TryParse(subject, out var userId))
+        {
+            yield break;
+        }
+
+        if (!Guid.TryParse(client, out var applicationId))
+        {
+            yield break;
+        }
+        
         var requestClient = _clientFactory.CreateRequestClient<Authorization_Get>();
 
         var response = await requestClient.GetResponse<Multiple<Authorization>>(new Authorization_Get
         {
-            ApplicationId = client,
-            UserId = subject,
+            ApplicationId = applicationId,
+            UserId = userId,
             Status = status,
             Type = type
         }, cancellationToken);
@@ -116,11 +126,16 @@ public class AuthorizationStore : BaseAuthorizationStore
     public override async IAsyncEnumerable<AuthorizationModel> FindByApplicationIdAsync(string identifier,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        if (!Guid.TryParse(identifier, out var id))
+        {
+            yield break;
+        }
+        
         var client = _clientFactory.CreateRequestClient<Authorization_GetById>();
 
         var response = await client.GetResponse<Multiple<Authorization>>(new Authorization_GetByApplication
         {
-            ApplicationId = identifier
+            ApplicationId = id
         }, cancellationToken);
 
         foreach (var authorization in response.Message.Items)
@@ -132,11 +147,16 @@ public class AuthorizationStore : BaseAuthorizationStore
     public override async ValueTask<AuthorizationModel?> FindByIdAsync(string identifier,
         CancellationToken cancellationToken)
     {
+        if (!Guid.TryParse(identifier, out var id))
+        {
+            return null;
+        }
+        
         var client = _clientFactory.CreateRequestClient<Authorization_GetById>();
 
         Response response = await client.GetResponse<Authorization, NotFound>(new Authorization_GetById
         {
-            Id = identifier
+            Id = id
         }, cancellationToken);
 
         return response switch
@@ -150,11 +170,16 @@ public class AuthorizationStore : BaseAuthorizationStore
     public override async IAsyncEnumerable<AuthorizationModel> FindBySubjectAsync(string subject,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        if (!Guid.TryParse(subject, out var userId))
+        {
+            yield break;
+        }
+        
         var client = _clientFactory.CreateRequestClient<Authorization_GetByUser>();
 
         var response = await client.GetResponse<Multiple<Authorization>>(new Authorization_GetByUser
         {
-            UserId = subject
+            UserId = userId
         }, cancellationToken);
 
         foreach (var authorization in response.Message.Items)

@@ -6,8 +6,8 @@ namespace Thavyra.Contracts.Authorization;
 /// <returns><see cref="Multiple{T}"/> of <see cref="Authorization"/></returns>
 public record Authorization_Get
 {
-    public required string UserId { get; init; }
-    public required string ApplicationId { get; init; }
+    public required Guid UserId { get; init; }
+    public required Guid ApplicationId { get; init; }
     public string? Status { get; init; }
     public string? Type { get; set; }
 }

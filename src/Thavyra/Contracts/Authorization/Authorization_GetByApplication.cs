@@ -6,5 +6,5 @@ namespace Thavyra.Contracts.Authorization;
 /// <returns><see cref="Multiple{T}"/> of <see cref="Authorization"/></returns>
 public record Authorization_GetByApplication
 {
-    public required string ApplicationId { get; init; }
+    public required Guid ApplicationId { get; init; }
 }
