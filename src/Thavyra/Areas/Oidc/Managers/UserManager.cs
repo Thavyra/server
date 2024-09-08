@@ -94,7 +94,8 @@ public class UserManager : IUserManager
                 Username = user.Message.Username,
                 CreatedAt = user.Message.CreatedAt
             },
-            _ => null
+            (_, Incorrect or NotFound) => null,
+            _ => throw new InvalidOperationException()
         };
     }
 
