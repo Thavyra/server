@@ -6,5 +6,5 @@ namespace Thavyra.Contracts.Scope;
 /// <returns><see cref="Scope"/>, <see cref="NotFound"/></returns>
 public record Scope_GetById
 {
-    public required string Id { get; init; }
+    public required Guid Id { get; init; }
 }

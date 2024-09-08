@@ -46,11 +46,16 @@ public class ScopeStore : BaseScopeStore
 
     public override async ValueTask<ScopeModel?> FindByIdAsync(string identifier, CancellationToken cancellationToken)
     {
+        if (!Guid.TryParse(identifier, out var id))
+        {
+            return null;
+        }
+        
         var client = _clientFactory.CreateRequestClient<Scope_GetById>();
 
         Response response = await client.GetResponse<Scope, NotFound>(new Scope_GetById
         {
-            Id = identifier
+            Id = id
         }, cancellationToken);
 
         return response switch
