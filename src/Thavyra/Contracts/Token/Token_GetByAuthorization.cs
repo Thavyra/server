@@ -6,5 +6,5 @@ namespace Thavyra.Contracts.Token;
 /// <returns><see cref="Multiple{T}"/> of <see cref="Token"/></returns>
 public record Token_GetByAuthorization
 {
-    public required string AuthorizationId { get; init; }
+    public required Guid AuthorizationId { get; init; }
 }

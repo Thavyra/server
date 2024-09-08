@@ -65,12 +65,22 @@ public class TokenStore : BaseTokenStore
     private async IAsyncEnumerable<TokenModel> GetAsync(string subject, string client, string? status = null,
         string? type = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
+        if (!Guid.TryParse(subject, out var userId))
+        {
+            yield break;
+        }
+
+        if (!Guid.TryParse(client, out var applicationId))
+        {
+            yield break;
+        }
+        
         var requestClient = _clientFactory.CreateRequestClient<Token_Get>();
 
         var response = await requestClient.GetResponse<Multiple<Token>>(new Token_Get
         {
-            ApplicationId = client,
-            UserId = subject,
+            ApplicationId = applicationId,
+            UserId = userId,
             Status = status,
             Type = type
         }, cancellationToken);
@@ -102,11 +112,16 @@ public class TokenStore : BaseTokenStore
     public override async IAsyncEnumerable<TokenModel> FindByApplicationIdAsync(string identifier,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        if (!Guid.TryParse(identifier, out var applicationId))
+        {
+            yield break;
+        }
+        
         var client = _clientFactory.CreateRequestClient<Token_GetByApplication>();
 
         var response = await client.GetResponse<Multiple<Token>>(new Token_GetByApplication
         {
-            ApplicationId = identifier
+            ApplicationId = applicationId
         }, cancellationToken);
 
         foreach (var token in response.Message.Items)
@@ -118,11 +133,16 @@ public class TokenStore : BaseTokenStore
     public override async IAsyncEnumerable<TokenModel> FindByAuthorizationIdAsync(string identifier,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        if (!Guid.TryParse(identifier, out var authorizationId))
+        {
+            yield break;
+        }
+        
         var client = _clientFactory.CreateRequestClient<Token_GetByAuthorization>();
 
         var response = await client.GetResponse<Multiple<Token>>(new Token_GetByAuthorization
         {
-            AuthorizationId = identifier
+            AuthorizationId = authorizationId
         }, cancellationToken);
 
         foreach (var token in response.Message.Items)
@@ -133,11 +153,16 @@ public class TokenStore : BaseTokenStore
 
     public override async ValueTask<TokenModel?> FindByIdAsync(string identifier, CancellationToken cancellationToken)
     {
+        if (!Guid.TryParse(identifier, out var id))
+        {
+            return null;
+        }
+        
         var client = _clientFactory.CreateRequestClient<Token_GetById>();
 
         Response response = await client.GetResponse<Token, NotFound>(new Token_GetById
         {
-            Id = identifier
+            Id = id
         }, cancellationToken);
 
         return response switch
@@ -168,11 +193,16 @@ public class TokenStore : BaseTokenStore
 
     public override async IAsyncEnumerable<TokenModel> FindBySubjectAsync(string subject, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        if (!Guid.TryParse(subject, out var userId))
+        {
+            yield break;
+        }
+        
         var client = _clientFactory.CreateRequestClient<Token_GetByUser>();
 
         var response = await client.GetResponse<Multiple<Token>>(new Token_GetByUser
         {
-            UserId = subject
+            UserId = userId
         }, cancellationToken);
 
         foreach (var token in response.Message.Items)
@@ -249,11 +279,16 @@ public class TokenStore : BaseTokenStore
     public override async ValueTask<long> RevokeByAuthorizationIdAsync(string identifier,
         CancellationToken cancellationToken)
     {
+        if (!Guid.TryParse(identifier, out var authorizationId))
+        {
+            return 0;
+        }
+        
         var client = _clientFactory.CreateRequestClient<Token_RevokeByAuthorization>();
 
         var response = await client.GetResponse<Count>(new Token_RevokeByAuthorization
         {
-            AuthorizationId = identifier
+            AuthorizationId = authorizationId
         }, cancellationToken);
 
         return response.Message.Value;

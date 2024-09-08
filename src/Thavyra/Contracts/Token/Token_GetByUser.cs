@@ -6,5 +6,5 @@ namespace Thavyra.Contracts.Token;
 /// <returns><see cref="Multiple{T}"/> of <see cref="Token"/></returns>
 public record Token_GetByUser
 {
-    public required string UserId { get; init; }
+    public required Guid UserId { get; init; }
 }

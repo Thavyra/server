@@ -6,5 +6,5 @@ namespace Thavyra.Contracts.Token;
 /// <returns><see cref="Token"/>, <see cref="NotFound"/></returns>
 public record Token_GetById
 {
-    public required string Id { get; init; }
+    public required Guid Id { get; init; }
 }

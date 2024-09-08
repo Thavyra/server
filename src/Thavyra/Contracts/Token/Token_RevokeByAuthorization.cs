@@ -6,5 +6,5 @@ namespace Thavyra.Contracts.Token;
 /// <returns><see cref="Count"/></returns>
 public record Token_RevokeByAuthorization
 {
-    public required string AuthorizationId { get; init; }
+    public required Guid AuthorizationId { get; init; }
 }
