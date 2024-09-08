@@ -18,7 +18,10 @@ public class ApplicationConsumer :
     IConsumer<Application_GetById>,
     IConsumer<Application_GetByRedirect>,
     IConsumer<Application_List>,
-    IConsumer<Application_Update>
+    IConsumer<Application_Update>,
+    IConsumer<Redirect_Create>,
+    IConsumer<Redirect_Delete>,
+    IConsumer<Redirect_GetByApplication>
 {
     private readonly ThavyraDbContext _dbContext;
 
@@ -176,5 +179,50 @@ public class ApplicationConsumer :
         application.Description = context.Message.Description.IsChanged ? context.Message.Description.Value : application.Description;
 
         await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task Consume(ConsumeContext<Redirect_Create> context)
+    {
+        var redirect = new RedirectDto
+        {
+            ApplicationId = context.Message.ApplicationId,
+            Uri = context.Message.Uri,
+            CreatedAt = DateTime.UtcNow
+        };
+        
+        await _dbContext.Redirects.AddAsync(redirect);
+        await _dbContext.SaveChangesAsync();
+        
+        await context.RespondAsync(new Redirect
+        {
+            Id = redirect.Id,
+            ApplicationId = redirect.ApplicationId,
+            Uri = redirect.Uri,
+            CreatedAt = redirect.CreatedAt
+        });
+    }
+
+    public async Task Consume(ConsumeContext<Redirect_Delete> context)
+    {
+        await _dbContext.Redirects
+            .Where(x => x.Id == context.Message.Id)
+            .ExecuteDeleteAsync();
+    }
+
+    public async Task Consume(ConsumeContext<Redirect_GetByApplication> context)
+    {
+        var redirects = await _dbContext.Redirects
+            .Where(x => x.ApplicationId == context.Message.ApplicationId)
+            .ToListAsync();
+
+        var response = redirects.Select(x => new Redirect
+        {
+            Id = x.Id,
+            ApplicationId = x.ApplicationId,
+            Uri = x.Uri,
+            CreatedAt = x.CreatedAt
+        });
+
+        await context.RespondAsync(new Multiple<Redirect>(response.ToList()));
     }
 }
