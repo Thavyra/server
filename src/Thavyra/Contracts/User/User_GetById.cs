@@ -2,5 +2,5 @@ namespace Thavyra.Contracts.User;
 
 public record User_GetById
 {
-    public required string Id { get; init; }
+    public required Guid Id { get; init; }
 }

@@ -44,11 +44,16 @@ public class UserManager : IUserManager
 
     public async Task<UserModel?> FindByIdAsync(string id, CancellationToken cancellationToken)
     {
+        if (!Guid.TryParse(id, out var userId))
+        {
+            return null;
+        }
+        
         var client = _clientFactory.CreateRequestClient<User_GetById>();
 
         Response response = await client.GetResponse<User, NotFound>(new User_GetById
         {
-            Id = id
+            Id = userId
         }, cancellationToken);
 
         return response switch
