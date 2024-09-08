@@ -8,8 +8,8 @@ public readonly struct Change<T>
         IsChanged = true;
     }
     
-    public T Value { get; }
-    public bool IsChanged { get; }
+    public T Value { get; init; }
+    public bool IsChanged { get; init; }
 
     public static implicit operator Change<T>(T value) => new(value);
 }
