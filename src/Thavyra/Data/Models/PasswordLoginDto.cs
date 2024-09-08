@@ -12,9 +12,9 @@ public class PasswordLoginDto
     [Column("user_id")]
     public Guid UserId { get; set; }
 
-    [Column("hashed_password")]
+    [Column("password")]
     [MaxLength(100)]
-    public string HashedPassword { get; set; } = default!;
+    public string Password { get; set; } = default!;
     
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }

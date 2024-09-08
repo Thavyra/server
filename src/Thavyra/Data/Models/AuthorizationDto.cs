@@ -5,13 +5,13 @@ namespace Thavyra.Data.Models;
 [Table("authorizations")]
 public class AuthorizationDto
 {
-    [Column("id")]
+    [Column("id"), DatabaseGenerated(DatabaseGeneratedOption.None)]
     public Guid Id { get; set; }
 
     [Column("application_id")]
-    public Guid ApplicationId { get; set; }
+    public Guid? ApplicationId { get; set; }
     [Column("user_id")]
-    public Guid UserId { get; set; }
+    public Guid? UserId { get; set; }
 
     [Column("type")]
     public string? Type { get; set; }
@@ -23,5 +23,6 @@ public class AuthorizationDto
     
     public ApplicationDto Application { get; set; } = default!;
     public UserDto User { get; set; } = default!;
+    public ICollection<TokenDto> Tokens { get; set; } = default!;
     public ICollection<ScopeDto> Scopes { get; set; } = default!;
 }
