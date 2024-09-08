@@ -213,7 +213,9 @@ public class TokenStore : BaseTokenStore
 
     public override async ValueTask CreateAsync(TokenModel token, CancellationToken cancellationToken)
     {
-        await _publishEndpoint.Publish(new Token_Create
+        var client = _clientFactory.CreateRequestClient<Token_Create>();
+
+        await client.GetResponse<Token>(new Token_Create
         {
             Id = token.Id,
             ApplicationId = token.ApplicationId,

@@ -190,7 +190,9 @@ public class AuthorizationStore : BaseAuthorizationStore
 
     public override async ValueTask CreateAsync(AuthorizationModel authorization, CancellationToken cancellationToken)
     {
-        await _publishEndpoint.Publish(new Authorization_Create
+        var client = _clientFactory.CreateRequestClient<Authorization_Create>();
+
+        await client.GetResponse<Authorization>(new Authorization_Create
         {
             Id = authorization.Id,
             ApplicationId = authorization.ApplicationId ?? null,
