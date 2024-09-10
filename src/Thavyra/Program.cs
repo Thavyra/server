@@ -4,6 +4,7 @@ using Thavyra.Data.Configuration;
 using Thavyra.Data.Contexts;
 using Thavyra.Data.Seeds;
 using Thavyra.Oidc.Configuration;
+using Thavyra.Rest.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,9 @@ foreach (var section in builder.Configuration.GetChildren())
         case "Oidc":
             builder.Services.AddOidcAuthorizationServer(section);
             authenticationBuilder.AddOidcAuthentication(section);
+            break;
+        case "Rest":
+            builder.Services.AddRestApi(section);
             break;
         case "Data":
             builder.Services.AddEntityFramework(section);
@@ -68,6 +72,8 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{area=Shared}/{controller=Home}/{action=Index}/{id?}");
+
+app.UseRestApi();
 
 if (app.Environment.IsDevelopment())
 {

@@ -67,6 +67,12 @@ public static class Services
                         options.UseAspNetCore()
                             .EnableAuthorizationEndpointPassthrough()
                             .DisableTransportSecurityRequirement();
+                    })
+                    .AddValidation(options =>
+                    {
+                        options.SetIssuer(section["Issuer"] ??
+                                          throw new Exception("OIDC issuer not provided."))
+                            .UseAspNetCore();
                     });
                     
                     break;
