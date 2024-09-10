@@ -50,6 +50,14 @@ public static class DbInitializer
             new ScopeDto
             {
                 Id = Guid.NewGuid(),
+                Name = "account.username",
+                DisplayName = "Username",
+                Description = "Change your username."
+            },
+            
+            new ScopeDto
+            {
+                Id = Guid.NewGuid(),
                 Name = "account.logins",
                 DisplayName = "Logins",
                 Description = "Manage your logins, and change your password."
