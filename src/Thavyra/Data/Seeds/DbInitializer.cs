@@ -18,9 +18,81 @@ public static class DbInitializer
             new ScopeDto
             {
                 Id = Guid.NewGuid(),
-                Name = "identify",
-                DisplayName = "Account Data",
-                Description = "View your account balance and roles."
+                Name = "account",
+                DisplayName = "Full Account Access",
+                Description = "View, manage and delete your profile, logins and account."
+            },
+            
+            new ScopeDto
+            {
+                Id = Guid.NewGuid(),
+                Name = "account.profile",
+                DisplayName = "Profile",
+                Description = "View and modify your profile."
+            },
+            
+            new ScopeDto
+            {
+                Id = Guid.NewGuid(),
+                Name = "account.profile.read",
+                DisplayName = "View Profile",
+                Description = "View your profile and avatar."
+            },
+            
+            new ScopeDto
+            {
+                Id = Guid.NewGuid(),
+                Name = "account.profile.edit",
+                DisplayName = "Edit Profile",
+                Description = "Modify your profile and avatar."
+            },
+            
+            new ScopeDto
+            {
+                Id = Guid.NewGuid(),
+                Name = "account.logins",
+                DisplayName = "Logins",
+                Description = "Manage your logins, and change your password."
+            },
+            
+            new ScopeDto
+            {
+                Id = Guid.NewGuid(),
+                Name = "applications",
+                DisplayName = "Applications",
+                Description = "View, manage and delete your OAuth applications."
+            },
+            
+            new ScopeDto
+            {
+                Id = Guid.NewGuid(),
+                Name = "applications.create",
+                DisplayName = "Create Applications",
+                Description = "Create new OAuth applications."
+            },
+            
+            new ScopeDto
+            {
+                Id = Guid.NewGuid(),
+                Name = "applications.read",
+                DisplayName = "View Applications",
+                Description = "View your OAuth applications."
+            },
+            
+            new ScopeDto
+            {
+                Id = Guid.NewGuid(),
+                Name = "applications.edit",
+                DisplayName = "Modify Applications",
+                Description = "Modify your OAuth applications."
+            },
+            
+            new ScopeDto
+            {
+                Id = Guid.NewGuid(),
+                Name = "applications.delete",
+                DisplayName = "Delete Applications",
+                Description = "Delete your OAuth applications."
             }
         };
         
