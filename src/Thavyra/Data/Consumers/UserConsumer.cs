@@ -52,6 +52,8 @@ public class UserConsumer :
         await _dbContext.Users
             .Where(x => x.Id == context.Message.Id)
             .ExecuteDeleteAsync();
+
+        await context.RespondAsync(new Success());
     }
 
     public async Task Consume(ConsumeContext<User_ExistsByUsername> context)

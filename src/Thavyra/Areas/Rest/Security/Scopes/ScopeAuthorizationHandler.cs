@@ -42,7 +42,10 @@ public class ScopeAuthorizationHandler : AuthorizationHandler<ScopeAuthorization
             if (context.User.HasScope(combined))
             {
                 context.Succeed(requirement);
+                return;
             }
         }
+        
+        context.Fail(new AuthorizationFailureReason(this, $"Scope {requirement.Name} is required."));
     }
 }

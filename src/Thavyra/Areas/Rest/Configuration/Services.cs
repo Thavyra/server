@@ -17,9 +17,11 @@ public static class Services
         return services;
     }
 
-    public static IApplicationBuilder UseRestApi(this IApplicationBuilder app)
+    public static IApplicationBuilder UseRestApi(this WebApplication app)
     {
-        return app.UseFastEndpoints(options =>
+        return app
+            .UseDefaultExceptionHandler(useGenericReason: !app.Environment.IsDevelopment())
+            .UseFastEndpoints(options =>
         {
             options.Errors.UseProblemDetails();
 
