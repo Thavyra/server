@@ -7,7 +7,7 @@ public static class Policies
 {
     public static class Operation
     {
-        public class Application
+        public static class Application
         {
             public const string Create = "operation.application.create";
             public const string Read = "operation.application.read";
@@ -22,6 +22,13 @@ public static class Policies
             public const string Username = "operation.user.username";
             public const string Password = "operation.user.login.password";
             public const string Delete = "operation.user.delete";
+        }
+        
+        public static class Transaction
+        {
+            public const string Read = "operation.transaction.read";
+            public const string Send = "operation.transaction.send";
+            public const string Transfer = "operation.transaction.transfer";
         }
     }
 }

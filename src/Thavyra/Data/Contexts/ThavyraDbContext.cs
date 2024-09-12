@@ -20,6 +20,8 @@ public class ThavyraDbContext : DbContext
     public DbSet<UserDto> Users { get; set; }
     public DbSet<PasswordLoginDto> Passwords { get; set; }
 
+    public DbSet<TransactionDto> Transactions { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<ScopeDto>()

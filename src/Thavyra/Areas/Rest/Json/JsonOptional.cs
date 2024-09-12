@@ -31,4 +31,9 @@ public readonly struct JsonOptional<T>
     public bool HasValue => _hasValue;
 
     public static implicit operator JsonOptional<T>(T value) => new(value);
+
+    public T? ValueOrDefault()
+    {
+        return HasValue ? Value : default;
+    }
 }

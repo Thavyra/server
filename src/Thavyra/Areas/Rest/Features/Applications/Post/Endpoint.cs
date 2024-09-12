@@ -44,8 +44,17 @@ public class Endpoint : Endpoint<Request, ApplicationResponse>
             Id = ownerId
         }, ct);
 
+        var createRequest = new Application_Create
+        {
+            OwnerId = ownerId,
+            Name = req.Name,
+            Type = req.Type,
+            ConsentType = req.ConsentType.HasValue ? req.ConsentType.Value : OpenIddictConstants.ConsentTypes.Explicit,
+            Description = req.Description.HasValue ? req.Description.Value : null,
+        };
+        
         var authorizationResult = await _authorizationService.AuthorizeAsync(User,
-            Create<Application>.For(owner.Message), Security.Policies.Operation.Application.Create);
+            createRequest, Security.Policies.Operation.Application.Create);
 
         if (authorizationResult.Failure?.FailureReasons is { } reasons)
             foreach (var reason in reasons)
@@ -59,18 +68,11 @@ public class Endpoint : Endpoint<Request, ApplicationResponse>
             return;
         }
 
-        var applicationResponse = await _applicationClient.GetResponse<Application>(new Application_Create
-        {
-            OwnerId = ownerId,
-            Name = req.Name,
-            Type = req.Type,
-            ConsentType = req.ConsentType.HasValue ? req.ConsentType.Value : OpenIddictConstants.ConsentTypes.Explicit,
-            Description = req.Description.HasValue ? req.Description.Value : null,
-        }, ct);
+        var applicationResponse = await _applicationClient.GetResponse<Application>(createRequest, ct);
 
         var application = applicationResponse.Message;
 
-        await SendCreatedAtAsync<Get.Endpoint>(new { ApplicationId = application.Id.ToString() }, new ApplicationResponse
+        await SendCreatedAtAsync<Get.Endpoint>(new { Application = application.Id.ToString() }, new ApplicationResponse
         {
             Id = application.Id.ToString(),
             OwnerId = application.OwnerId.ToString(),

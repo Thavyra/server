@@ -34,7 +34,12 @@ public class Endpoint : Endpoint<UserRequest, List<ApplicationResponse>>
             throw new InvalidOperationException("Could not retrieve user.");
         }
 
-        var authorizationResult = await _authorizationService.AuthorizeAsync(User, Collect<Application>.For(user),
+        var request = new Application_GetByOwner
+        {
+            OwnerId = user.Id,
+        };
+        
+        var authorizationResult = await _authorizationService.AuthorizeAsync(User, request,
             Security.Policies.Operation.Application.Read);
 
         if (authorizationResult.Failure?.FailureReasons is {} reasons)
@@ -49,10 +54,7 @@ public class Endpoint : Endpoint<UserRequest, List<ApplicationResponse>>
             return;
         }
 
-        var applicationResponse = await _client.GetResponse<Multiple<Application>>(new Application_GetByOwner
-        {
-            OwnerId = user.Id,
-        }, ct);
+        var applicationResponse = await _client.GetResponse<Multiple<Application>>(request, ct);
 
         await SendAsync(applicationResponse.Message.Items.Select(application =>
             new ApplicationResponse

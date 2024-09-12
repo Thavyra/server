@@ -72,6 +72,6 @@ public class Endpoint : Endpoint<Request, ApplicationResponse>
             Description = response.Message.Description,
 
             CreatedAt = application.CreatedAt
-        });
+        }, cancellation: ct);
     }
 }

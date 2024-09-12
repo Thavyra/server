@@ -9,6 +9,8 @@ public static class RegisterPolicies
     public static AuthorizationBuilder AddOperationPolicies(this AuthorizationBuilder builder)
     {
         return builder
+                
+            // Users
             
             .AddPolicy(Policies.Operation.User.Read, new AuthorizationPolicyBuilder()
                 .RequireScope(ScopeNames.Account.ReadProfile)
@@ -31,6 +33,7 @@ public static class RegisterPolicies
                 .AddRequirements(Operations.Delete)
                 .Build())
             
+            // Applications
             
             .AddPolicy(Policies.Operation.Application.Create, new AuthorizationPolicyBuilder()
                 .RequireScope(ScopeNames.Applications.Create)
@@ -47,6 +50,21 @@ public static class RegisterPolicies
             .AddPolicy(Policies.Operation.Application.Delete, new AuthorizationPolicyBuilder()
                 .RequireScope(ScopeNames.Applications.Delete)
                 .AddRequirements(Operations.Delete)
+                .Build())
+            
+            // Transactions
+            
+            .AddPolicy(Policies.Operation.Transaction.Send, new AuthorizationPolicyBuilder()
+                .RequireScope(ScopeNames.Transactions.Send)
+                .AddRequirements(Operations.Transaction.Send)
+                .Build())
+            .AddPolicy(Policies.Operation.Transaction.Transfer, new AuthorizationPolicyBuilder()
+                .RequireScope(ScopeNames.Transactions.Transfer)
+                .AddRequirements(Operations.Transaction.Transfer)
+                .Build())
+            .AddPolicy(Policies.Operation.Transaction.Read, new AuthorizationPolicyBuilder()
+                .RequireScope(ScopeNames.Transactions.Read)
+                .AddRequirements(Operations.Read)
                 .Build());
     }
 }

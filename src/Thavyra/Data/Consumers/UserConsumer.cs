@@ -1,6 +1,7 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Thavyra.Contracts;
+using Thavyra.Contracts.Transaction;
 using Thavyra.Contracts.User;
 using Thavyra.Data.Contexts;
 using Thavyra.Data.Models;
@@ -16,10 +17,12 @@ public class UserConsumer :
     IConsumer<User_Update>
 {
     private readonly ThavyraDbContext _dbContext;
+    private readonly IPublishEndpoint _publishEndpoint;
 
-    public UserConsumer(ThavyraDbContext dbContext)
+    public UserConsumer(ThavyraDbContext dbContext, IPublishEndpoint publishEndpoint)
     {
         _dbContext = dbContext;
+        _publishEndpoint = publishEndpoint;
     }
 
     private User Map(UserDto user)
@@ -45,6 +48,14 @@ public class UserConsumer :
         await _dbContext.SaveChangesAsync();
 
         await context.RespondAsync(Map(user));
+
+        await _publishEndpoint.Publish(new Transaction_Create
+        {
+            ApplicationId = Guid.Empty,
+            SubjectId = user.Id,
+            Description = "Welcome to Thavyra!",
+            Amount = 1000
+        });
     }
 
     public async Task Consume(ConsumeContext<User_Delete> context)

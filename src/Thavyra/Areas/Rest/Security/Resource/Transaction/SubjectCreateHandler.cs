@@ -1,24 +1,24 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using OpenIddict.Abstractions;
-using Thavyra.Contracts.Application;
+using Thavyra.Contracts.Transaction;
 
-namespace Thavyra.Rest.Security.Resource.Application;
+namespace Thavyra.Rest.Security.Resource.Transaction;
 
 /// <summary>
-/// Authorizes a create operation if the user will be the owner.
+/// Authorizes a create operation if the user will be the subject.
 /// </summary>
-public class OwnerCreateHandler : AuthorizationHandler<OperationAuthorizationRequirement, Application_Create>
+public class SubjectCreateHandler : AuthorizationHandler<OperationAuthorizationRequirement, Transaction_Create>
 {
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, OperationAuthorizationRequirement requirement,
-        Application_Create resource)
+        Transaction_Create resource)
     {
         if (requirement.Name != Operations.Create.Name)
         {
             return Task.CompletedTask;
         }
 
-        if (context.User.GetClaim(OpenIddictConstants.Claims.Subject) == resource.OwnerId.ToString())
+        if (context.User.GetClaim(OpenIddictConstants.Claims.Subject) == resource.SubjectId.ToString())
         {
             context.Succeed(requirement);
         }

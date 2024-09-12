@@ -16,6 +16,9 @@ public class UserDto
     [MaxLength(400)]
     public string? Description { get; set; }
 
+    [Column("balance")]
+    public double Balance { get; set; }
+    
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
 }
