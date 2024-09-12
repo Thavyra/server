@@ -42,43 +42,17 @@ public class UserService : IUserService
         };
     }
 
-    public async Task<SlugResult<User>> GetUserFromRequestAsync(RequestWithAuthentication request, CancellationToken cancellationToken)
+    public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken)
     {
-        object? slug = request.UserSlug switch
+        Response response = await _getById.GetResponse<User, NotFound>(new User_GetById
         {
-            "@me" when Guid.TryParse(request.Subject, out var subject) => subject,
-            "@me" => new SlugClaimMissing<User>(),
-            
-            not null when Guid.TryParse(request.UserSlug, out var id) => id,
-            not null when request.UserSlug.StartsWith('@') => request.UserSlug[1..],
-            
-            _ => new SlugInvalid<User>()
-        };
-
-        if (slug is SlugResult<User> result)
-        {
-            return result;
-        }
-
-        Response response = slug switch
-        {
-            Guid guid => await _getById.GetResponse<User, NotFound>(new User_GetById
-            {
-                Id = guid
-            }, cancellationToken),
-            
-            string username => await _getByUsername.GetResponse<User, NotFound>(new User_GetByUsername
-            {
-                Username = username
-            }, cancellationToken),
-            
-            _ => throw new InvalidOperationException()
-        };
+            Id = id
+        }, cancellationToken);
 
         return response switch
         {
-            (_, User user) => new SlugFoundResult<User>(user),
-            (_, NotFound) => new SlugNotFound<User>(),
+            (_, User) => true,
+            (_, NotFound) => false,
             _ => throw new InvalidOperationException()
         };
     }
@@ -95,7 +69,7 @@ public class UserService : IUserService
 
         if (profileAuthorizationResult.Succeeded)
         {
-            response.Description = JsonOptional<string?>.Of(user.Description);
+            response.Description = user.Description;
         }
 
         return response;

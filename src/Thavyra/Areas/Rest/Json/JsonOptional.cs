@@ -30,7 +30,5 @@ public readonly struct JsonOptional<T>
     
     public bool HasValue => _hasValue;
 
-    public static JsonOptional<T> Of(T value) => new(value);
-    public static JsonOptional<T> Empty() => new();
-
+    public static implicit operator JsonOptional<T>(T value) => new(value);
 }

@@ -34,18 +34,18 @@ public class NullableConverterFactory : JsonConverterFactory
         )!;
     }
     
-    private class NullableConverter<T> : JsonConverter<JsonNullable<T>>
+    private class NullableConverter<T> : JsonConverter<JsonNullable<T>> where T : notnull
     {
         public override JsonNullable<T> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             var value = JsonSerializer.Deserialize<T>(ref reader, options);
 
-            return value is null ? JsonNullable<T>.Null() : JsonNullable<T>.Of(value);
+            return value;
         }
 
         public override void Write(Utf8JsonWriter writer, JsonNullable<T> value, JsonSerializerOptions options)
         {
-            JsonSerializer.Serialize(writer, value.Value, options);
+            JsonSerializer.Serialize(writer, (T?)value, options);
         }
     }
 }

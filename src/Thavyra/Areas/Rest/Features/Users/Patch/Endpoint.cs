@@ -12,39 +12,28 @@ namespace Thavyra.Rest.Features.Users.Patch;
 public class Endpoint : Endpoint<Request, UserResponse>
 {
     private readonly IUserService _userService;
-    private readonly IRequestClient<User_Update> _client;
+    private readonly IRequestClient<User_GetById> _getClient;
+    private readonly IRequestClient<User_Update> _updateClient;
     private readonly IAuthorizationService _authorizationService;
 
-    public Endpoint(IUserService userService, IRequestClient<User_Update> client, IAuthorizationService authorizationService)
+    public Endpoint(IUserService userService, IRequestClient<User_GetById> getClient, IRequestClient<User_Update> updateClient, IAuthorizationService authorizationService)
     {
         _userService = userService;
-        _client = client;
+        _getClient = getClient;
+        _updateClient = updateClient;
         _authorizationService = authorizationService;
     }
 
     public override void Configure()
     {
-        Patch("/users/{UserSlug}");
+        Patch("/users/{User}");
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)
     {
-        var userResult = await _userService.GetUserFromRequestAsync(req, ct);
+        var state = ProcessorState<UserRequestState>();
 
-        switch (userResult)
-        {
-            case (SlugClaimMissing, _):
-                await SendUnauthorizedAsync(ct);
-                return;
-            case (SlugInvalid, _):
-                await SendErrorsAsync(cancellation: ct);
-                break;
-            case (SlugNotFound, _):
-                await SendNotFoundAsync(ct);
-                return;
-        }
-        
-        if (userResult is not (_, { } user))
+        if (state.User is not { } user)
         {
             throw new InvalidOperationException("Could not retrieve user.");
         }
@@ -100,7 +89,7 @@ public class Endpoint : Endpoint<Request, UserResponse>
             updateRequest = updateRequest with { Description = req.Description.Value };
         }
 
-        var updateResponse = await _client.GetResponse<User>(updateRequest, ct);
+        var updateResponse = await _updateClient.GetResponse<User>(updateRequest, ct);
 
         var response = await _userService.GetResponseAsync(updateResponse.Message, HttpContext, ct);
         

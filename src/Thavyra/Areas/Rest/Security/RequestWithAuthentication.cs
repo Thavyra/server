@@ -12,21 +12,11 @@ public class RequestWithAuthentication
     /// Subject ID retrieved from claims.
     /// </summary>
     [FromClaim(ClaimType = OpenIddictConstants.Claims.Subject, IsRequired = false)]
-    public string? Subject { get; set; }
+    public Guid Subject { get; set; }
     
     /// <summary>
     /// Client ID retrieved from claims.
     /// </summary>
     [FromClaim(ClaimType = OpenIddictConstants.Claims.ClientId, IsRequired = false)]
-    public string? Client { get; set; }
-
-    /// <summary>
-    /// User slug retrieved from request fields.
-    /// </summary>
-    public string? UserSlug { get; set; }
-    
-    /// <summary>
-    /// Application slug retrieved from request fields.
-    /// </summary>
-    public string? ApplicationSlug { get; set; }
+    public Guid Client { get; set; }
 }

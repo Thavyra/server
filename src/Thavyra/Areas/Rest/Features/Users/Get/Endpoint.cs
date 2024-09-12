@@ -1,43 +1,40 @@
 using FastEndpoints;
+using MassTransit;
+using Thavyra.Contracts;
+using Thavyra.Contracts.User;
 using Thavyra.Rest.Json;
 using Thavyra.Rest.Security;
 using Thavyra.Rest.Services;
 
 namespace Thavyra.Rest.Features.Users.Get;
 
-public class Endpoint : Endpoint<RequestWithAuthentication, UserResponse>
+public class Endpoint : Endpoint<UserRequest, UserResponse>
 {
+    private readonly IRequestClient<User_GetById> _getById;
+    private readonly IRequestClient<User_GetByUsername> _getByUsername;
     private readonly IUserService _userService;
 
-    public Endpoint(IUserService userService)
+    public Endpoint(
+        IRequestClient<User_GetById> getById,
+        IRequestClient<User_GetByUsername> getByUsername,
+        IUserService userService)
     {
+        _getById = getById;
+        _getByUsername = getByUsername;
         _userService = userService;
     }
 
     public override void Configure()
     {
-        Get("/users/{UserSlug}");
+        Get("/users/{User}");
         AllowAnonymous();
     }
 
-    public override async Task HandleAsync(RequestWithAuthentication req, CancellationToken ct)
+    public override async Task HandleAsync(UserRequest req, CancellationToken ct)
     {
-        var userResult = await _userService.GetUserFromRequestAsync(req, ct);
-        
-        switch (userResult)
-        {
-            case (SlugClaimMissing, _):
-                await SendUnauthorizedAsync(ct);
-                return;
-            case (SlugInvalid, _):
-                await SendErrorsAsync(cancellation: ct);
-                break;
-            case (SlugNotFound, _):
-                await SendNotFoundAsync(ct);
-                return;
-        }
+        var state = ProcessorState<UserRequestState>();
 
-        if (userResult is not (_, { } user))
+        if (state.User is not { } user)
         {
             throw new InvalidOperationException("Could not retrieve user.");
         }

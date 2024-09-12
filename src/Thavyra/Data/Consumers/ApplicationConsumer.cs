@@ -16,6 +16,7 @@ public class ApplicationConsumer :
     IConsumer<Application_Delete>,
     IConsumer<Application_GetByClientId>,
     IConsumer<Application_GetById>,
+    IConsumer<Application_GetByOwner>,
     IConsumer<Application_GetByRedirect>,
     IConsumer<Application_List>,
     IConsumer<Application_Update>,
@@ -146,6 +147,15 @@ public class ApplicationConsumer :
         }
         
         await context.RespondAsync(Map(application));
+    }
+    
+    public async Task Consume(ConsumeContext<Application_GetByOwner> context)
+    {
+        var applications = await _dbContext.Applications
+            .Where(x => x.OwnerId == context.Message.OwnerId)
+            .ToListAsync();
+
+        await context.RespondAsync(new Multiple<Application>(applications.Select(Map).ToList()));
     }
 
     public async Task Consume(ConsumeContext<Application_GetByRedirect> context)

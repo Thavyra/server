@@ -43,7 +43,7 @@ public class OptionalConverterFactory : JsonConverterFactory
         {
             var value = JsonSerializer.Deserialize<T>(ref reader, options);
             
-            return JsonOptional<T>.Of(value!); // Value may be null, this is ok
+            return value!; // Value may be null, this is ok
         }
 
         public override void Write(Utf8JsonWriter writer, JsonOptional<T> value, JsonSerializerOptions options)

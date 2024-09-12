@@ -6,7 +6,7 @@ namespace Thavyra.Rest.Json;
 /// JSON property which should be written, even if set to null.
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public readonly struct JsonNullable<T>
+public readonly struct JsonNullable<T> where T : notnull
 {
     private readonly T? _value;
     private readonly bool _isNull = false;
@@ -22,11 +22,10 @@ public readonly struct JsonNullable<T>
         _isNull = true;
     }
 
-    public T? Value => IsNull ? default : Value;
-
-    [MemberNotNullWhen(true, nameof(Value))]
     public bool IsNull => _isNull;
 
-    public static JsonNullable<T> Of(T value) => new(value);
+    public static implicit operator JsonNullable<T>(T? value) => value is null ? Null() : new(value);
+    public static implicit operator T?(JsonNullable<T> value) => value._value;
+    
     public static JsonNullable<T> Null() => new(isNull: true);
 }

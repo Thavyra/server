@@ -8,16 +8,18 @@ using Thavyra.Rest.Services;
 
 namespace Thavyra.Rest.Features.Users.Delete;
 
-public class Endpoint : Endpoint<RequestWithAuthentication>
+public class Endpoint : Endpoint<UserRequest>
 {
     private readonly IUserService _userService;
-    private readonly IRequestClient<User_Delete> _client;
+    private readonly IRequestClient<User_GetById> _getClient;
+    private readonly IRequestClient<User_Delete> _deleteClient;
     private readonly IAuthorizationService _authorizationService;
 
-    public Endpoint(IUserService userService, IRequestClient<User_Delete> client, IAuthorizationService authorizationService)
+    public Endpoint(IUserService userService, IRequestClient<User_GetById> getClient, IRequestClient<User_Delete> deleteClient, IAuthorizationService authorizationService)
     {
         _userService = userService;
-        _client = client;
+        _getClient = getClient;
+        _deleteClient = deleteClient;
         _authorizationService = authorizationService;
     }
 
@@ -26,24 +28,11 @@ public class Endpoint : Endpoint<RequestWithAuthentication>
         Delete("/users/{UserSlug}");
     }
 
-    public override async Task HandleAsync(RequestWithAuthentication req, CancellationToken ct)
+    public override async Task HandleAsync(UserRequest req, CancellationToken ct)
     {
-        var userResult = await _userService.GetUserFromRequestAsync(req, ct);
+        var state = ProcessorState<UserRequestState>();
 
-        switch (userResult)
-        {
-            case (SlugClaimMissing, _):
-                await SendUnauthorizedAsync(ct);
-                return;
-            case (SlugInvalid, _):
-                await SendErrorsAsync(cancellation: ct);
-                break;
-            case (SlugNotFound, _):
-                await SendNotFoundAsync(ct);
-                return;
-        }
-        
-        if (userResult is not (_, { } user))
+        if (state.User is not { } user)
         {
             throw new InvalidOperationException("Could not retrieve user.");
         }
@@ -63,7 +52,7 @@ public class Endpoint : Endpoint<RequestWithAuthentication>
             return;
         }
 
-        var response = await _client.GetResponse<Success>(new User_Delete
+        var response = await _deleteClient.GetResponse<Success>(new User_Delete
         {
             Id = user.Id
         }, ct);
