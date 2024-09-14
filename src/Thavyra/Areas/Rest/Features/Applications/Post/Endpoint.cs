@@ -27,22 +27,18 @@ public class Endpoint : Endpoint<Request, ApplicationResponse>
 
     public override void Configure()
     {
-        Post("/");
+        Post("/applications");
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)
     {
-        if (!Guid.TryParse(User.GetClaim(OpenIddictConstants.Claims.Subject), out var subject))
+        var ownerId = req.OwnerId.HasValue ? req.OwnerId.Value : req.Subject;
+
+        if (ownerId == default)
         {
-            throw new InvalidOperationException();
+            await SendUnauthorizedAsync(ct);
+            return;
         }
-
-        var ownerId = req.OwnerId.HasValue ? req.OwnerId.Value : subject;
-
-        var owner = await _userClient.GetResponse<User>(new User_GetById
-        {
-            Id = ownerId
-        }, ct);
 
         var createRequest = new Application_Create
         {
@@ -86,7 +82,7 @@ public class Endpoint : Endpoint<Request, ApplicationResponse>
                 _ => false
             },
             ClientId = application.ClientId,
-            ConsentType = application.ClientType,
+            ConsentType = application.ConsentType,
             
             CreatedAt = application.CreatedAt
         }, cancellation: ct);

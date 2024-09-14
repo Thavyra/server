@@ -12,5 +12,5 @@ public class UserResponse
     /// </summary>
     public JsonOptional<string?> Description { get; set; }
     
-    // public JsonOptional<double> Balance { get; set; }
+    public JsonOptional<double> Balance { get; set; }
 }

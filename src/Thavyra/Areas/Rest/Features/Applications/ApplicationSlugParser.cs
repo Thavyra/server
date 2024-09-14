@@ -5,27 +5,31 @@ using Thavyra.Contracts.Application;
 
 namespace Thavyra.Rest.Features.Applications;
 
-public class ApplicationSlugParser : GlobalPreProcessor<ApplicationRequestState>
+public class ApplicationSlugParser : GlobalPreProcessor<RequestState>
 {
-    private readonly IRequestClient<Application_GetById> _client;
-
-    public ApplicationSlugParser(IRequestClient<Application_GetById> client)
+    private readonly IServiceScopeFactory _scopeFactory;
+    
+    public ApplicationSlugParser(IServiceScopeFactory scopeFactory)
     {
-        _client = client;
+        _scopeFactory = scopeFactory;
     }
     
-    public override async Task PreProcessAsync(IPreProcessorContext context, ApplicationRequestState requestState, CancellationToken ct)
+    public override async Task PreProcessAsync(IPreProcessorContext context, RequestState requestState, CancellationToken ct)
     {
         if (context.Request is not ApplicationRequest request)
         {
             return;
         }
         
+        using var scope = _scopeFactory.CreateScope();
+
+        var client = scope.Resolve<IRequestClient<Application_GetById>>();
+        
         Response? applicationResponse = null;
 
         if (Guid.TryParse(request.Application, out var id))
         {
-            applicationResponse = await _client.GetResponse<Application, NotFound>(new Application_GetById
+            applicationResponse = await client.GetResponse<Application, NotFound>(new Application_GetById
             {
                 Id = id
             }, ct);
@@ -33,15 +37,15 @@ public class ApplicationSlugParser : GlobalPreProcessor<ApplicationRequestState>
         
         if (request.Application == "@me")
         {
-            if (request.Subject == default)
+            if (request.ApplicationId == default)
             {
                 await context.HttpContext.Response.SendUnauthorizedAsync(ct);
                 return;
             }
             
-            applicationResponse = await _client.GetResponse<Application, NotFound>(new Application_GetById
+            applicationResponse = await client.GetResponse<Application, NotFound>(new Application_GetById
             {
-                Id = request.Subject
+                Id = request.ApplicationId
             }, ct);
         }
         

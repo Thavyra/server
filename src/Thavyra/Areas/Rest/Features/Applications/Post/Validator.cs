@@ -1,13 +1,17 @@
+using FastEndpoints;
 using FluentValidation;
 using OpenIddict.Abstractions;
 using Thavyra.Rest.Services;
 
 namespace Thavyra.Rest.Features.Applications.Post;
 
-public class Validator : AbstractValidator<Request>
+public class Validator : Validator<Request>
 {
-    public Validator(IUserService userService)
+    public Validator()
     {
+        using var scope = CreateScope();
+        var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+        
         When(x => x.OwnerId.HasValue, () =>
         {
             RuleFor(req => req.OwnerId.Value)
@@ -22,7 +26,7 @@ public class Validator : AbstractValidator<Request>
         string[] types = [OpenIddictConstants.ApplicationTypes.Web, OpenIddictConstants.ApplicationTypes.Native];
         RuleFor(x => x.Type)
             .NotEmpty()
-            .Must(x => types.Contains(x)).WithMessage("Unknown application type.");
+            .Must(x => types.Contains(x)).WithMessage($"Application type should be one of {string.Join(", ", types)}");
 
         When(x => x.ConsentType.HasValue, () =>
         {
@@ -30,7 +34,7 @@ public class Validator : AbstractValidator<Request>
                 [OpenIddictConstants.ConsentTypes.Explicit, OpenIddictConstants.ConsentTypes.Implicit];
             RuleFor(req => req.ConsentType.Value)
                 .NotEmpty()
-                .Must(y => consentTypes.Contains(y)).WithMessage("Unknown consent type.");
+                .Must(y => consentTypes.Contains(y)).WithMessage($"Consent type should be one of {string.Join(", ", consentTypes)}");
         });
 
         When(x => x.Description.HasValue, () =>

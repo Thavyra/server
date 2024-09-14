@@ -100,15 +100,17 @@ public class AuthorizeController : Controller
         return request.HasPrompt(Prompts.Consent) switch
         {
             false when permanentAuthorizations.Any() => await AuthorizeAsync(
-                user, 
-                clientId, 
+                user: user,
+                clientId: clientId,
+                applicationId: applicationId, 
                 scopeNames,
                 authorization: permanentAuthorizations.LastOrDefault(), 
                 cancellationToken),
             
             false when application.ConsentType == ConsentTypes.Implicit => await AuthorizeAsync(
-                user, 
-                clientId, 
+                user: user,
+                clientId: clientId,
+                applicationId: applicationId, 
                 scopeNames,
                 authorization: null, 
                 cancellationToken),
@@ -150,9 +152,9 @@ public class AuthorizeController : Controller
             throw new InvalidOperationException("Could not retrieve application details.");
         }
         
-        string? client = await _applicationManager.GetIdAsync(application, cancellationToken);
+        string? applicationId = await _applicationManager.GetIdAsync(application, cancellationToken);
 
-        if (client is null)
+        if (applicationId is null)
         {
             throw new InvalidOperationException();
         }
@@ -161,13 +163,14 @@ public class AuthorizeController : Controller
 
         var permanentAuthorizations = await GetPermanentAuthorizationsAsync(
             subject,
-            client,
+            applicationId,
             scopes,
             cancellationToken);
 
         return await AuthorizeAsync(
-            user,
-            client,
+            user: user,
+            clientId: clientId,
+            applicationId: applicationId, 
             scopes,
             authorization: permanentAuthorizations.LastOrDefault(),
             cancellationToken);
@@ -223,20 +226,22 @@ public class AuthorizeController : Controller
 
     private async Task<IActionResult> AuthorizeAsync(
         UserModel user,
-        string client,
+        string clientId,
+        string applicationId,
         ImmutableArray<string> scopes,
         object? authorization,
         CancellationToken ct)
     {
         var identity = new ClaimsIdentity(
             authenticationType: TokenValidationParameters.DefaultAuthenticationType,
-            nameType: Claims.Name,
+            nameType: Claims.Username,
             roleType: Claims.Role);
 
-        identity.SetClaim(Claims.Subject, user.Id.ToString());
         identity.SetClaim(Claims.Username, user.Username);
-
-        identity.SetClaim(Claims.ClientId, client);
+        
+        identity.SetClaim(Claims.Subject, user.Id.ToString());
+        identity.SetClaim(Claims.ClientId, clientId);
+        identity.SetClaim("application_id", applicationId);
 
         identity.SetScopes(scopes);
 
@@ -251,7 +256,7 @@ public class AuthorizeController : Controller
         authorization ??= await _authorizationManager.CreateAsync(
             identity: identity,
             subject: user.Id.ToString(),
-            client: client,
+            client: applicationId,
             type: AuthorizationTypes.Permanent,
             scopes: scopes,
             cancellationToken: ct);

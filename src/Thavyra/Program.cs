@@ -1,10 +1,14 @@
 using MassTransit;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using OpenIddict.Validation.AspNetCore;
 using Tailwind;
 using Thavyra.Data.Configuration;
 using Thavyra.Data.Contexts;
 using Thavyra.Data.Seeds;
 using Thavyra.Oidc.Configuration;
 using Thavyra.Rest.Configuration;
+using Thavyra.Rest.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,12 +25,19 @@ builder.Services.AddMassTransit(x =>
     });
 });
 
-var authenticationBuilder = builder.Services.AddAuthentication();
+var authenticationBuilder = builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+});
 
 foreach (var section in builder.Configuration.GetChildren())
 {
     switch (section.Key)
     {
+        case "Data":
+            builder.Services.AddEntityFramework(section);
+            break;
         case "Oidc":
             builder.Services.AddOidcAuthorizationServer(section);
             authenticationBuilder.AddOidcAuthentication(section);
@@ -34,13 +45,11 @@ foreach (var section in builder.Configuration.GetChildren())
         case "Rest":
             builder.Services.AddRestApi(section);
             break;
-        case "Data":
-            builder.Services.AddEntityFramework(section);
-            break;
     }
 }
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorizationBuilder()
+    .AddOperationPolicies();
 
 var app = builder.Build();
 

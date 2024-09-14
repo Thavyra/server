@@ -1,9 +1,12 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using FastEndpoints;
+using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Thavyra.Rest.Features.Applications;
 using Thavyra.Rest.Features.Users;
 using Thavyra.Rest.Json;
+using Thavyra.Rest.Security.Scopes;
 using Thavyra.Rest.Services;
 
 namespace Thavyra.Rest.Configuration;
@@ -12,19 +15,22 @@ public static class Services
 {
     public static IServiceCollection AddRestApi(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton<Security.Resource.User.SameSubjectHandler>();
+        services.AddScoped<IAuthorizationHandler, ScopeAuthorizationHandler>();
         
-        services.AddSingleton<Security.Resource.Application.OwnerHandler>();
-        services.AddSingleton<Security.Resource.Application.OwnerCreateHandler>();
-        services.AddSingleton<Security.Resource.Application.OwnerCollectHandler>();
+        services.AddSingleton<IAuthorizationHandler, Security.Resource.User.SameSubjectHandler>();
+        
+        services.AddSingleton<IAuthorizationHandler, Security.Resource.Application.OwnerHandler>();
+        services.AddSingleton<IAuthorizationHandler, Security.Resource.Application.OwnerCreateHandler>();
+        services.AddSingleton<IAuthorizationHandler, Security.Resource.Application.OwnerCollectHandler>();
 
-        services.AddSingleton<Security.Resource.Transaction.OwnerCollectHandler>();
-        services.AddSingleton<Security.Resource.Transaction.OwnerReadHandler>();
-        services.AddSingleton<Security.Resource.Transaction.SubjectCreateHandler>();
-        services.AddSingleton<Security.Resource.Transaction.SubjectOrRecipientCollectHandler>();
-        services.AddSingleton<Security.Resource.Transaction.SubjectOrRecipientReadHandler>();
+        services.AddSingleton<IAuthorizationHandler, Security.Resource.Transaction.OwnerCollectHandler>();
+        services.AddSingleton<IAuthorizationHandler, Security.Resource.Transaction.OwnerReadHandler>();
+        services.AddSingleton<IAuthorizationHandler, Security.Resource.Transaction.SubjectSendHandler>();
+        services.AddSingleton<IAuthorizationHandler, Security.Resource.Transaction.SubjectTransferHandler>();
+        services.AddSingleton<IAuthorizationHandler, Security.Resource.Transaction.SubjectOrRecipientCollectHandler>();
+        services.AddSingleton<IAuthorizationHandler, Security.Resource.Transaction.SubjectOrRecipientReadHandler>();
 
-        services.AddSingleton<IUserService, UserService>();
+        services.AddTransient<IUserService, UserService>();
         
         services.AddFastEndpoints();
         

@@ -53,7 +53,7 @@ public class OptionalConverterFactory : JsonConverterFactory
                 return;
             }
             
-            JsonSerializer.Serialize(writer, value, options);
+            JsonSerializer.Serialize(writer, value.Value, options);
         }
     }
 }

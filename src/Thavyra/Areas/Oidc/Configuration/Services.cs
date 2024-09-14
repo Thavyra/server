@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using OpenIddict.Abstractions;
 using Thavyra.Oidc.Managers;
 using Thavyra.Oidc.Models.Internal;
+using Thavyra.Oidc.Models.View;
 using Thavyra.Oidc.Stores;
 
 namespace Thavyra.Oidc.Configuration;
@@ -13,7 +14,8 @@ public static class Services
 {
     public static void AddOidcAuthorizationServer(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddValidatorsFromAssembly(typeof(Services).Assembly);
+        services.AddScoped<IValidator<LoginViewModel>, LoginViewModel.Validator>();
+        services.AddScoped<IValidator<RegisterViewModel>, RegisterViewModel.Validator>();
         services.AddFluentValidationClientsideAdapters();
         
         services.AddTransient<IOpenIddictApplicationStore<ApplicationModel>, ApplicationStore>();
@@ -70,9 +72,8 @@ public static class Services
                     })
                     .AddValidation(options =>
                     {
-                        options.SetIssuer(section["Issuer"] ??
-                                          throw new Exception("OIDC issuer not provided."))
-                            .UseAspNetCore();
+                        options.UseLocalServer();
+                        options.UseAspNetCore();
                     });
                     
                     break;

@@ -35,7 +35,7 @@ public class ScopeAuthorizationHandler : AuthorizationHandler<ScopeAuthorization
         // e.g. account.profile automatically allows account.profile.read and account.profile.edit
         
         // Incrementally recombine the parts of the required scope until the user possesses it or authorization fails
-        for (int i = 1; i < parts.Length; i++)
+        for (int i = 1; i <= parts.Length; i++)
         {
             string combined = string.Join('.', parts.Take(i));
 

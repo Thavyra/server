@@ -32,6 +32,7 @@ public class UserConsumer :
             Id = user.Id,
             Username = user.Username,
             Description = user.Description,
+            Balance = user.Balance,
             CreatedAt = user.CreatedAt
         };
     }
@@ -51,7 +52,7 @@ public class UserConsumer :
 
         await _publishEndpoint.Publish(new Transaction_Create
         {
-            ApplicationId = Guid.Empty,
+            ApplicationId = new Guid("96ab99e3-6b3e-4265-a36a-8524e9a74f60"),
             SubjectId = user.Id,
             Description = "Welcome to Thavyra!",
             Amount = 1000

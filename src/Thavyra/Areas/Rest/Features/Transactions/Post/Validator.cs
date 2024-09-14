@@ -1,8 +1,9 @@
+using FastEndpoints;
 using FluentValidation;
 
 namespace Thavyra.Rest.Features.Transactions.Post;
 
-public class Validator : AbstractValidator<Request>
+public class Validator : Validator<Request>
 {
     public Validator()
     {

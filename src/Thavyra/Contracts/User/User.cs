@@ -6,6 +6,7 @@ public record User
 
     public required string Username { get; init; }
     public required string? Description { get; init; }
+    public required double Balance { get; init; }
 
     public required DateTime CreatedAt { get; init; }
 }

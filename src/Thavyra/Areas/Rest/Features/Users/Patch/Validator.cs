@@ -1,16 +1,17 @@
 using System.Text.RegularExpressions;
+using FastEndpoints;
 using FluentValidation;
-using MassTransit;
-using Thavyra.Contracts;
-using Thavyra.Contracts.User;
 using Thavyra.Rest.Services;
 
 namespace Thavyra.Rest.Features.Users.Patch;
 
-public partial class Validator : AbstractValidator<Request>
+public partial class Validator : Validator<Request>
 {
-    public Validator(IUserService userService)
+    public Validator()
     {
+        using var scope = CreateScope();
+        var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+        
         When(x => x.Username.HasValue, () =>
         {
             RuleFor(user => user.Username.Value)

@@ -25,7 +25,7 @@ public class Endpoint : Endpoint<Request, TransactionResponse>
 
     public override async Task HandleAsync(Request req, CancellationToken ct)
     {
-        var state = ProcessorState<UserRequestState>();
+        var state = ProcessorState<RequestState>();
 
         if (state.User is not { } user)
         {
@@ -34,7 +34,7 @@ public class Endpoint : Endpoint<Request, TransactionResponse>
 
         var createRequest = new Transfer_Create
         {
-            ApplicationId = req.Client,
+            ApplicationId = req.ApplicationId,
             SubjectId = user.Id,
             RecipientId = req.RecipientId,
             Description = req.Description.ValueOrDefault(),

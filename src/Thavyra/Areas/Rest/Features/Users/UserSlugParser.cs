@@ -5,54 +5,60 @@ using Thavyra.Contracts.User;
 
 namespace Thavyra.Rest.Features.Users;
 
-public class UserSlugParser : GlobalPreProcessor<UserRequestState>
+public class UserSlugParser : GlobalPreProcessor<RequestState>
 {
-    private readonly IRequestClient<User_GetById> _idClient;
-    private readonly IRequestClient<User_GetByUsername> _usernameClient;
+    private readonly IServiceScopeFactory _scopeFactory;
 
-    public UserSlugParser(IRequestClient<User_GetById> idClient, IRequestClient<User_GetByUsername> usernameClient)
+    public UserSlugParser(IServiceScopeFactory scopeFactory)
     {
-        _idClient = idClient;
-        _usernameClient = usernameClient;
+        _scopeFactory = scopeFactory;
     }
 
-    public override async Task PreProcessAsync(IPreProcessorContext context, UserRequestState requestState, CancellationToken ct)
+    public override async Task PreProcessAsync(IPreProcessorContext context, RequestState requestState, CancellationToken ct)
     {
         if (context.Request is not UserRequest request)
         {
             return;
         }
-        
+
+        using var scope = _scopeFactory.CreateScope();
+
+        var idClient = scope.Resolve<IRequestClient<User_GetById>>();
+        var usernameClient = scope.Resolve<IRequestClient<User_GetByUsername>>();
+
         Response? userResponse = null;
 
-        if (Guid.TryParse(request.User, out var id))
+        switch (request.User)
         {
-            userResponse = await _idClient.GetResponse<User, NotFound>(new User_GetById
-            {
-                Id = id
-            }, ct);
-        }
-        
-        if (request.User == "@me")
-        {
-            if (request.Subject == default)
-            {
-                await context.HttpContext.Response.SendUnauthorizedAsync(ct);
-                return;
-            }
+            case { } guid when Guid.TryParse(guid, out var id):
+                userResponse = await idClient.GetResponse<User, NotFound>(new User_GetById
+                {
+                    Id = id
+                }, ct);
+                
+                break;
             
-            userResponse = await _idClient.GetResponse<User, NotFound>(new User_GetById
-            {
-                Id = request.Subject
-            }, ct);
-        }
-        
-        if (request.User?.StartsWith('@') is true)
-        {
-            userResponse = await _usernameClient.GetResponse<User, NotFound>(new User_GetByUsername
-            {
-                Username = request.User[1..]
-            }, ct);
+            case "@me":
+                if (request.Subject == default)
+                {
+                    await context.HttpContext.Response.SendUnauthorizedAsync(ct);
+                    return;
+                }
+            
+                userResponse = await idClient.GetResponse<User, NotFound>(new User_GetById
+                {
+                    Id = request.Subject
+                }, ct);
+                
+                break;
+            
+            case { } username when username.StartsWith('@'):
+                userResponse = await usernameClient.GetResponse<User, NotFound>(new User_GetByUsername
+                {
+                    Username = request.User[1..]
+                }, ct);
+                
+                break;
         }
         
         switch (userResponse)

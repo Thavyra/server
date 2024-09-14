@@ -11,11 +11,11 @@ namespace Thavyra.Rest.Security.Resource.Transaction;
 /// </summary>
 public class OwnerReadHandler : AuthorizationHandler<OperationAuthorizationRequirement, Contracts.Transaction.Transaction>
 {
-    private readonly IRequestClient<Application_GetById> _client;
+    private readonly IClientFactory _clientFactory;
 
-    public OwnerReadHandler(IRequestClient<Application_GetById> client)
+    public OwnerReadHandler(IClientFactory clientFactory)
     {
-        _client = client;
+        _clientFactory = clientFactory;
     }
     
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, OperationAuthorizationRequirement requirement,
@@ -26,7 +26,9 @@ public class OwnerReadHandler : AuthorizationHandler<OperationAuthorizationRequi
             return;
         }
 
-        var response = await _client.GetResponse<Contracts.Application.Application>(new Application_GetById
+        var client = _clientFactory.CreateRequestClient<Application_GetById>();
+
+        var response = await client.GetResponse<Contracts.Application.Application>(new Application_GetById
         {
             Id = resource.ApplicationId
         });

@@ -8,12 +8,12 @@ namespace Thavyra.Rest.Security.Resource.Transaction;
 /// <summary>
 /// Authorizes a create operation if the user will be the subject.
 /// </summary>
-public class SubjectCreateHandler : AuthorizationHandler<OperationAuthorizationRequirement, Transaction_Create>
+public class SubjectSendHandler : AuthorizationHandler<OperationAuthorizationRequirement, Transaction_Create>
 {
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, OperationAuthorizationRequirement requirement,
         Transaction_Create resource)
     {
-        if (requirement.Name != Operations.Create.Name)
+        if (requirement.Name != Operations.Transaction.Send.Name)
         {
             return Task.CompletedTask;
         }

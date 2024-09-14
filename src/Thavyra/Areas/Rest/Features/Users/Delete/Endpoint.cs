@@ -4,21 +4,16 @@ using Microsoft.AspNetCore.Authorization;
 using Thavyra.Contracts;
 using Thavyra.Contracts.User;
 using Thavyra.Rest.Security;
-using Thavyra.Rest.Services;
 
 namespace Thavyra.Rest.Features.Users.Delete;
 
 public class Endpoint : Endpoint<UserRequest>
 {
-    private readonly IUserService _userService;
-    private readonly IRequestClient<User_GetById> _getClient;
     private readonly IRequestClient<User_Delete> _deleteClient;
     private readonly IAuthorizationService _authorizationService;
 
-    public Endpoint(IUserService userService, IRequestClient<User_GetById> getClient, IRequestClient<User_Delete> deleteClient, IAuthorizationService authorizationService)
+    public Endpoint(IRequestClient<User_Delete> deleteClient, IAuthorizationService authorizationService)
     {
-        _userService = userService;
-        _getClient = getClient;
         _deleteClient = deleteClient;
         _authorizationService = authorizationService;
     }
@@ -30,7 +25,7 @@ public class Endpoint : Endpoint<UserRequest>
 
     public override async Task HandleAsync(UserRequest req, CancellationToken ct)
     {
-        var state = ProcessorState<UserRequestState>();
+        var state = ProcessorState<RequestState>();
 
         if (state.User is not { } user)
         {

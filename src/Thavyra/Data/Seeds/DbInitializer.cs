@@ -101,6 +101,30 @@ public static class DbInitializer
                 Name = "applications.delete",
                 DisplayName = "Delete Applications",
                 Description = "Delete your OAuth applications."
+            },
+            
+            new ScopeDto
+            {
+                Id = Guid.NewGuid(),
+                Name = "transactions",
+                DisplayName = "Transactions",
+                Description = "Send transactions and view your virtual balance."
+            },
+            
+            new ScopeDto
+            {
+                Id = Guid.NewGuid(),
+                Name = "transactions.send",
+                DisplayName = "Send Transactions",
+                Description = "Change your virtual balance."
+            },
+            
+            new ScopeDto
+            {
+                Id = Guid.NewGuid(),
+                Name = "transactions.transfer",
+                DisplayName = "Transfer",
+                Description = "Transfer your virtual balance to other users."
             }
         };
         
@@ -123,6 +147,24 @@ public static class DbInitializer
 
         var applications = new[]
         {
+            new ApplicationDto
+            {
+                Id = Guid.Parse("96ab99e3-6b3e-4265-a36a-8524e9a74f60"),
+                OwnerId = Guid.Parse("d6c0de21-8579-44e5-8e08-c45bc03a4227"),
+
+                ClientId = "j17FHt92IVSvzBufa9c1q0QDaKTd6aFC",
+                ClientSecret = "j17FHt92IVSvzBufa9c1q0QDaKTd6aFC",
+                ClientType = OpenIddictConstants.ClientTypes.Confidential,
+                ConsentType = OpenIddictConstants.ConsentTypes.Implicit,
+
+                Type = OpenIddictConstants.ApplicationTypes.Web,
+                Name = "System",
+                Description = "System application",
+
+                CreatedAt = DateTime.UtcNow
+            },
+            
+            
             new ApplicationDto
             {
                 Id = Guid.Parse("5276f543-60f5-40ff-9bef-631f4649714a"),

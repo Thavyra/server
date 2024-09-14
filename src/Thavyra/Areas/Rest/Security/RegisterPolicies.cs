@@ -63,7 +63,6 @@ public static class RegisterPolicies
                 .AddRequirements(Operations.Transaction.Transfer)
                 .Build())
             .AddPolicy(Policies.Operation.Transaction.Read, new AuthorizationPolicyBuilder()
-                .RequireScope(ScopeNames.Transactions.Read)
                 .AddRequirements(Operations.Read)
                 .Build());
     }

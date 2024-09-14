@@ -70,6 +70,7 @@ public class UserService : IUserService
         if (profileAuthorizationResult.Succeeded)
         {
             response.Description = user.Description;
+            response.Balance = user.Balance;
         }
 
         return response;

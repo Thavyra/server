@@ -25,7 +25,7 @@ public class Endpoint : Endpoint<ApplicationRequest>
 
     public override async Task HandleAsync(ApplicationRequest req, CancellationToken ct)
     {
-        var state = ProcessorState<ApplicationRequestState>();
+        var state = ProcessorState<RequestState>();
 
         if (state.Application is not { } application)
         {
