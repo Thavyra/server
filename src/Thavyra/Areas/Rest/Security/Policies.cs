@@ -30,5 +30,20 @@ public static class Policies
             public const string Send = "operation.transaction.send";
             public const string Transfer = "operation.transaction.transfer";
         }
+        
+        public static class Objective
+        {
+            public const string Create = "operation.objective.create";
+            public const string Read = "operation.objective.read";
+            public const string Update = "operation.objective.update";
+            public const string Delete = "operation.objective.delete";
+        }
+        
+        public static class Score
+        {
+            public const string Create = "operation.score.create";
+            public const string Read = "operation.score.read";
+            public const string Delete = "operation.score.delete";
+        }
     }
 }

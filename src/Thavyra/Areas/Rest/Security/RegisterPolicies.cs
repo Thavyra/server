@@ -9,7 +9,7 @@ public static class RegisterPolicies
     public static AuthorizationBuilder AddOperationPolicies(this AuthorizationBuilder builder)
     {
         return builder
-                
+
             // Users
             
             .AddPolicy(Policies.Operation.User.Read, new AuthorizationPolicyBuilder()
@@ -32,7 +32,7 @@ public static class RegisterPolicies
                 .RequireScope(ScopeNames.Account.Delete)
                 .AddRequirements(Operations.Delete)
                 .Build())
-            
+
             // Applications
             
             .AddPolicy(Policies.Operation.Application.Create, new AuthorizationPolicyBuilder()
@@ -51,7 +51,7 @@ public static class RegisterPolicies
                 .RequireScope(ScopeNames.Applications.Delete)
                 .AddRequirements(Operations.Delete)
                 .Build())
-            
+
             // Transactions
             
             .AddPolicy(Policies.Operation.Transaction.Send, new AuthorizationPolicyBuilder()
@@ -64,6 +64,38 @@ public static class RegisterPolicies
                 .Build())
             .AddPolicy(Policies.Operation.Transaction.Read, new AuthorizationPolicyBuilder()
                 .AddRequirements(Operations.Read)
+                .RequireScope(ScopeNames.Transactions.Read)
+                .Build())
+
+            // Objectives
+            
+            .AddPolicy(Policies.Operation.Objective.Create, new AuthorizationPolicyBuilder()
+                .AddRequirements(Operations.Create)
+                .RequireScope(ScopeNames.Applications.Edit)
+                .Build())
+            .AddPolicy(Policies.Operation.Objective.Read, new AuthorizationPolicyBuilder()
+                .AddRequirements(Operations.Read)
+                .RequireScope(ScopeNames.Applications.Edit)
+                .Build())
+            .AddPolicy(Policies.Operation.Objective.Update, new AuthorizationPolicyBuilder()
+                .AddRequirements(Operations.Update)
+                .RequireScope(ScopeNames.Applications.Edit)
+                .Build())
+            .AddPolicy(Policies.Operation.Objective.Delete, new AuthorizationPolicyBuilder()
+                .AddRequirements(Operations.Delete)
+                .RequireScope(ScopeNames.Applications.Edit)
+                .Build())
+
+            // Scores
+            
+            .AddPolicy(Policies.Operation.Score.Create, new AuthorizationPolicyBuilder()
+                .AddRequirements(Operations.Create)
+                .Build())
+            .AddPolicy(Policies.Operation.Score.Read, new AuthorizationPolicyBuilder()
+                .AddRequirements(Operations.Read)
+                .Build())
+            .AddPolicy(Policies.Operation.Score.Delete, new AuthorizationPolicyBuilder()
+                .AddRequirements(Operations.Delete)
                 .Build());
     }
 }

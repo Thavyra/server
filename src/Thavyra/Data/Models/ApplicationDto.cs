@@ -32,4 +32,5 @@ public class ApplicationDto
 
     public UserDto Owner { get; set; } = default!;
     public ICollection<RedirectDto> Redirects { get; set; } = default!;
+    public ICollection<ObjectiveDto> Objectives { get; set; } = default!;
 }

@@ -22,6 +22,9 @@ public class ThavyraDbContext : DbContext
 
     public DbSet<TransactionDto> Transactions { get; set; }
 
+    public DbSet<ObjectiveDto> Objectives { get; set; }
+    public DbSet<ScoreDto> Scores { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<ScopeDto>()

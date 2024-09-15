@@ -32,6 +32,7 @@ public static class Services
         configurator.AddConsumer<TokenConsumer>();
         configurator.AddConsumer<UserConsumer>();
         configurator.AddConsumer<TransactionConsumer>();
+        configurator.AddConsumer<ScoreboardConsumer>();
         
         return configurator;
     }

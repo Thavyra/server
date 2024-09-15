@@ -17,18 +17,28 @@ public static class Services
     {
         services.AddScoped<IAuthorizationHandler, ScopeAuthorizationHandler>();
         
-        services.AddSingleton<IAuthorizationHandler, Security.Resource.User.SameSubjectHandler>();
+        services.AddScoped<IAuthorizationHandler, Security.Resource.User.SameSubjectHandler>();
         
-        services.AddSingleton<IAuthorizationHandler, Security.Resource.Application.OwnerHandler>();
-        services.AddSingleton<IAuthorizationHandler, Security.Resource.Application.OwnerCreateHandler>();
-        services.AddSingleton<IAuthorizationHandler, Security.Resource.Application.OwnerCollectHandler>();
+        services.AddScoped<IAuthorizationHandler, Security.Resource.Application.OwnerHandler>();
+        services.AddScoped<IAuthorizationHandler, Security.Resource.Application.OwnerCreateHandler>();
+        services.AddScoped<IAuthorizationHandler, Security.Resource.Application.OwnerCollectHandler>();
 
-        services.AddSingleton<IAuthorizationHandler, Security.Resource.Transaction.OwnerCollectHandler>();
-        services.AddSingleton<IAuthorizationHandler, Security.Resource.Transaction.OwnerReadHandler>();
-        services.AddSingleton<IAuthorizationHandler, Security.Resource.Transaction.SubjectSendHandler>();
-        services.AddSingleton<IAuthorizationHandler, Security.Resource.Transaction.SubjectTransferHandler>();
-        services.AddSingleton<IAuthorizationHandler, Security.Resource.Transaction.SubjectOrRecipientCollectHandler>();
-        services.AddSingleton<IAuthorizationHandler, Security.Resource.Transaction.SubjectOrRecipientReadHandler>();
+        services.AddScoped<IAuthorizationHandler, Security.Resource.Transaction.OwnerCollectHandler>();
+        services.AddScoped<IAuthorizationHandler, Security.Resource.Transaction.OwnerReadHandler>();
+        services.AddScoped<IAuthorizationHandler, Security.Resource.Transaction.SubjectSendHandler>();
+        services.AddScoped<IAuthorizationHandler, Security.Resource.Transaction.SubjectTransferHandler>();
+        services.AddScoped<IAuthorizationHandler, Security.Resource.Transaction.SubjectOrRecipientCollectHandler>();
+        services.AddScoped<IAuthorizationHandler, Security.Resource.Transaction.SubjectOrRecipientReadHandler>();
+
+        services.AddScoped<IAuthorizationHandler, Security.Resource.Objective.ClientCollectHandler>();
+        services.AddScoped<IAuthorizationHandler, Security.Resource.Objective.ClientReadHandler>();
+        services.AddScoped<IAuthorizationHandler, Security.Resource.Objective.OwnerCollectHandler>();
+        services.AddScoped<IAuthorizationHandler, Security.Resource.Objective.OwnerCreateHandler>();
+        services.AddScoped<IAuthorizationHandler, Security.Resource.Objective.OwnerHandler>();
+
+        services.AddScoped<IAuthorizationHandler, Security.Resource.Score.ClientAndSubjectCreateHandler>();
+        services.AddScoped<IAuthorizationHandler, Security.Resource.Score.ClientAndSubjectDeleteHandler>();
+        services.AddScoped<IAuthorizationHandler, Security.Resource.Score.ClientReadHandler>();
 
         services.AddTransient<IUserService, UserService>();
         
@@ -43,6 +53,7 @@ public static class Services
             .UseDefaultExceptionHandler(useGenericReason: !app.Environment.IsDevelopment())
             .UseFastEndpoints(options =>
             {
+                options.Endpoints.RoutePrefix = "api";
                 options.Endpoints.Configurator = ep =>
                 {
                     ep.PreProcessor<UserSlugParser>(Order.Before);
