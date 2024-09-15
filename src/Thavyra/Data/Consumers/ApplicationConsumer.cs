@@ -119,6 +119,8 @@ public class ApplicationConsumer :
         await _dbContext.Applications
             .Where(x => x.Id == context.Message.Id)
             .ExecuteDeleteAsync();
+
+        await context.RespondAsync(new Success());
     }
 
     public async Task Consume(ConsumeContext<Application_GetByClientId> context)
