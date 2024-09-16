@@ -92,7 +92,7 @@ public class AuthorizeController : Controller
 
         var permanentAuthorizations = await GetPermanentAuthorizationsAsync(
             subject,
-            clientId,
+            applicationId,
             scopeNames,
             cancellationToken);
 

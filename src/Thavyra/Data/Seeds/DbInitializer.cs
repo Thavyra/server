@@ -114,6 +114,14 @@ public static class DbInitializer
             new ScopeDto
             {
                 Id = Guid.NewGuid(),
+                Name = "transactions.read",
+                DisplayName = "Read Transactions",
+                Description = "View your virtual balance and transactions."
+            },
+            
+            new ScopeDto
+            {
+                Id = Guid.NewGuid(),
                 Name = "transactions.send",
                 DisplayName = "Send Transactions",
                 Description = "Change your virtual balance."

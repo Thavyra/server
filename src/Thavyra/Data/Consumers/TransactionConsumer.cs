@@ -60,6 +60,7 @@ public class TransactionConsumer :
             SubjectId = context.Message.SubjectId,
             Description = context.Message.Description,
             Amount = context.Message.Amount,
+            CreatedAt = DateTime.UtcNow
         };
 
         _dbContext.Transactions.Add(transaction);

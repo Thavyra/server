@@ -92,6 +92,7 @@ public class AuthorizationConsumer :
             .Where(x => x.ApplicationId == context.Message.ApplicationId)
             .Where(x => context.Message.Type == null || x.Type == context.Message.Type)
             .Where(x => context.Message.Status == null || x.Status == context.Message.Status)
+            .Include(x => x.Scopes)
             .ToListAsync();
         
         await context.RespondAsync(new Multiple<Authorization>(authorizations.Select(Map).ToList()));
@@ -101,6 +102,7 @@ public class AuthorizationConsumer :
     {
         var authorizations = await _dbContext.Authorizations
             .Where(x => x.ApplicationId == context.Message.ApplicationId)
+            .Include(x => x.Scopes)
             .ToListAsync();
         
         await context.RespondAsync(new Multiple<Authorization>(authorizations.Select(Map).ToList()));
@@ -108,7 +110,9 @@ public class AuthorizationConsumer :
 
     public async Task Consume(ConsumeContext<Authorization_GetById> context)
     {
-        var authorization = await _dbContext.Authorizations.FirstOrDefaultAsync(x => x.Id == context.Message.Id);
+        var authorization = await _dbContext.Authorizations
+            .Include(x => x.Scopes)
+            .FirstOrDefaultAsync(x => x.Id == context.Message.Id);
 
         if (authorization is null)
         {
@@ -123,6 +127,7 @@ public class AuthorizationConsumer :
     {
         var authorizations = await _dbContext.Authorizations
             .Where(x => x.UserId == context.Message.UserId)
+            .Include(x => x.Scopes)
             .ToListAsync();
         
         await context.RespondAsync(new Multiple<Authorization>(authorizations.Select(Map).ToList()));
@@ -130,7 +135,9 @@ public class AuthorizationConsumer :
 
     public async Task Consume(ConsumeContext<Authorization_List> context)
     {
-        var authorization = await _dbContext.Authorizations.ToListAsync();
+        var authorization = await _dbContext.Authorizations
+            .Include(x => x.Scopes)
+            .ToListAsync();
         
         await context.RespondAsync(new Multiple<Authorization>(authorization.Select(Map).ToList()));
     }
