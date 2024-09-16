@@ -19,20 +19,15 @@ public class UserManager : IUserManager
     
     public async Task<UserModel> RegisterAsync(PasswordRegisterModel login, CancellationToken cancellationToken)
     {
-        var userClient = _clientFactory.CreateRequestClient<User_Create>();
+        var client = _clientFactory.CreateRequestClient<PasswordLogin_Create>();
 
-        var userResponse = await userClient.GetResponse<User>(new User_Create
+        var response = await client.GetResponse<PasswordLogin>(new PasswordLogin_Create
         {
-            Username = login.Username
-        }, cancellationToken);
-
-        var user = userResponse.Message;
-
-        await _publishEndpoint.Publish(new PasswordLogin_Create
-        {
-            UserId = user.Id,
+            Username = login.Username,
             Password = login.Password
         }, cancellationToken);
+
+        var user = response.Message.User;
 
         return new UserModel
         {
@@ -101,6 +96,46 @@ public class UserManager : IUserManager
             },
             (_, Incorrect or NotFound) => null,
             _ => throw new InvalidOperationException()
+        };
+    }
+
+    public async Task<UserModel> FindOrCreateByLoginAsync(DiscordLoginModel login, CancellationToken cancellationToken)
+    {
+        var client = _clientFactory.CreateRequestClient<DiscordLogin_GetOrCreate>();
+
+        var response = await client.GetResponse<DiscordLogin>(new DiscordLogin_GetOrCreate
+        {
+            DiscordId = login.Id,
+            Username = login.Username
+        }, cancellationToken);
+
+        var user = response.Message.User;
+
+        return new UserModel
+        {
+            Id = user.Id,
+            Username = user.Username,
+            CreatedAt = user.CreatedAt
+        };
+    }
+
+    public async Task<UserModel> FindOrCreateByLoginAsync(GitHubLoginModel login, CancellationToken cancellationToken)
+    {
+        var client = _clientFactory.CreateRequestClient<GitHubLogin_GetOrCreate>();
+
+        var response = await client.GetResponse<GitHubLogin>(new GitHubLogin_GetOrCreate
+        {
+            GitHubId = login.Id,
+            Username = login.Username
+        }, cancellationToken);
+        
+        var user = response.Message.User;
+
+        return new UserModel
+        {
+            Id = user.Id,
+            Username = user.Username,
+            CreatedAt = user.CreatedAt
         };
     }
 

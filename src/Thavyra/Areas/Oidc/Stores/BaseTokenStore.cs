@@ -67,12 +67,13 @@ public abstract class BaseTokenStore : IOpenIddictTokenStore<TokenModel>
 
     public ValueTask SetApplicationIdAsync(TokenModel token, string? identifier, CancellationToken cancellationToken)
     {
-        if (!Guid.TryParse(identifier, out var guid))
+        token.ApplicationId = identifier switch
         {
-            throw new ArgumentException("Not a valid guid.", nameof(identifier));
-        }
+            null or "" => null,
+            not null when Guid.TryParse(identifier, out var guid) => guid,
+            _ => throw new InvalidOperationException("Identifier invalid.")
+        };
         
-        token.ApplicationId = guid;
         return new ValueTask();
     }
 
@@ -82,12 +83,13 @@ public abstract class BaseTokenStore : IOpenIddictTokenStore<TokenModel>
     
     public ValueTask SetAuthorizationIdAsync(TokenModel token, string? identifier, CancellationToken cancellationToken)
     {
-        if (!Guid.TryParse(identifier, out var guid))
+        token.AuthorizationId = identifier switch
         {
-            throw new ArgumentException("Not a valid guid.", nameof(identifier));
-        }
+            null or "" => null,
+            not null when Guid.TryParse(identifier, out var guid) => guid,
+            _ => throw new InvalidOperationException("Identifier invalid.")
+        };
         
-        token.AuthorizationId = guid;
         return new ValueTask();
     }
 
@@ -161,12 +163,13 @@ public abstract class BaseTokenStore : IOpenIddictTokenStore<TokenModel>
     
     public ValueTask SetSubjectAsync(TokenModel token, string? subject, CancellationToken cancellationToken)
     {
-        if (!Guid.TryParse(subject, out var guid))
+        token.Subject = subject switch
         {
-            throw new ArgumentException("Not a valid guid.", nameof(subject));
-        }
+            null or "" => null,
+            not null when Guid.TryParse(subject, out var guid) => guid,
+            _ => throw new InvalidOperationException("Identifier invalid.")
+        };
         
-        token.Subject = guid;
         return new ValueTask();
     }
 

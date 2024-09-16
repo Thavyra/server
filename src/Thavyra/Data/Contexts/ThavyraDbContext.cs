@@ -19,7 +19,9 @@ public class ThavyraDbContext : DbContext
 
     public DbSet<UserDto> Users { get; set; }
     public DbSet<PasswordLoginDto> Passwords { get; set; }
-
+    public DbSet<DiscordLoginDto> DiscordLogins { get; set; }
+    public DbSet<GitHubLoginDto> GitHubLogins { get; set; }
+    
     public DbSet<TransactionDto> Transactions { get; set; }
 
     public DbSet<ObjectiveDto> Objectives { get; set; }

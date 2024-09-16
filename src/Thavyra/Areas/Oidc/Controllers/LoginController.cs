@@ -20,7 +20,13 @@ public class LoginController : Controller
         _userManager = userManager;
     }
 
-    [FromQuery] public string ReturnUrl { get; set; } = "/";
+    private string? _returnUrl;
+    [FromQuery]
+    public string ReturnUrl
+    {
+        get => Url.IsLocalUrl(_returnUrl) ? _returnUrl : "/";
+        set => _returnUrl = value;
+    }
 
     [HttpGet("/login")]
     public IActionResult Login()
@@ -143,7 +149,10 @@ public class LoginController : Controller
     [HttpGet("/logout")]
     public IActionResult Logout()
     {
-        return SignOut(CookieAuthenticationDefaults.AuthenticationScheme);
+        return SignOut(new AuthenticationProperties
+        {
+            RedirectUri = ReturnUrl
+        }, CookieAuthenticationDefaults.AuthenticationScheme);
     }
 
     private SignInResult SignIn(Guid userId)
@@ -154,7 +163,8 @@ public class LoginController : Controller
         var properties = new AuthenticationProperties
         {
             ExpiresUtc = DateTimeOffset.UtcNow.AddMonths(6),
-            IsPersistent = true
+            IsPersistent = true,
+            RedirectUri = ReturnUrl
         };
         
         return SignIn(new ClaimsPrincipal(identity), properties, CookieAuthenticationDefaults.AuthenticationScheme);

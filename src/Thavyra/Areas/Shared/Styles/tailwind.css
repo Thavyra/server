@@ -63,6 +63,8 @@ body {
 }
 
 .btn {
+    @apply block;
+    
     @apply transition;
     @apply appearance-none;
 
@@ -77,6 +79,17 @@ body {
     @apply bg-primary;
     @apply hover:bg-primary-hover;
     @apply focus:bg-primary-focus;
+}
+
+.btn-discord {
+    @apply text-white;
+    @apply bg-discord;
+    @apply hover:bg-discord-hover;
+}
+
+.btn-github {
+    @apply bg-github;
+    @apply hover:bg-github-hover;
 }
 
 .link {

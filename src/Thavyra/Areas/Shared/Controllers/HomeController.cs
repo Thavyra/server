@@ -1,21 +1,41 @@
 using System.Diagnostics;
+using System.Security.Claims;
+using MassTransit;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OpenIddict.Abstractions;
+using Thavyra.Contracts.User;
 using Thavyra.Shared.Models;
 
 namespace Thavyra.Shared.Controllers;
 
+[Area("Shared")]
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
+    private readonly IRequestClient<User_GetById> _client;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(IRequestClient<User_GetById> client)
     {
-        _logger = logger;
+        _client = client;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View();
+        if (User.Identity?.IsAuthenticated is not true)
+        {
+            return Challenge();
+        }
+        
+        var response = await _client.GetResponse<User>(new User_GetById
+        {
+            Id = Guid.Parse(User.GetClaim(ClaimTypes.NameIdentifier)!)
+        });
+
+        return View(new UserViewModel
+        {
+            User = response.Message
+        });
     }
 
     public IActionResult Privacy()

@@ -77,6 +77,49 @@ public static class Services
                     });
                     
                     break;
+                
+                case "Client":
+                    builder.AddClient(options =>
+                    {
+                        options.AllowAuthorizationCodeFlow();
+
+                        options.AddDevelopmentEncryptionCertificate()
+                            .AddDevelopmentSigningCertificate();
+
+                        options.UseAspNetCore()
+                            .DisableTransportSecurityRequirement()
+                            .EnableRedirectionEndpointPassthrough();
+
+                        var providers = options.UseWebProviders();
+
+                        foreach (var provider in section.GetChildren())
+                            switch (provider.Key)
+                            {
+                                case "Discord":
+                                    providers.AddDiscord(discord => discord
+                                        .SetClientId(provider["ClientId"]
+                                                     ?? throw new Exception("Discord ClientId not provided."))
+                                        .SetClientSecret(provider["ClientSecret"]
+                                                         ?? throw new Exception("Discord ClientSecret not provided."))
+                                        .SetRedirectUri("callback/discord")
+                                        .AddScopes(provider.GetValue<string[]>("Scopes") ?? []));
+
+                                    break;
+
+                                case "GitHub":
+                                    providers.AddGitHub(github => github
+                                        .SetClientId(provider["ClientId"]
+                                                     ?? throw new Exception("GitHub ClientId not provided."))
+                                        .SetClientSecret(provider["ClientSecret"]
+                                                         ?? throw new Exception("GitHub ClientSecret not provided."))
+                                        .SetRedirectUri("callback/github")
+                                        .AddScopes(provider.GetValue<string[]>("Scopes") ?? []));
+
+                                    break;
+                            }
+                    });
+                    
+                    break;
             }
         }
     }
