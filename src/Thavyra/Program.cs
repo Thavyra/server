@@ -1,6 +1,6 @@
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.Net.Http.Headers;
 using OpenIddict.Validation.AspNetCore;
 using Tailwind;
 using Thavyra.Data.Configuration;
@@ -28,11 +28,25 @@ builder.Services.AddMassTransit(x =>
     });
 });
 
-var authenticationBuilder = builder.Services.AddAuthentication(options =>
-{
-    options.DefaultScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-});
+var authenticationBuilder = builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultScheme = "Combined";
+        options.DefaultAuthenticateScheme = "Combined";
+    })
+    .AddPolicyScheme("Combined", "Combined", options =>
+    {
+        options.ForwardDefaultSelector = context =>
+        {
+            if (context.Request.Headers.TryGetValue(HeaderNames.Authorization, out var header) &&
+                header.FirstOrDefault()?.StartsWith("Bearer ") is true)
+            {
+                return OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+            }
+
+            return CookieAuthenticationDefaults.AuthenticationScheme;
+        };
+    });
 
 foreach (var section in builder.Configuration.GetChildren())
 {
@@ -81,11 +95,12 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseRestApi();
+
+app.MapControllers();
 app.MapControllerRoute(
     name: "default",
     pattern: "{area=Shared}/{controller=Home}/{action=Index}/{id?}");
-
-app.UseRestApi();
 
 if (app.Environment.IsDevelopment())
 {

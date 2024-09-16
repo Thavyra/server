@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Security.Claims;
 using MassTransit.Internals;
 using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -180,7 +181,13 @@ public class AuthorizeController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult CancelAsync()
     {
-        return Forbid(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+        return Forbid(
+            authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+            properties: new AuthenticationProperties(new Dictionary<string, string?>
+            {
+                [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.AccessDenied,
+                [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The user denied the authorization request."
+            }));
     }
 
     private async Task<IList<object>> GetPermanentAuthorizationsAsync(

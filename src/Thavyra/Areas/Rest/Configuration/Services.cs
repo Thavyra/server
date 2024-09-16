@@ -1,8 +1,8 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using FastEndpoints;
-using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
+using OpenIddict.Validation.AspNetCore;
 using Thavyra.Rest.Features.Applications;
 using Thavyra.Rest.Features.Users;
 using Thavyra.Rest.Json;
@@ -58,14 +58,15 @@ public static class Services
                 {
                     ep.PreProcessor<UserSlugParser>(Order.Before);
                     ep.PreProcessor<ApplicationSlugParser>(Order.Before);
+                    ep.AuthSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
                 };
             
-            options.Errors.UseProblemDetails();
+                options.Errors.UseProblemDetails();
 
-            options.Serializer.Options.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
-            options.Serializer.Options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
-            options.Serializer.Options.Converters.Add(new OptionalConverterFactory());
-            options.Serializer.Options.Converters.Add(new NullableConverterFactory());
+                options.Serializer.Options.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
+                options.Serializer.Options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
+                options.Serializer.Options.Converters.Add(new OptionalConverterFactory());
+                options.Serializer.Options.Converters.Add(new NullableConverterFactory());
         });
     }
 }
