@@ -24,13 +24,20 @@ public static class RegisterPolicies
                 .RequireScope(ScopeNames.Account.Username)
                 .AddRequirements(Operations.User.Username)
                 .Build())
-            .AddPolicy(Policies.Operation.User.Password, new AuthorizationPolicyBuilder()
-                .RequireScope(ScopeNames.Account.Logins)
-                .AddRequirements(Operations.User.Password)
-                .Build())
             .AddPolicy(Policies.Operation.User.Delete, new AuthorizationPolicyBuilder()
                 .RequireScope(ScopeNames.Account.Delete)
                 .AddRequirements(Operations.Delete)
+                .Build())
+            
+            // Logins
+            
+            .AddPolicy(Policies.Operation.Login.Read, new AuthorizationPolicyBuilder()
+                .RequireScope(ScopeNames.Account.Logins)
+                .AddRequirements(Operations.Read)
+                .Build())
+            .AddPolicy(Policies.Operation.Login.Password, new AuthorizationPolicyBuilder()
+                .RequireScope(ScopeNames.Account.Logins)
+                .AddRequirements(Operations.Login.Password)
                 .Build())
 
             // Applications

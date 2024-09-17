@@ -15,6 +15,9 @@ public class PasswordLoginDto
     [Column("password")]
     [MaxLength(100)]
     public string Password { get; set; } = default!;
+
+    [Column("changed_at")]
+    public DateTime ChangedAt { get; set; }
     
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }

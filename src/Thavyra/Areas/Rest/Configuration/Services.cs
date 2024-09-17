@@ -18,6 +18,8 @@ public static class Services
         services.AddScoped<IAuthorizationHandler, ScopeAuthorizationHandler>();
         
         services.AddScoped<IAuthorizationHandler, Security.Resource.User.SameSubjectHandler>();
+
+        services.AddScoped<IAuthorizationHandler, Security.Resource.Login.SubjectHandler>();
         
         services.AddScoped<IAuthorizationHandler, Security.Resource.Application.OwnerHandler>();
         services.AddScoped<IAuthorizationHandler, Security.Resource.Application.OwnerCreateHandler>();

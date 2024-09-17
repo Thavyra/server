@@ -15,7 +15,10 @@ public static class Operations
         /// Change user's username.
         /// </summary>
         public static readonly OperationAuthorizationRequirement Username = new() { Name = nameof(Username) };
-
+    }
+    
+    public static class Login
+    {
         /// <summary>
         /// Change user's password.
         /// </summary>

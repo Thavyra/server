@@ -2,6 +2,7 @@ using MassTransit;
 using Thavyra.Contracts;
 using Thavyra.Contracts.Login;
 using Thavyra.Contracts.User;
+using Thavyra.Contracts.User.Register;
 using Thavyra.Oidc.Models.Internal;
 
 namespace Thavyra.Oidc.Managers;
@@ -9,19 +10,17 @@ namespace Thavyra.Oidc.Managers;
 public class UserManager : IUserManager
 {
     private readonly IScopedClientFactory _clientFactory;
-    private readonly IPublishEndpoint _publishEndpoint;
 
-    public UserManager(IScopedClientFactory clientFactory, IPublishEndpoint publishEndpoint)
+    public UserManager(IScopedClientFactory clientFactory)
     {
         _clientFactory = clientFactory;
-        _publishEndpoint = publishEndpoint;
     }
     
     public async Task<UserModel> RegisterAsync(PasswordRegisterModel login, CancellationToken cancellationToken)
     {
-        var client = _clientFactory.CreateRequestClient<PasswordLogin_Create>();
-
-        var response = await client.GetResponse<PasswordLogin>(new PasswordLogin_Create
+        var client = _clientFactory.CreateRequestClient<User_Register>();
+        
+        var response = await client.GetResponse<PasswordRegistration>(new User_Register
         {
             Username = login.Username,
             Password = login.Password
@@ -99,11 +98,11 @@ public class UserManager : IUserManager
         };
     }
 
-    public async Task<UserModel> FindOrCreateByLoginAsync(DiscordLoginModel login, CancellationToken cancellationToken)
+    public async Task<UserModel> RegisterWithDiscordAsync(DiscordLoginModel login, CancellationToken cancellationToken)
     {
-        var client = _clientFactory.CreateRequestClient<DiscordLogin_GetOrCreate>();
+        var client = _clientFactory.CreateRequestClient<User_RegisterWithDiscord>();
 
-        var response = await client.GetResponse<DiscordLogin>(new DiscordLogin_GetOrCreate
+        var response = await client.GetResponse<DiscordRegistration>(new User_RegisterWithDiscord
         {
             DiscordId = login.Id,
             Username = login.Username
@@ -119,11 +118,11 @@ public class UserManager : IUserManager
         };
     }
 
-    public async Task<UserModel> FindOrCreateByLoginAsync(GitHubLoginModel login, CancellationToken cancellationToken)
+    public async Task<UserModel> RegisterWithGitHubAsync(GitHubLoginModel login, CancellationToken cancellationToken)
     {
-        var client = _clientFactory.CreateRequestClient<GitHubLogin_GetOrCreate>();
+        var client = _clientFactory.CreateRequestClient<User_RegisterWithGitHub>();
 
-        var response = await client.GetResponse<GitHubLogin>(new GitHubLogin_GetOrCreate
+        var response = await client.GetResponse<GitHubRegistration>(new User_RegisterWithGitHub
         {
             GitHubId = login.Id,
             Username = login.Username

@@ -50,10 +50,11 @@ public class DiscordController : Controller
             throw new InvalidOperationException("Could not parse Discord login data.");
         }
         
-        var user = await _userManager.FindOrCreateByLoginAsync(login, cancellationToken);
+        var user = await _userManager.RegisterWithDiscordAsync(login, cancellationToken);
         
-        var identity = 
-            new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())], "Discord");
+        var identity = new ClaimsIdentity(
+            [new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())], 
+            authenticationType: "Discord");
 
         var properties = new AuthenticationProperties
         {

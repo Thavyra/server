@@ -50,7 +50,7 @@ public class GitHubController : Controller
             Username = username
         };
 
-        var user = await _userManager.FindOrCreateByLoginAsync(login, cancellationToken);
+        var user = await _userManager.RegisterWithGitHubAsync(login, cancellationToken);
 
         var identity =
             new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())], "GitHub");

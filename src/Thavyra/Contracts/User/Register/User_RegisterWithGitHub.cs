@@ -1,6 +1,6 @@
-namespace Thavyra.Contracts.Login;
+namespace Thavyra.Contracts.User.Register;
 
-public record GitHubLogin_GetOrCreate
+public record User_RegisterWithGitHub
 {
     public required string GitHubId { get; init; }
     public required string Username { get; init; }

@@ -1,7 +1,7 @@
 namespace Thavyra.Contracts.Login;
 
-public record PasswordLogin_UpdateOrCreate
+public record PasswordLogin_Update
 {
-    public required Guid UserId { get; init; }
+    public required Guid Id { get; init; }
     public required string Password { get; init; }
 }

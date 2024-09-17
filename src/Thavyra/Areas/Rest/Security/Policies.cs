@@ -20,8 +20,13 @@ public static class Policies
             public const string Read = "operation.user.read";
             public const string Update = "operation.user.update";
             public const string Username = "operation.user.username";
-            public const string Password = "operation.user.login.password";
             public const string Delete = "operation.user.delete";
+        }
+        
+        public static class Login
+        {
+            public const string Read = "operation.user.login.read";
+            public const string Password = "operation.user.login.password";
         }
         
         public static class Transaction
