@@ -1,10 +1,9 @@
-using Thavyra.Rest.Json;
 using Thavyra.Rest.Security;
 
-namespace Thavyra.Rest.Features.Objectives.Post;
+namespace Thavyra.Rest.Features.Scoreboard.Objectives.Post;
 
 public class Request : RequestWithAuthentication
 {
     public string Name { get; set; } = null!;
-    public string DisplayName { get; set; } = null!;
+    public double Score { get; set; }
 }

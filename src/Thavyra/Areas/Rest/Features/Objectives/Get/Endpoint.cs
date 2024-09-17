@@ -55,6 +55,7 @@ public class Endpoint : Endpoint<Request, ObjectiveResponse>
             Id = objective.Id,
             ApplicationId = objective.ApplicationId,
             Name = objective.Name,
+            DisplayName = objective.DisplayName,
             CreatedAt = objective.CreatedAt
         }, cancellation: ct);
     }

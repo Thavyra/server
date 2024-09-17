@@ -6,6 +6,7 @@ public class ObjectiveResponse
     public required Guid ApplicationId { get; set; }
 
     public required string Name { get; set; }
+    public required string DisplayName { get; set; }
 
     public required DateTime CreatedAt { get; set; }
 }

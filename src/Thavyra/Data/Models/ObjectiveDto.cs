@@ -13,6 +13,9 @@ public class ObjectiveDto
     [Column("name")]
     public string Name { get; set; } = default!;
 
+    [Column("display_name")]
+    public string DisplayName { get; set; } = default!;
+
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
 

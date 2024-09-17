@@ -33,6 +33,7 @@ public class Endpoint : Endpoint<RequestWithAuthentication, List<Response>>
             Id = x.Id,
             ApplicationId = x.ApplicationId,
             Name = x.Name,
+            DisplayName = x.DisplayName,
             Scores = x.Scores.Select(score => new ScoreResponseWithoutObjective
             {
                 Id = score.Id,

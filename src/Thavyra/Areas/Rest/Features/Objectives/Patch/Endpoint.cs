@@ -55,11 +55,22 @@ public class Endpoint : Endpoint<Request, ObjectiveResponse>
             return;
         }
 
-        var updateResponse = await _updateClient.GetResponse<Objective>(new Objective_Update
+        var updateRequest = new Objective_Update
         {
-            Id = objective.Id,
-            Name = req.Name
-        }, ct);
+            Id = objective.Id
+        };
+
+        if (req.Name.HasValue)
+        {
+            updateRequest = updateRequest with { Name = req.Name.Value };
+        }
+
+        if (req.DisplayName.HasValue)
+        {
+            updateRequest = updateRequest with { DisplayName = req.DisplayName.Value };
+        }
+        
+        var updateResponse = await _updateClient.GetResponse<Objective>(updateRequest, ct);
 
         await SendAsync(new ObjectiveResponse
         {
@@ -67,6 +78,7 @@ public class Endpoint : Endpoint<Request, ObjectiveResponse>
             ApplicationId = objective.ApplicationId,
             
             Name = updateResponse.Message.Name,
+            DisplayName = updateResponse.Message.DisplayName,
             
             CreatedAt = objective.CreatedAt
         }, cancellation: ct);

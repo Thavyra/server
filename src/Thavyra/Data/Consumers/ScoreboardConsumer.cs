@@ -11,8 +11,10 @@ namespace Thavyra.Data.Consumers;
 public class ScoreboardConsumer :
     IConsumer<Objective_Create>,
     IConsumer<Objective_Delete>,
+    IConsumer<Objective_ExistsByName>,
     IConsumer<Objective_GetByApplication>,
     IConsumer<Objective_GetById>,
+    IConsumer<Objective_GetByName>,
     IConsumer<Objective_Update>,
     IConsumer<Score_Create>,
     IConsumer<Score_Delete>,
@@ -34,6 +36,7 @@ public class ScoreboardConsumer :
             ApplicationId = objective.ApplicationId,
 
             Name = objective.Name,
+            DisplayName = objective.DisplayName,
             Scores = objective.Scores?.Select(MapScore).ToList() ?? [],
 
             CreatedAt = objective.CreatedAt
@@ -53,7 +56,7 @@ public class ScoreboardConsumer :
             CreatedAt = score.CreatedAt
         };
     }
-    
+
     public async Task Consume(ConsumeContext<Objective_Create> context)
     {
         var objective = new ObjectiveDto
@@ -75,8 +78,15 @@ public class ScoreboardConsumer :
             .Where(x => x.Id == context.Message.Id)
             .ExecuteDeleteAsync(context.CancellationToken);
 
-        if (context.IsResponseAccepted<Success>()) 
+        if (context.IsResponseAccepted<Success>())
             await context.RespondAsync(new Success());
+    }
+    
+    public async Task Consume(ConsumeContext<Objective_ExistsByName> context)
+    {
+        bool exists = await _dbContext.Objectives.AnyAsync(x => x.Name == context.Message.Name, context.CancellationToken);
+
+        await context.RespondAsync(exists ? new ObjectiveExists() : new NotFound());
     }
 
     public async Task Consume(ConsumeContext<Objective_GetByApplication> context)
@@ -99,8 +109,25 @@ public class ScoreboardConsumer :
         {
             if (context.IsResponseAccepted<NotFound>())
                 await context.RespondAsync(new NotFound());
+
+            throw new InvalidOperationException("Objective not found.");
+        }
+
+        await context.RespondAsync(MapObjective(objective));
+    }
+    
+    public async Task Consume(ConsumeContext<Objective_GetByName> context)
+    {
+        var objective = await _dbContext.Objectives
+            .Include(x => x.Scores)
+            .FirstOrDefaultAsync(x => x.Name == context.Message.Name, context.CancellationToken);
+
+        if (objective is null)
+        {
+            if (context.IsResponseAccepted<NotFound>())
+                await context.RespondAsync(new NotFound());
             
-            return;
+            throw new InvalidOperationException("Objective not found.");
         }
 
         await context.RespondAsync(MapObjective(objective));
@@ -115,9 +142,12 @@ public class ScoreboardConsumer :
             await context.RespondAsync(new NotFound());
             return;
         }
-        
-        objective.Name = context.Message.Name;
-        
+
+        objective.Name = context.Message.Name.IsChanged ? context.Message.Name.Value : objective.Name;
+        objective.DisplayName = context.Message.DisplayName.IsChanged
+            ? context.Message.DisplayName.Value
+            : objective.DisplayName;
+
         await _dbContext.SaveChangesAsync(context.CancellationToken);
 
         await context.RespondAsync(MapObjective(objective));
@@ -132,7 +162,7 @@ public class ScoreboardConsumer :
             Value = context.Message.Value,
             CreatedAt = DateTime.UtcNow
         };
-        
+
         _dbContext.Scores.Add(score);
         await _dbContext.SaveChangesAsync(context.CancellationToken);
 
@@ -147,7 +177,7 @@ public class ScoreboardConsumer :
 
         await context.RespondAsync(new Success());
     }
-    
+
     public async Task Consume(ConsumeContext<Score_GetById> context)
     {
         var score = await _dbContext.Scores
@@ -158,7 +188,7 @@ public class ScoreboardConsumer :
             await context.RespondAsync(new NotFound());
             return;
         }
-        
+
         await context.RespondAsync(MapScore(score));
     }
 

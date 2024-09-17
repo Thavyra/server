@@ -27,7 +27,8 @@ public class Endpoint : Endpoint<Request, ObjectiveResponse>
         var createRequest = new Objective_Create
         {
             ApplicationId = req.ApplicationId,
-            Name = req.Name
+            Name = req.Name,
+            DisplayName = req.DisplayName
         };
         
         var authorizationResult = 
@@ -39,17 +40,14 @@ public class Endpoint : Endpoint<Request, ObjectiveResponse>
             return;
         }
 
-        var response = await _client.GetResponse<Objective>(new Objective_Create
-        {
-            ApplicationId = req.ApplicationId,
-            Name = req.Name
-        }, ct);
+        var response = await _client.GetResponse<Objective>(createRequest, ct);
 
         await SendCreatedAtAsync<Get.Endpoint>(new { Id = response.Message.Id }, new ObjectiveResponse
         {
             Id = response.Message.Id,
             ApplicationId = response.Message.ApplicationId,
             Name = response.Message.Name,
+            DisplayName = response.Message.Name,
             CreatedAt = response.Message.CreatedAt
         }, cancellation: ct);
     }

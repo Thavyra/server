@@ -54,6 +54,7 @@ public class Endpoint : Endpoint<ApplicationRequest, List<ObjectiveResponse>>
             Id = x.Id,
             ApplicationId = x.ApplicationId,
             Name = x.Name,
+            DisplayName = x.DisplayName,
             CreatedAt = x.CreatedAt
         }).ToList(), cancellation: ct);
     }

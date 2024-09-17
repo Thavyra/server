@@ -64,5 +64,8 @@ public class ThavyraDbContext : DbContext
         builder.Entity<TokenDto>()
             .HasIndex(e => e.ReferenceId)
             .IsUnique();
+
+        builder.Entity<ObjectiveDto>()
+            .HasIndex(e => e.Name);
     }
 }
