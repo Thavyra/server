@@ -22,7 +22,8 @@ public class ApplicationConsumer :
     IConsumer<Application_Update>,
     IConsumer<Redirect_Create>,
     IConsumer<Redirect_Delete>,
-    IConsumer<Redirect_GetByApplication>
+    IConsumer<Redirect_GetByApplication>,
+    IConsumer<Redirect_GetById>
 {
     private readonly ThavyraDbContext _dbContext;
 
@@ -217,6 +218,7 @@ public class ApplicationConsumer :
     public async Task Consume(ConsumeContext<Redirect_Delete> context)
     {
         await _dbContext.Redirects
+            .Where(x => x.ApplicationId == context.Message.ApplicationId)
             .Where(x => x.Id == context.Message.Id)
             .ExecuteDeleteAsync();
     }
@@ -236,5 +238,27 @@ public class ApplicationConsumer :
         });
 
         await context.RespondAsync(new Multiple<Redirect>(response.ToList()));
+    }
+
+    public async Task Consume(ConsumeContext<Redirect_GetById> context)
+    {
+        var redirect = await _dbContext.Redirects
+            .Where(x => x.ApplicationId == context.Message.ApplicationId)
+            .Where(x => x.Id == context.Message.Id)
+            .FirstOrDefaultAsync();
+
+        if (redirect is null)
+        {
+            await context.RespondAsync(new NotFound());
+            return;
+        }
+
+        await context.RespondAsync(new Redirect
+        {
+            Id = redirect.Id,
+            ApplicationId = redirect.ApplicationId,
+            Uri = redirect.Uri,
+            CreatedAt = redirect.CreatedAt
+        });
     }
 }
