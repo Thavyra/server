@@ -28,7 +28,7 @@ public static class DbInitializer
                 Id = Guid.NewGuid(),
                 Name = "account.profile",
                 DisplayName = "Profile",
-                Description = "View and modify your profile."
+                Description = "View and modify your profile and avatar."
             },
             
             new ScopeDto
@@ -42,17 +42,9 @@ public static class DbInitializer
             new ScopeDto
             {
                 Id = Guid.NewGuid(),
-                Name = "account.profile.edit",
-                DisplayName = "Edit Profile",
-                Description = "Modify your profile and avatar."
-            },
-            
-            new ScopeDto
-            {
-                Id = Guid.NewGuid(),
-                Name = "account.username",
-                DisplayName = "Username",
-                Description = "Change your username."
+                Name = "account.transactions",
+                DisplayName = "View Transactions",
+                Description = "View transactions sent to your virtual balance."
             },
             
             new ScopeDto
@@ -60,7 +52,15 @@ public static class DbInitializer
                 Id = Guid.NewGuid(),
                 Name = "account.logins",
                 DisplayName = "Logins",
-                Description = "Manage your logins, and change your password."
+                Description = "Manage your logins and change your password."
+            },
+            
+            new ScopeDto
+            {
+                Id = Guid.NewGuid(),
+                Name = "account.delete",
+                DisplayName = "Delete Account",
+                Description = "Delete your account."
             },
             
             new ScopeDto
@@ -68,15 +68,7 @@ public static class DbInitializer
                 Id = Guid.NewGuid(),
                 Name = "applications",
                 DisplayName = "Applications",
-                Description = "View, manage and delete your OAuth applications."
-            },
-            
-            new ScopeDto
-            {
-                Id = Guid.NewGuid(),
-                Name = "applications.create",
-                DisplayName = "Create Applications",
-                Description = "Create new OAuth applications."
+                Description = "Manage your OAuth applications."
             },
             
             new ScopeDto
@@ -90,17 +82,9 @@ public static class DbInitializer
             new ScopeDto
             {
                 Id = Guid.NewGuid(),
-                Name = "applications.edit",
-                DisplayName = "Modify Applications",
-                Description = "Modify your OAuth applications."
-            },
-            
-            new ScopeDto
-            {
-                Id = Guid.NewGuid(),
-                Name = "applications.delete",
-                DisplayName = "Delete Applications",
-                Description = "Delete your OAuth applications."
+                Name = "authorizations",
+                DisplayName = "Authorizations",
+                Description = "Manage your authorized third party apps."
             },
             
             new ScopeDto
@@ -109,30 +93,6 @@ public static class DbInitializer
                 Name = "transactions",
                 DisplayName = "Transactions",
                 Description = "Send transactions and view your virtual balance."
-            },
-            
-            new ScopeDto
-            {
-                Id = Guid.NewGuid(),
-                Name = "transactions.read",
-                DisplayName = "Read Transactions",
-                Description = "View your virtual balance and transactions."
-            },
-            
-            new ScopeDto
-            {
-                Id = Guid.NewGuid(),
-                Name = "transactions.send",
-                DisplayName = "Send Transactions",
-                Description = "Change your virtual balance."
-            },
-            
-            new ScopeDto
-            {
-                Id = Guid.NewGuid(),
-                Name = "transactions.transfer",
-                DisplayName = "Transfer",
-                Description = "Transfer your virtual balance to other users."
             }
         };
         
