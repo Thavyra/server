@@ -25,6 +25,9 @@ public static class Services
         services.AddScoped<IAuthorizationHandler, Security.Resource.Application.OwnerCreateHandler>();
         services.AddScoped<IAuthorizationHandler, Security.Resource.Application.OwnerCollectHandler>();
 
+        services.AddScoped<IAuthorizationHandler, Security.Resource.Authorization.SubjectHandler>();
+        services.AddScoped<IAuthorizationHandler, Security.Resource.Authorization.SubjectCollectHandler>();
+
         services.AddScoped<IAuthorizationHandler, Security.Resource.Transaction.OwnerCollectHandler>();
         services.AddScoped<IAuthorizationHandler, Security.Resource.Transaction.OwnerReadHandler>();
         services.AddScoped<IAuthorizationHandler, Security.Resource.Transaction.SubjectSendHandler>();

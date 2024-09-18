@@ -14,6 +14,12 @@ public static class Policies
             public const string Update = "operation.application.update";
             public const string Delete = "operation.application.delete";
         }
+        
+        public static class Authorization
+        {
+            public const string Read = "operation.authorization.read";
+            public const string Delete = "operation.authorization.delete";
+        }
     
         public static class User
         {
