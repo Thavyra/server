@@ -2,21 +2,21 @@
 @using Microsoft.Extensions.Primitives
 @model Thavyra.Oidc.Models.View.AuthorizeViewModel
 
-<h2 class="text-3xl font-extralight mb-7 text-center">Connect to <span class="font-bold">@Model.Client.DisplayName</span></h2>
+<h2 class="text-bright text-3xl font-extralight mb-7 text-center">Connect to <span class="font-bold">@Model.Client.DisplayName</span></h2>
 
-<p class="my-1.5">A third party application wants to access your Thavyra account.</p>
+<p class="my-1.5 text-sm text-center">A third party application wants to access your Thavyra account.</p>
 
-<p class="my-1.5 text-sm">
+<p class="my-1.5 text-center">
     Signed in as
-    <span class="text-flash">@Model.Subject.Username</span>
+    <span class="text-bright">@Model.Subject.Username</span>
     <a class="link ml-0.5" asp-controller="Login" asp-action="Logout" asp-route-ReturnUrl="@Model.ReturnUrl">
         Change
     </a>
 </p>
 
-<hr class="my-1.5 border-flash" />
+<hr class="my-1.5 border-dark-700"/>
 
-<p class="my-1.5">This will give the developer of @Model.Client.DisplayName permission to:</p>
+<p class="my-1.5 text-sm text-center">This will give the developer of @Model.Client.DisplayName permission to:</p>
 
 <ul class="list-disc list-inside">
     @foreach (var scope in Model.Scopes)
@@ -25,16 +25,16 @@
     }
 </ul>
 
-<hr class="border-flash mt-auto" />
+<hr class="my-1.5 border-dark-700"/>
 
-<div class="md:flex md:justify-between">
-    <form method="post">
-        @foreach (var parameter in Context.Request.HasFormContentType ?
-        (IEnumerable<KeyValuePair<string, StringValues>>) Context.Request.Form : Context.Request.Query)
-        {
-            <input type="hidden" name="@parameter.Key" value="@parameter.Value" />
-        }
-        
+<form method="post">
+    @foreach (var parameter in Context.Request.HasFormContentType ? (IEnumerable<KeyValuePair<string, StringValues>>) Context.Request.Form : Context.Request.Query)
+    {
+        <input type="hidden" name="@parameter.Key" value="@parameter.Value"/>
+    }
+
+    <div class="md:flex md:justify-between">
+
         <button class="btn btn-primary px-1.5 text-md w-full md:w-auto"
                 name="submit.Accept" type="submit" value="Yes">
             Authorize
@@ -44,5 +44,6 @@
                 name="submit.Cancel" type="submit" value="No">
             Cancel
         </button>
-    </form>
-</div>
+
+    </div>
+</form>

@@ -7,24 +7,24 @@ module.exports = {
       transparent: 'transparent',
       current: 'currentColor',
 
-      'deep': '#030712',
-      'dark': '#111827',
-      'base': '#1f2937',
-      'content': '#2b3440',
-      'flash': '#374151',
-
-      'white': '#ffffff',
+      'dark-950': '#030712',
+      'dark-900': '#111827',
+      'dark-800': '#1f2937',
+      'dark-750': '#2b3440',
+      'dark-700': '#374151',
+      
+      'bright': {
+        DEFAULT: '#d1d5db',
+      },
       
       'light': {
-        DEFAULT: '#d1d5db',
-        hover: '#6b7280',
-        focus: '#4b5563'
+        DEFAULT: '#9ca3af',
       },
 
       'primary': {
-        DEFAULT: '#2b3440',
-        hover: '#262e38',
-        focus: '#262e38'
+        DEFAULT: '#374151',
+        hover: '#475569',
+        focus: '#475569'
       },
 
       'link': {
@@ -39,7 +39,7 @@ module.exports = {
       
       'github': {
         DEFAULT: '#fafafa',
-        hover: '#f5f5f5',
+        hover: '#9ca3af',
       },
 
       'positive': '#16a34a',

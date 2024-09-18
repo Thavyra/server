@@ -25,12 +25,12 @@
         <span class="text-sm text-negative" asp-validation-for="Password"></span>
     </div>
 
-    <button type="submit" class="btn btn-primary my-3 w-full">Log In</button>
+    <button type="submit" class="btn btn-primary my-3 w-full text-bright">Log In</button>
     
     <div class="flex py-3 items-center">
-        <div class="flex-grow border-t border-light"></div>
-        <span class="flex-shrink mx-3">Or sign in with</span>
-        <div class="flex-grow border-t border-light"></div>
+        <div class="flex-grow border-t border-dark-700"></div>
+        <span class="flex-shrink mx-3">or sign in with</span>
+        <div class="flex-grow border-t border-dark-700"></div>
     </div>
     
     <a class="btn btn-discord my-3 w-full text-center" asp-controller="Discord" asp-action="Discord" asp-route-ReturnUrl="@Model.ReturnUrl">
