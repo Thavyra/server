@@ -18,7 +18,7 @@ public class ClientCollectHandler : AuthorizationHandler<OperationAuthorizationR
             return Task.CompletedTask;
         }
 
-        if (context.User.GetClaim("application_id") == resource.ApplicationId.ToString())
+        if (context.User.GetClaim(Constants.Claims.ApplicationId) == resource.ApplicationId.ToString())
         {
             context.Succeed(requirement);
         }

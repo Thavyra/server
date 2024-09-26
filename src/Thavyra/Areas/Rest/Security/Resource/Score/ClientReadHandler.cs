@@ -31,7 +31,7 @@ public class ClientReadHandler : AuthorizationHandler<OperationAuthorizationRequ
             Id = resource.ObjectiveId
         });
 
-        if (context.User.GetClaim("application_id") == response.Message.ApplicationId.ToString())
+        if (context.User.GetClaim(Constants.Claims.ApplicationId) == response.Message.ApplicationId.ToString())
         {
             context.Succeed(requirement);
         }

@@ -17,7 +17,7 @@ public class RequestWithAuthentication
     /// <summary>
     /// Application ID retrieved from claims.
     /// </summary>
-    [FromClaim(ClaimType = "application_id", IsRequired = false)]
+    [FromClaim(ClaimType = Constants.Claims.ApplicationId, IsRequired = false)]
     public Guid ApplicationId { get; set; }
 
     /// <summary>

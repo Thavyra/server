@@ -125,7 +125,7 @@ public static class DbInitializer
                 ClientType = OpenIddictConstants.ClientTypes.Confidential,
                 ConsentType = OpenIddictConstants.ConsentTypes.Implicit,
 
-                Type = OpenIddictConstants.ApplicationTypes.Web,
+                Type = Constants.ApplicationTypes.Service,
                 Name = "Thavyra",
                 Description = null,
 

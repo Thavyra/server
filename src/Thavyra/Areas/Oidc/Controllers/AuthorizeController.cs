@@ -268,7 +268,7 @@ public class AuthorizeController : Controller
 
         identity.SetClaim(Claims.Subject, user.Id.ToString());
         identity.SetClaim(Claims.ClientId, clientId);
-        identity.SetClaim("application_id", applicationId);
+        identity.SetClaim(Constants.Claims.ApplicationId, applicationId);
 
         identity.SetScopes(scopes);
 
