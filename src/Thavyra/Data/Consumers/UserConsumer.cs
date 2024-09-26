@@ -106,7 +106,7 @@ public class UserConsumer :
 
     public async Task Consume(ConsumeContext<User_Update> context)
     {
-        var user = await _dbContext.Users.FindAsync(context.Message.Id);
+        var user = await _dbContext.Users.FindAsync(context.Message.Id, context.CancellationToken);
 
         if (user is null)
         {
@@ -116,5 +116,9 @@ public class UserConsumer :
         
         user.Username = context.Message.Username.IsChanged ? context.Message.Username.Value : user.Username;
         user.Description = context.Message.Description.IsChanged ? context.Message.Description.Value : user.Description;
+
+        await _dbContext.SaveChangesAsync(context.CancellationToken);
+        
+        await context.RespondAsync(Map(user));
     }
 }
