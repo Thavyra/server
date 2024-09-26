@@ -4,12 +4,13 @@ using Microsoft.AspNetCore.Authorization;
 using OpenIddict.Abstractions;
 using Thavyra.Contracts.Application;
 using Thavyra.Contracts.User;
+using Thavyra.Rest.Json;
 using Thavyra.Rest.Security;
 using Thavyra.Rest.Security.Resource;
 
 namespace Thavyra.Rest.Features.Applications.Post;
 
-public class Endpoint : Endpoint<Request, ApplicationResponse>
+public class Endpoint : Endpoint<Request, Response>
 {
     private readonly IRequestClient<User_GetById> _userClient;
     private readonly IAuthorizationService _authorizationService;
@@ -64,11 +65,11 @@ public class Endpoint : Endpoint<Request, ApplicationResponse>
             return;
         }
 
-        var applicationResponse = await _applicationClient.GetResponse<Application>(createRequest, ct);
+        var applicationResponse = await _applicationClient.GetResponse<ApplicationCreated>(createRequest, ct);
 
-        var application = applicationResponse.Message;
+        var application = applicationResponse.Message.Application;
 
-        await SendCreatedAtAsync<Get.Endpoint>(new { Application = application.Id.ToString() }, new ApplicationResponse
+        await SendCreatedAtAsync<Get.Endpoint>(new { Application = application.Id.ToString() }, new Response
         {
             Id = application.Id.ToString(),
             OwnerId = application.OwnerId.ToString(),
@@ -82,6 +83,7 @@ public class Endpoint : Endpoint<Request, ApplicationResponse>
                 _ => false
             },
             ClientId = application.ClientId,
+            ClientSecret = applicationResponse.Message.ClientSecret ?? default(JsonOptional<string>),
             ConsentType = application.ConsentType,
             
             CreatedAt = application.CreatedAt

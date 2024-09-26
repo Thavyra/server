@@ -12,6 +12,7 @@ public static class Policies
             public const string Create = "operation.application.create";
             public const string Read = "operation.application.read";
             public const string Update = "operation.application.update";
+            public const string ClientSecret = "operation.application.client_secret";
             public const string Delete = "operation.application.delete";
         }
         

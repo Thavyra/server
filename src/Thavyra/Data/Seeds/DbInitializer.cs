@@ -104,8 +104,8 @@ public static class DbInitializer
             new UserDto
             {
                 Id = Guid.Parse("d6c0de21-8579-44e5-8e08-c45bc03a4227"),
-                Username = "System",
-                Description = "The system.",
+                Username = "Thavyra",
+                Description = null,
                 CreatedAt = DateTime.UtcNow
             }
         };
@@ -121,14 +121,31 @@ public static class DbInitializer
                 OwnerId = Guid.Parse("d6c0de21-8579-44e5-8e08-c45bc03a4227"),
 
                 ClientId = "j17FHt92IVSvzBufa9c1q0QDaKTd6aFC",
-                ClientSecret = "j17FHt92IVSvzBufa9c1q0QDaKTd6aFC",
+                ClientSecretHash = "$2a$11$tRuJytuNCD6RujInkHzoJOGuYsRrxliJXB2Q9iImeT3e9jsCUl2fS",
                 ClientType = OpenIddictConstants.ClientTypes.Confidential,
                 ConsentType = OpenIddictConstants.ConsentTypes.Implicit,
 
                 Type = OpenIddictConstants.ApplicationTypes.Web,
-                Name = "System",
-                Description = "System application",
+                Name = "Thavyra",
+                Description = null,
 
+                CreatedAt = DateTime.UtcNow
+            },
+            
+            new ApplicationDto
+            {
+                Id = Guid.Parse("309ebb5f-6c89-4fe1-9ff5-b8a9ae6ae44a"),
+                OwnerId = Guid.Parse("d6c0de21-8579-44e5-8e08-c45bc03a4227"),
+                
+                ClientId = "tLa9WBudEm1IcVjfbszcsjOAEn1tE8cC",
+                ClientSecretHash = "$2a$11$JY5RAuErd67fIlxXeW5BeOm0DoQwFRFa5e2Zgu4lDEx13DiUNffMW",
+                ClientType = OpenIddictConstants.ClientTypes.Confidential,
+                ConsentType = OpenIddictConstants.ConsentTypes.Implicit,
+                
+                Type = OpenIddictConstants.ApplicationTypes.Native,
+                Name = "Account Portal",
+                Description = null,
+                
                 CreatedAt = DateTime.UtcNow
             },
             
@@ -139,7 +156,7 @@ public static class DbInitializer
                 OwnerId = Guid.Parse("d6c0de21-8579-44e5-8e08-c45bc03a4227"),
 
                 ClientId = "KD1l6XfcD5rL1b7des0IUzJ69xZ4JTYF",
-                ClientSecret = "KD1l6XfcD5rL1b7des0IUzJ69xZ4JTYF",
+                ClientSecretHash = "$2a$11$3Gy/VUv1024vxAYeqj4V2u0pIkzZDj8w0M6jNJpbyB5MQ9akxVfwm",
                 ClientType = OpenIddictConstants.ClientTypes.Confidential,
                 ConsentType = OpenIddictConstants.ConsentTypes.Explicit,
 
@@ -183,6 +200,13 @@ public static class DbInitializer
                 Id = Guid.NewGuid(),
                 ApplicationId = Guid.Parse("5276f543-60f5-40ff-9bef-631f4649714a"),
                 Uri = "https://oauth.pstmn.io/v1/callback",
+                CreatedAt = DateTime.UtcNow
+            },
+            new RedirectDto
+            {
+                Id = Guid.NewGuid(),
+                ApplicationId = Guid.Parse("309ebb5f-6c89-4fe1-9ff5-b8a9ae6ae44a"),
+                Uri = "http://localhost:3000/auth/callback/thavyra",
                 CreatedAt = DateTime.UtcNow
             },
             new RedirectDto

@@ -2,6 +2,7 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Thavyra.Data.Consumers;
 using Thavyra.Data.Contexts;
+using Thavyra.Data.Security.Hashing;
 
 namespace Thavyra.Data.Configuration;
 
@@ -9,16 +10,32 @@ public static class Services
 {
     public static IServiceCollection AddEntityFramework(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<ThavyraDbContext>(options =>
-        {
-            foreach (var section in configuration.GetChildren())
-                switch (section.Key)
-                {
-                    case "Postgres":
+        foreach (var section in configuration.GetChildren())
+            switch (section.Key)
+            {
+                case "Postgres":
+                    services.AddDbContext<ThavyraDbContext>(options =>
+                    {
                         options.UseNpgsql(section["ConnectionString"]);
-                        break;
-                }
-        });
+                    });
+                    
+                    break;
+                
+                case "Security":
+                    foreach (var securitySection in section.GetChildren())
+                        switch (securitySection.Key)
+                        {
+                            case "BCrypt":
+                                services.Configure<BCryptOptions>(securitySection);
+                                services.AddSingleton<IHashService, BCryptHashService>();
+                                    
+                                break;
+                        }
+                    
+                    break;
+            }
+        
+        
         
         return services;
     }

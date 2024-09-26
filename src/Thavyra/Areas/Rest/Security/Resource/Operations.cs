@@ -25,6 +25,14 @@ public static class Operations
         public static readonly OperationAuthorizationRequirement Password = new() { Name = nameof(Password) };
     }
 
+    public static class Application
+    {
+        /// <summary>
+        /// Set/read client secret.
+        /// </summary>
+        public static readonly OperationAuthorizationRequirement ClientSecret = new() { Name = nameof(ClientSecret) };
+    }
+
     public static class Transaction
     {
         /// <summary>

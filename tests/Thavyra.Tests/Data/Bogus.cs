@@ -2,6 +2,8 @@ using Bogus;
 using OpenIddict.Abstractions;
 using Thavyra.Data.Models;
 
+using BC = BCrypt.Net.BCrypt;
+
 namespace Thavyra.Tests.Data;
 
 public static class Bogus
@@ -21,7 +23,7 @@ public static class Bogus
         return new Faker<PasswordLoginDto>()
             .RuleFor(p => p.Id, f => id ?? f.Random.Guid())
             .RuleFor(p => p.UserId, f => userId ?? f.Random.Guid())
-            .RuleFor(p => p.Password, f => f.Internet.Password())
+            .RuleFor(p => p.PasswordHash, f => BC.HashPassword(f.Internet.Password()))
             .RuleFor(p => p.CreatedAt, _ => DateTime.UtcNow)
             .Generate(count);
     }
@@ -55,9 +57,9 @@ public static class Bogus
                 OpenIddictConstants.ApplicationTypes.Web => OpenIddictConstants.ClientTypes.Confidential,
                 _ => OpenIddictConstants.ClientTypes.Public
             })
-            .RuleFor(a => a.ClientSecret, (f, a) => a.ClientType switch
+            .RuleFor(a => a.ClientSecretHash, (f, a) => a.ClientType switch
             {
-                OpenIddictConstants.ClientTypes.Confidential => clientSecret ?? f.Random.Utf16String(),
+                OpenIddictConstants.ClientTypes.Confidential => BC.HashPassword(clientSecret ?? f.Random.Utf16String()),
                 _ => null
             })
             .RuleFor(a => a.ConsentType, f => consentType ?? f.PickRandom(consentTypes))

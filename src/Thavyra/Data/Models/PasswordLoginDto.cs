@@ -12,9 +12,8 @@ public class PasswordLoginDto
     [Column("user_id")]
     public Guid UserId { get; set; }
 
-    [Column("password")]
-    [MaxLength(100)]
-    public string Password { get; set; } = default!;
+    [Column("password_hash")]
+    public string PasswordHash { get; set; } = default!;
 
     [Column("changed_at")]
     public DateTime ChangedAt { get; set; }

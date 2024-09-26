@@ -2,9 +2,9 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Thavyra.Contracts;
 using Thavyra.Contracts.Login;
-using Thavyra.Contracts.User;
 using Thavyra.Data.Contexts;
 using Thavyra.Data.Models;
+using Thavyra.Data.Security.Hashing;
 
 namespace Thavyra.Data.Consumers;
 
@@ -21,17 +21,14 @@ public class LoginConsumer :
     IConsumer<GitHubLogin_GetByUser>
 {
     private readonly ThavyraDbContext _dbContext;
-    private readonly IRequestClient<User_Create> _createUserClient;
-    private readonly IRequestClient<User_GetById> _getUserClient;
+    private readonly IHashService _hashService;
 
     public LoginConsumer(
         ThavyraDbContext dbContext,
-        IRequestClient<User_Create> createUserClient,
-        IRequestClient<User_GetById> getUserClient)
+        IHashService hashService)
     {
         _dbContext = dbContext;
-        _createUserClient = createUserClient;
-        _getUserClient = getUserClient;
+        _hashService = hashService;
     }
 
     //
@@ -41,7 +38,7 @@ public class LoginConsumer :
     public async Task Consume(ConsumeContext<PasswordLogin_Check> context)
     {
         var login = await _dbContext.Passwords
-            .FirstOrDefaultAsync(x => x.UserId == context.Message.UserId);
+            .FirstOrDefaultAsync(x => x.UserId == context.Message.UserId, context.CancellationToken);
 
         if (login is null)
         {
@@ -49,23 +46,34 @@ public class LoginConsumer :
             return;
         }
 
-        if (context.Message.Password == login.Password)
+        var result = await _hashService.CheckAsync(context.Message.Password, login.PasswordHash);
+
+        if (!result.Succeeded)
         {
-            await context.RespondAsync(new Correct());
+            await context.RespondAsync(new Incorrect());
             return;
         }
 
-        await context.RespondAsync(new Incorrect());
+        if (result.Rehash is { } rehash)
+        {
+            login.PasswordHash = rehash;
+            
+            await _dbContext.SaveChangesAsync(context.CancellationToken);
+        }
+
+        await context.RespondAsync(new Correct());
     }
 
     public async Task Consume(ConsumeContext<PasswordLogin_Create> context)
     {
         var now = DateTime.UtcNow;
+
+        string hash = await _hashService.HashAsync(context.Message.Password);
         
         var login = new PasswordLoginDto
         {
             UserId = context.Message.UserId,
-            Password = context.Message.Password,
+            PasswordHash = hash,
             ChangedAt = now,
             CreatedAt = now
         };
@@ -111,8 +119,10 @@ public class LoginConsumer :
             await context.RespondAsync(new NotFound());
             return;
         }
+
+        string hash = await _hashService.HashAsync(context.Message.Password);
         
-        login.Password = context.Message.Password;
+        login.PasswordHash = hash;
         login.ChangedAt = DateTime.UtcNow;
 
         await _dbContext.SaveChangesAsync(context.CancellationToken);

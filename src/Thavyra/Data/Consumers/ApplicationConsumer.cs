@@ -6,6 +6,7 @@ using Thavyra.Contracts.Application;
 using Thavyra.Data.Contexts;
 using Thavyra.Data.Models;
 using Thavyra.Data.Security;
+using Thavyra.Data.Security.Hashing;
 
 namespace Thavyra.Data.Consumers;
 
@@ -19,6 +20,7 @@ public class ApplicationConsumer :
     IConsumer<Application_GetByOwner>,
     IConsumer<Application_GetByRedirect>,
     IConsumer<Application_List>,
+    IConsumer<Application_ResetClientSecret>,
     IConsumer<Application_Update>,
     IConsumer<Redirect_Create>,
     IConsumer<Redirect_Delete>,
@@ -26,10 +28,12 @@ public class ApplicationConsumer :
     IConsumer<Redirect_GetById>
 {
     private readonly ThavyraDbContext _dbContext;
+    private readonly IHashService _hashService;
 
-    public ApplicationConsumer(ThavyraDbContext dbContext)
+    public ApplicationConsumer(ThavyraDbContext dbContext, IHashService hashService)
     {
         _dbContext = dbContext;
+        _hashService = hashService;
     }
 
     private Application Map(ApplicationDto application)
@@ -48,24 +52,34 @@ public class ApplicationConsumer :
             CreatedAt = application.CreatedAt
         };
     }
-    
+
     public async Task Consume(ConsumeContext<Application_CheckClientSecret> context)
     {
-        var application = await _dbContext.Applications.FindAsync(context.Message.ApplicationId);
+        var application =
+            await _dbContext.Applications.FindAsync(context.Message.ApplicationId, context.CancellationToken);
 
-        if (application is null)
+        if (application?.ClientSecretHash is null)
         {
             await context.RespondAsync(new NotFound());
             return;
         }
 
-        if (application.ClientSecret == context.Message.Secret)
+        var result = await _hashService.CheckAsync(context.Message.Secret, application.ClientSecretHash);
+
+        if (!result.Succeeded)
         {
-            await context.RespondAsync(new Correct());
+            await context.RespondAsync(new Incorrect());
             return;
         }
-        
-        await context.RespondAsync(new Incorrect());
+
+        if (result.Rehash is { } rehash)
+        {
+            application.ClientSecretHash = rehash;
+
+            await _dbContext.SaveChangesAsync(context.CancellationToken);
+        }
+
+        await context.RespondAsync(new Correct());
     }
 
     public async Task Consume(ConsumeContext<Application_Count> context)
@@ -87,32 +101,40 @@ public class ApplicationConsumer :
             Type = context.Message.Type,
             Name = context.Message.Name,
             Description = context.Message.Description,
-            
+
             CreatedAt = DateTime.UtcNow
         };
+
+        string? clientSecret = null;
 
         switch (context.Message.Type)
         {
             case OpenIddictConstants.ApplicationTypes.Web:
-                var secret = Secret.NewSecret(32);
-            
-                application.ClientSecret = secret.ToString();
+                clientSecret = Secret.NewSecret(32).ToString();
+                string hash = await _hashService.HashAsync(clientSecret);
+
+                application.ClientSecretHash = hash;
                 application.ClientType = OpenIddictConstants.ClientTypes.Confidential;
-                
+
                 break;
-            
+
             case OpenIddictConstants.ApplicationTypes.Native:
                 application.ClientType = OpenIddictConstants.ClientTypes.Public;
                 break;
-            
+
             default:
                 throw new InvalidOperationException($"Unsupported application type: {context.Message.Type}");
         }
-        
+
         await _dbContext.Applications.AddAsync(application);
         await _dbContext.SaveChangesAsync();
 
-        await context.RespondAsync(Map(application));
+        await context.RespondAsync(new ApplicationCreated
+        {
+            Id = application.Id,
+            Application = Map(application),
+            ClientSecret = clientSecret
+        });
     }
 
     public async Task Consume(ConsumeContext<Application_Delete> context)
@@ -148,10 +170,10 @@ public class ApplicationConsumer :
             await context.RespondAsync(new NotFound());
             return;
         }
-        
+
         await context.RespondAsync(Map(application));
     }
-    
+
     public async Task Consume(ConsumeContext<Application_GetByOwner> context)
     {
         var applications = await _dbContext.Applications
@@ -167,15 +189,40 @@ public class ApplicationConsumer :
             .Where(x => x.Uri == context.Message.Uri)
             .Select(x => x.Application)
             .ToListAsync();
-        
+
         await context.RespondAsync(new Multiple<Application>(applications.Select(Map).ToList()));
     }
 
     public async Task Consume(ConsumeContext<Application_List> context)
     {
         var applications = await _dbContext.Applications.ToListAsync();
-        
+
         await context.RespondAsync(new Multiple<Application>(applications.Select(Map).ToList()));
+    }
+    
+    public async Task Consume(ConsumeContext<Application_ResetClientSecret> context)
+    {
+        var application = await _dbContext.Applications.FindAsync(context.Message.ApplicationId, context.CancellationToken);
+
+        if (application is null)
+        {
+            await context.RespondAsync(new NotFound());
+            return;
+        }
+
+        string secret = Secret.NewSecret(32).ToString();
+        string hash = await _hashService.HashAsync(secret);
+        
+        application.ClientSecretHash = hash;
+        application.ClientType = OpenIddictConstants.ClientTypes.Confidential;
+        
+        await _dbContext.SaveChangesAsync(context.CancellationToken);
+
+        await context.RespondAsync(new ClientSecretCreated
+        {
+            ApplicationId = application.Id,
+            ClientSecret = secret
+        });
     }
 
     public async Task Consume(ConsumeContext<Application_Update> context)
@@ -187,9 +234,11 @@ public class ApplicationConsumer :
             await context.RespondAsync(new NotFound());
             return;
         }
-        
+
         application.Name = context.Message.Name.IsChanged ? context.Message.Name.Value : application.Name;
-        application.Description = context.Message.Description.IsChanged ? context.Message.Description.Value : application.Description;
+        application.Description = context.Message.Description.IsChanged
+            ? context.Message.Description.Value
+            : application.Description;
 
         await _dbContext.SaveChangesAsync();
     }
@@ -202,10 +251,10 @@ public class ApplicationConsumer :
             Uri = context.Message.Uri,
             CreatedAt = DateTime.UtcNow
         };
-        
+
         await _dbContext.Redirects.AddAsync(redirect);
         await _dbContext.SaveChangesAsync();
-        
+
         await context.RespondAsync(new Redirect
         {
             Id = redirect.Id,

@@ -13,8 +13,10 @@ public class ApplicationDto
     
     [Column("client_id")]
     public string ClientId { get; set; } = default!;
-    [Column("client_secret")]
-    public string? ClientSecret { get; set; }
+    
+    [Column("client_secret_hash")]
+    public string? ClientSecretHash { get; set; }
+    
     [Column("client_type")]
     public string ClientType { get; set; } = default!;
     [Column("consent_type")]
