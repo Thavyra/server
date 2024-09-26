@@ -58,8 +58,6 @@ public class DiscordController : Controller
 
         var properties = new AuthenticationProperties
         {
-            ExpiresUtc = DateTimeOffset.UtcNow.AddMonths(6),
-            IsPersistent = true,
             RedirectUri = result.Properties?.RedirectUri ?? "/"
         };
         
