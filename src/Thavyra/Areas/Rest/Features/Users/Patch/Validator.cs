@@ -17,7 +17,8 @@ public partial class Validator : Validator<Request>
             RuleFor(user => user.Username.Value)
                 .NotEmpty()
                 .Length(1, 40)
-                .Matches(UsernameRegex()).WithMessage("Invalid special character.")
+                .Must(x => x.All(c => char.IsLetterOrDigit(c) || "_-'.".Contains(c)))
+                    .WithMessage("Invalid special character in username.")
                 .MustAsync(userService.IsUsernameUniqueAsync).WithMessage("Username already taken.");
         });
 
@@ -27,7 +28,4 @@ public partial class Validator : Validator<Request>
                 .Length(1, 400);
         });
     }
-
-    [GeneratedRegex(@"([a-zA-Z0-9_-]+)")]
-    private static partial Regex UsernameRegex();
 }

@@ -23,7 +23,10 @@ public partial class RegisterViewModel
             RuleFor(model => model.Username)
                 .NotEmpty().WithMessage("Please choose a username.")
                 .Length(1, 40).WithMessage("Username must be shorter than 40 characters.")
+                // Works on the client
                 .Matches(UsernameRegex()).WithMessage("Invalid special character in username.")
+                // But not on server?
+                .Must(x => x.All(c => char.IsLetterOrDigit(c) || "_-'.".Contains(c))).WithMessage("Invalid special character in username.")
                 .MustAsync(users.IsUsernameUniqueAsync).WithMessage("Username already taken.");
 
             RuleFor(model => model.Password)
