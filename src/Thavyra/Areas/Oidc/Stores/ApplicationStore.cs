@@ -165,7 +165,7 @@ public class ApplicationStore : BaseApplicationStore
             OpenIddictConstants.Permissions.Endpoints.Revocation,
             
             OpenIddictConstants.Permissions.ResponseTypes.Code,
-            OpenIddictConstants.Permissions.ResponseTypes.Token,
+            OpenIddictConstants.Permissions.ResponseTypes.IdToken,
             
             OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
             OpenIddictConstants.Permissions.GrantTypes.ClientCredentials,

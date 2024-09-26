@@ -59,6 +59,7 @@ public static class Services
 
                         options
                             .AllowAuthorizationCodeFlow()
+                            .AllowImplicitFlow()
                             .AllowClientCredentialsFlow()
                             .AllowRefreshTokenFlow();
 
