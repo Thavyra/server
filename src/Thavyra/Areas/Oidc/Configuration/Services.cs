@@ -68,6 +68,7 @@ public static class Services
                         
                         options.UseAspNetCore()
                             .EnableAuthorizationEndpointPassthrough()
+                            .EnableUserinfoEndpointPassthrough()
                             .DisableTransportSecurityRequirement();
                     })
                     .AddValidation(options =>
@@ -130,10 +131,7 @@ public static class Services
         builder.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
         {
             options.LoginPath = "/login";
-            options.AccessDeniedPath = "/login";
-
-            options.ExpireTimeSpan = DateTimeOffset.UtcNow.AddMonths(6) - DateTimeOffset.UtcNow;
-            options.SlidingExpiration = true;
+            options.SlidingExpiration = false;
         });
 
         return builder;
