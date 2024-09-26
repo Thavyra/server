@@ -6,6 +6,7 @@ using OpenIddict.Validation.AspNetCore;
 using Thavyra.Rest.Features.Applications;
 using Thavyra.Rest.Features.Users;
 using Thavyra.Rest.Json;
+using Thavyra.Rest.Processors;
 using Thavyra.Rest.Security.Scopes;
 using Thavyra.Rest.Services;
 
@@ -64,6 +65,7 @@ public static class Services
                     ep.PreProcessor<UserSlugParser>(Order.Before);
                     ep.PreProcessor<ApplicationSlugParser>(Order.Before);
                     ep.AuthSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
+                    ep.PostProcessor<EndpointResponseLogger>(Order.After);
                 };
             
                 options.Errors.UseProblemDetails();
