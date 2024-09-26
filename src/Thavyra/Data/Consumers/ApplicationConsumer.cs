@@ -1,5 +1,6 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using OpenIddict.Abstractions;
 using Thavyra.Contracts;
 using Thavyra.Contracts.Application;
@@ -28,15 +29,17 @@ public class ApplicationConsumer :
     IConsumer<Redirect_GetById>
 {
     private readonly ThavyraDbContext _dbContext;
+    private readonly IMemoryCache _cache;
     private readonly IHashService _hashService;
 
-    public ApplicationConsumer(ThavyraDbContext dbContext, IHashService hashService)
+    public ApplicationConsumer(ThavyraDbContext dbContext, IMemoryCache cache, IHashService hashService)
     {
         _dbContext = dbContext;
+        _cache = cache;
         _hashService = hashService;
     }
 
-    private Application Map(ApplicationDto application)
+    private static Application Map(ApplicationDto application)
     {
         return new Application
         {
@@ -55,8 +58,7 @@ public class ApplicationConsumer :
 
     public async Task Consume(ConsumeContext<Application_CheckClientSecret> context)
     {
-        var application =
-            await _dbContext.Applications.FindAsync(context.Message.ApplicationId, context.CancellationToken);
+        var application = await _dbContext.Applications.FindAsync([context.Message.ApplicationId], context.CancellationToken);
 
         if (application?.ClientSecretHash is null)
         {
@@ -84,7 +86,7 @@ public class ApplicationConsumer :
 
     public async Task Consume(ConsumeContext<Application_Count> context)
     {
-        long count = await _dbContext.Applications.LongCountAsync();
+        long count = await _dbContext.Applications.LongCountAsync(context.CancellationToken);
 
         await context.RespondAsync(new Count(count));
     }
@@ -126,8 +128,9 @@ public class ApplicationConsumer :
                 throw new InvalidOperationException($"Unsupported application type: {context.Message.Type}");
         }
 
-        await _dbContext.Applications.AddAsync(application);
-        await _dbContext.SaveChangesAsync();
+        _dbContext.Applications.Add(application);
+        
+        await _dbContext.SaveChangesAsync(context.CancellationToken);
 
         await context.RespondAsync(new ApplicationCreated
         {
@@ -141,7 +144,7 @@ public class ApplicationConsumer :
     {
         await _dbContext.Applications
             .Where(x => x.Id == context.Message.Id)
-            .ExecuteDeleteAsync();
+            .ExecuteDeleteAsync(context.CancellationToken);
 
         await context.RespondAsync(new Success());
     }
@@ -149,7 +152,7 @@ public class ApplicationConsumer :
     public async Task Consume(ConsumeContext<Application_GetByClientId> context)
     {
         var application = await _dbContext.Applications
-            .FirstOrDefaultAsync(x => x.ClientId == context.Message.ClientId);
+            .FirstOrDefaultAsync(x => x.ClientId == context.Message.ClientId, context.CancellationToken);
 
         if (application is null)
         {
@@ -162,13 +165,20 @@ public class ApplicationConsumer :
 
     public async Task Consume(ConsumeContext<Application_GetById> context)
     {
-        var application = await _dbContext.Applications
-            .FirstOrDefaultAsync(x => x.Id == context.Message.Id);
+        var application = _cache.Get<ApplicationDto>(context.Message.Id);
 
         if (application is null)
         {
-            await context.RespondAsync(new NotFound());
-            return;
+            application = await _dbContext.Applications
+                .FirstOrDefaultAsync(x => x.Id == context.Message.Id, context.CancellationToken);
+
+            if (application is null)
+            {
+                await context.RespondAsync(new NotFound());
+                return;
+            }
+
+            _cache.Set(application.Id, application, TimeSpan.FromMinutes(1));
         }
 
         await context.RespondAsync(Map(application));
@@ -178,7 +188,7 @@ public class ApplicationConsumer :
     {
         var applications = await _dbContext.Applications
             .Where(x => x.OwnerId == context.Message.OwnerId)
-            .ToListAsync();
+            .ToListAsync(context.CancellationToken);
 
         await context.RespondAsync(new Multiple<Application>(applications.Select(Map).ToList()));
     }
@@ -188,21 +198,21 @@ public class ApplicationConsumer :
         var applications = await _dbContext.Redirects
             .Where(x => x.Uri == context.Message.Uri)
             .Select(x => x.Application)
-            .ToListAsync();
+            .ToListAsync(context.CancellationToken);
 
         await context.RespondAsync(new Multiple<Application>(applications.Select(Map).ToList()));
     }
 
     public async Task Consume(ConsumeContext<Application_List> context)
     {
-        var applications = await _dbContext.Applications.ToListAsync();
+        var applications = await _dbContext.Applications.ToListAsync(context.CancellationToken);
 
         await context.RespondAsync(new Multiple<Application>(applications.Select(Map).ToList()));
     }
     
     public async Task Consume(ConsumeContext<Application_ResetClientSecret> context)
     {
-        var application = await _dbContext.Applications.FindAsync(context.Message.ApplicationId, context.CancellationToken);
+        var application = await _dbContext.Applications.FindAsync([context.Message.ApplicationId], context.CancellationToken);
 
         if (application is null)
         {
@@ -227,7 +237,7 @@ public class ApplicationConsumer :
 
     public async Task Consume(ConsumeContext<Application_Update> context)
     {
-        var application = await _dbContext.Applications.FindAsync(context.Message.Id);
+        var application = await _dbContext.Applications.FindAsync([context.Message.Id], context.CancellationToken);
 
         if (application is null)
         {
@@ -240,7 +250,11 @@ public class ApplicationConsumer :
             ? context.Message.Description.Value
             : application.Description;
 
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(context.CancellationToken);
+        
+        _cache.Remove(application.Id);
+
+        await context.RespondAsync(Map(application));
     }
 
     public async Task Consume(ConsumeContext<Redirect_Create> context)
@@ -252,8 +266,9 @@ public class ApplicationConsumer :
             CreatedAt = DateTime.UtcNow
         };
 
-        await _dbContext.Redirects.AddAsync(redirect);
-        await _dbContext.SaveChangesAsync();
+        _dbContext.Redirects.Add(redirect);
+        
+        await _dbContext.SaveChangesAsync(context.CancellationToken);
 
         await context.RespondAsync(new Redirect
         {
@@ -269,14 +284,14 @@ public class ApplicationConsumer :
         await _dbContext.Redirects
             .Where(x => x.ApplicationId == context.Message.ApplicationId)
             .Where(x => x.Id == context.Message.Id)
-            .ExecuteDeleteAsync();
+            .ExecuteDeleteAsync(context.CancellationToken);
     }
 
     public async Task Consume(ConsumeContext<Redirect_GetByApplication> context)
     {
         var redirects = await _dbContext.Redirects
             .Where(x => x.ApplicationId == context.Message.ApplicationId)
-            .ToListAsync();
+            .ToListAsync(context.CancellationToken);
 
         var response = redirects.Select(x => new Redirect
         {
@@ -294,7 +309,7 @@ public class ApplicationConsumer :
         var redirect = await _dbContext.Redirects
             .Where(x => x.ApplicationId == context.Message.ApplicationId)
             .Where(x => x.Id == context.Message.Id)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(context.CancellationToken);
 
         if (redirect is null)
         {

@@ -1,5 +1,6 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using OpenIddict.Abstractions;
 using Thavyra.Contracts;
 using Thavyra.Contracts.Authorization;
@@ -21,13 +22,15 @@ public class AuthorizationConsumer :
     IConsumer<Authorization_Update>
 {
     private readonly ThavyraDbContext _dbContext;
+    private readonly IMemoryCache _cache;
 
-    public AuthorizationConsumer(ThavyraDbContext dbContext)
+    public AuthorizationConsumer(ThavyraDbContext dbContext, IMemoryCache cache)
     {
         _dbContext = dbContext;
+        _cache = cache;
     }
 
-    private Authorization Map(AuthorizationDto authorization)
+    private static Authorization Map(AuthorizationDto authorization)
     {
         return new Authorization
         {
@@ -47,7 +50,7 @@ public class AuthorizationConsumer :
     
     public async Task Consume(ConsumeContext<Authorization_Count> context)
     {
-        long count = await _dbContext.Applications.LongCountAsync();
+        long count = await _dbContext.Applications.LongCountAsync(context.CancellationToken);
 
         await context.RespondAsync(new Count(count));
     }
@@ -56,7 +59,7 @@ public class AuthorizationConsumer :
     {
         var scopes = await _dbContext.Scopes
             .Where(x => context.Message.Scopes.Contains(x.Name))
-            .ToListAsync();
+            .ToListAsync(context.CancellationToken);
         
         var authorization = new AuthorizationDto
         {
@@ -70,8 +73,9 @@ public class AuthorizationConsumer :
             Scopes = scopes
         };
 
-        await _dbContext.AddAsync(authorization);
-        await _dbContext.SaveChangesAsync();
+        _dbContext.Add(authorization);
+        
+        await _dbContext.SaveChangesAsync(context.CancellationToken);
 
         await context.RespondAsync(Map(authorization));
     }
@@ -80,9 +84,9 @@ public class AuthorizationConsumer :
     {
         await _dbContext.Authorizations
             .Where(x => x.Id == context.Message.Id)
-            .ExecuteDeleteAsync();
+            .ExecuteDeleteAsync(context.CancellationToken);
 
-        await _dbContext.SaveChangesAsync();
+        await context.RespondAsync(new Success());
     }
 
     public async Task Consume(ConsumeContext<Authorization_Get> context)
@@ -93,7 +97,7 @@ public class AuthorizationConsumer :
             .Where(x => context.Message.Type == null || x.Type == context.Message.Type)
             .Where(x => context.Message.Status == null || x.Status == context.Message.Status)
             .Include(x => x.Scopes)
-            .ToListAsync();
+            .ToListAsync(context.CancellationToken);
         
         await context.RespondAsync(new Multiple<Authorization>(authorizations.Select(Map).ToList()));
     }
@@ -103,23 +107,30 @@ public class AuthorizationConsumer :
         var authorizations = await _dbContext.Authorizations
             .Where(x => x.ApplicationId == context.Message.ApplicationId)
             .Include(x => x.Scopes)
-            .ToListAsync();
+            .ToListAsync(context.CancellationToken);
         
         await context.RespondAsync(new Multiple<Authorization>(authorizations.Select(Map).ToList()));
     }
 
     public async Task Consume(ConsumeContext<Authorization_GetById> context)
     {
-        var authorization = await _dbContext.Authorizations
-            .Include(x => x.Scopes)
-            .FirstOrDefaultAsync(x => x.Id == context.Message.Id);
+        var authorization = _cache.Get<AuthorizationDto>(context.Message.Id);
 
         if (authorization is null)
         {
-            await context.RespondAsync(new NotFound());
-            return;
-        }
+            authorization = await _dbContext.Authorizations
+                .Include(x => x.Scopes)
+                .FirstOrDefaultAsync(x => x.Id == context.Message.Id, context.CancellationToken);
+            
+            if (authorization is null)
+            {
+                await context.RespondAsync(new NotFound());
+                return;
+            }
 
+            _cache.Set(authorization.Id, authorization, TimeSpan.FromMinutes(1));
+        }
+        
         await context.RespondAsync(Map(authorization));
     }
 
@@ -128,7 +139,7 @@ public class AuthorizationConsumer :
         var authorizations = await _dbContext.Authorizations
             .Where(x => x.UserId == context.Message.UserId)
             .Include(x => x.Scopes)
-            .ToListAsync();
+            .ToListAsync(context.CancellationToken);
         
         await context.RespondAsync(new Multiple<Authorization>(authorizations.Select(Map).ToList()));
     }
@@ -137,7 +148,7 @@ public class AuthorizationConsumer :
     {
         var authorization = await _dbContext.Authorizations
             .Include(x => x.Scopes)
-            .ToListAsync();
+            .ToListAsync(context.CancellationToken);
         
         await context.RespondAsync(new Multiple<Authorization>(authorization.Select(Map).ToList()));
     }
@@ -149,17 +160,15 @@ public class AuthorizationConsumer :
             .Where(x => x.Status != OpenIddictConstants.Statuses.Valid ||
                         x.Type == OpenIddictConstants.AuthorizationTypes.AdHoc && !x.Tokens.Any());
 
-        long count = await authorizations.LongCountAsync();
-        await authorizations.ExecuteDeleteAsync();
-
-        await _dbContext.SaveChangesAsync();
+        long count = await authorizations.LongCountAsync(context.CancellationToken);
+        await authorizations.ExecuteDeleteAsync(context.CancellationToken);
 
         await context.RespondAsync(new Count(count));
     }
 
     public async Task Consume(ConsumeContext<Authorization_Update> context)
     {
-        var authorization = await _dbContext.Authorizations.FindAsync(context.Message.Id);
+        var authorization = await _dbContext.Authorizations.FindAsync([context.Message.Id], context.CancellationToken);
 
         if (authorization is null)
         {
@@ -170,7 +179,9 @@ public class AuthorizationConsumer :
         authorization.Type = context.Message.Type.IsChanged ? context.Message.Type.Value : authorization.Type;
         authorization.Status = context.Message.Status.IsChanged ? context.Message.Status.Value : authorization.Status;
 
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(context.CancellationToken);
+        
+        _cache.Remove(authorization.Id);
         
         await context.RespondAsync(Map(authorization));
     }

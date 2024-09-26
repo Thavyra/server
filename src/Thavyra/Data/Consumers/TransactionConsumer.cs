@@ -22,7 +22,7 @@ public class TransactionConsumer :
         _dbContext = dbContext;
     }
 
-    private Transaction Map(TransactionDto transaction)
+    private static Transaction Map(TransactionDto transaction)
     {
         return new Transaction
         {
@@ -41,7 +41,7 @@ public class TransactionConsumer :
     
     public async Task Consume(ConsumeContext<Transaction_Create> context)
     {
-        var subject = await _dbContext.Users.FindAsync(context.Message.SubjectId, context.CancellationToken);
+        var subject = await _dbContext.Users.FindAsync([context.Message.SubjectId], context.CancellationToken);
 
         if (subject is null)
         {
@@ -84,8 +84,8 @@ public class TransactionConsumer :
 
     public async Task Consume(ConsumeContext<Transfer_Create> context)
     {
-        var subject = await _dbContext.Users.FindAsync(context.Message.SubjectId, context.CancellationToken);
-        var recipient = await _dbContext.Users.FindAsync(context.Message.RecipientId, context.CancellationToken);
+        var subject = await _dbContext.Users.FindAsync([context.Message.SubjectId], context.CancellationToken);
+        var recipient = await _dbContext.Users.FindAsync([context.Message.RecipientId], context.CancellationToken);
         
         if (subject is null || recipient is null)
         {

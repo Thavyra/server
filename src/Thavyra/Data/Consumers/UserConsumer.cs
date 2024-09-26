@@ -1,5 +1,6 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Thavyra.Contracts;
 using Thavyra.Contracts.Transaction;
 using Thavyra.Contracts.User;
@@ -17,15 +18,17 @@ public class UserConsumer :
     IConsumer<User_Update>
 {
     private readonly ThavyraDbContext _dbContext;
+    private readonly IMemoryCache _cache;
     private readonly IPublishEndpoint _publishEndpoint;
 
-    public UserConsumer(ThavyraDbContext dbContext, IPublishEndpoint publishEndpoint)
+    public UserConsumer(ThavyraDbContext dbContext, IMemoryCache cache, IPublishEndpoint publishEndpoint)
     {
         _dbContext = dbContext;
+        _cache = cache;
         _publishEndpoint = publishEndpoint;
     }
 
-    private User Map(UserDto user)
+    private static User Map(UserDto user)
     {
         return new User
         {
@@ -45,8 +48,9 @@ public class UserConsumer :
             CreatedAt = DateTime.UtcNow
         };
         
-        await _dbContext.Users.AddAsync(user);
-        await _dbContext.SaveChangesAsync();
+        _dbContext.Users.Add(user);
+        
+        await _dbContext.SaveChangesAsync(context.CancellationToken);
 
         await context.RespondAsync(Map(user));
 
@@ -56,14 +60,14 @@ public class UserConsumer :
             SubjectId = user.Id,
             Description = "Welcome to Thavyra!",
             Amount = 1000
-        });
+        }, context.CancellationToken);
     }
 
     public async Task Consume(ConsumeContext<User_Delete> context)
     {
         await _dbContext.Users
             .Where(x => x.Id == context.Message.Id)
-            .ExecuteDeleteAsync();
+            .ExecuteDeleteAsync(context.CancellationToken);
 
         await context.RespondAsync(new Success());
     }
@@ -71,29 +75,36 @@ public class UserConsumer :
     public async Task Consume(ConsumeContext<User_ExistsByUsername> context)
     {
         bool exists = await _dbContext.Users
-            .AnyAsync(x => x.Username == context.Message.Username);
+            .AnyAsync(x => x.Username == context.Message.Username, context.CancellationToken);
 
         await context.RespondAsync(exists ? new UsernameExists() : new NotFound());
     }
 
     public async Task Consume(ConsumeContext<User_GetById> context)
     {
-        var user = await _dbContext.Users
-            .FirstOrDefaultAsync(x => x.Id == context.Message.Id);
+        var user = _cache.Get<UserDto>(context.Message.Id);
 
         if (user is null)
         {
-            await context.RespondAsync(new NotFound());
-            return;
-        }
+            user = await _dbContext.Users
+                .FirstOrDefaultAsync(x => x.Id == context.Message.Id, context.CancellationToken);
+            
+            if (user is null)
+            {
+                await context.RespondAsync(new NotFound());
+                return;
+            }
 
+            _cache.Set(user.Id, user, TimeSpan.FromMinutes(1));
+        }
+        
         await context.RespondAsync(Map(user));
     }
 
     public async Task Consume(ConsumeContext<User_GetByUsername> context)
     {
         var user = await _dbContext.Users
-            .FirstOrDefaultAsync(x => x.Username == context.Message.Username);
+            .FirstOrDefaultAsync(x => x.Username == context.Message.Username, context.CancellationToken);
 
         if (user is null)
         {

@@ -78,7 +78,8 @@ public class LoginConsumer :
             CreatedAt = now
         };
 
-        await _dbContext.Passwords.AddAsync(login);
+        _dbContext.Passwords.Add(login);
+        
         await _dbContext.SaveChangesAsync(context.CancellationToken);
 
         await context.RespondAsync(new PasswordLogin
@@ -112,7 +113,7 @@ public class LoginConsumer :
     
     public async Task Consume(ConsumeContext<PasswordLogin_Update> context)
     {
-        var login = await _dbContext.Passwords.FindAsync(context.Message.Id, context.CancellationToken);
+        var login = await _dbContext.Passwords.FindAsync([context.Message.Id], context.CancellationToken);
 
         if (login is null)
         {

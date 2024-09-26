@@ -1,5 +1,6 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using OpenIddict.Abstractions;
 using Thavyra.Contracts;
 using Thavyra.Contracts.Token;
@@ -24,13 +25,15 @@ public class TokenConsumer :
     IConsumer<Token_Update>
 {
     private readonly ThavyraDbContext _dbContext;
+    private readonly IMemoryCache _cache;
 
-    public TokenConsumer(ThavyraDbContext dbContext)
+    public TokenConsumer(ThavyraDbContext dbContext, IMemoryCache cache)
     {
         _dbContext = dbContext;
+        _cache = cache;
     }
 
-    private Token Map(TokenDto token)
+    private static Token Map(TokenDto token)
     {
         return new Token
         {
@@ -52,7 +55,7 @@ public class TokenConsumer :
     
     public async Task Consume(ConsumeContext<Token_Count> context)
     {
-        long count = await _dbContext.Tokens.LongCountAsync();
+        long count = await _dbContext.Tokens.LongCountAsync(context.CancellationToken);
 
         await context.RespondAsync(new Count(count));
     }
@@ -76,8 +79,9 @@ public class TokenConsumer :
             ExpiresAt = context.Message.ExpiresAt
         };
 
-        await _dbContext.Tokens.AddAsync(token);
-        await _dbContext.SaveChangesAsync();
+        _dbContext.Tokens.Add(token);
+        
+        await _dbContext.SaveChangesAsync(context.CancellationToken);
         
         await context.RespondAsync(Map(token));
     }
@@ -86,9 +90,7 @@ public class TokenConsumer :
     {
         await _dbContext.Tokens
             .Where(x => x.Id == context.Message.Id)
-            .ExecuteDeleteAsync();
-        
-        await _dbContext.SaveChangesAsync();
+            .ExecuteDeleteAsync(context.CancellationToken);
     }
 
     public async Task Consume(ConsumeContext<Token_Get> context)
@@ -98,7 +100,7 @@ public class TokenConsumer :
             .Where(x => x.ApplicationId == context.Message.ApplicationId)
             .Where(x => context.Message.Type == null || x.Type == context.Message.Type)
             .Where(x => context.Message.Status == null || x.Status == context.Message.Status)
-            .ToListAsync();
+            .ToListAsync(context.CancellationToken);
 
         await context.RespondAsync(new Multiple<Token>(tokens.Select(Map).ToList()));
     }
@@ -107,7 +109,7 @@ public class TokenConsumer :
     {
         var tokens = await _dbContext.Tokens
             .Where(x => x.ApplicationId == context.Message.ApplicationId)
-            .ToListAsync();
+            .ToListAsync(context.CancellationToken);
         
         await context.RespondAsync(new Multiple<Token>(tokens.Select(Map).ToList()));
     }
@@ -116,7 +118,7 @@ public class TokenConsumer :
     {
         var tokens = await _dbContext.Tokens
             .Where(x => x.AuthorizationId == context.Message.AuthorizationId)
-            .ToListAsync();
+            .ToListAsync(context.CancellationToken);
         
         await context.RespondAsync(new Multiple<Token>(tokens.Select(Map).ToList()));
     }
@@ -124,7 +126,7 @@ public class TokenConsumer :
     public async Task Consume(ConsumeContext<Token_GetById> context)
     {
         var token = await _dbContext.Tokens
-            .FirstOrDefaultAsync(x => x.Id == context.Message.Id);
+            .FirstOrDefaultAsync(x => x.Id == context.Message.Id, context.CancellationToken);
 
         if (token is null)
         {
@@ -138,7 +140,7 @@ public class TokenConsumer :
     public async Task Consume(ConsumeContext<Token_GetByReferenceId> context)
     {
         var token = await _dbContext.Tokens
-            .FirstOrDefaultAsync(x => x.ReferenceId == context.Message.ReferenceId);
+            .FirstOrDefaultAsync(x => x.ReferenceId == context.Message.ReferenceId, context.CancellationToken);
 
         if (token is null)
         {
@@ -153,14 +155,14 @@ public class TokenConsumer :
     {
         var tokens = await _dbContext.Tokens
             .Where(x => x.UserId == context.Message.UserId)
-            .ToListAsync();
+            .ToListAsync(context.CancellationToken);
         
         await context.RespondAsync(new Multiple<Token>(tokens.Select(Map).ToList()));
     }
 
     public async Task Consume(ConsumeContext<Token_List> context)
     {
-        var tokens = await _dbContext.Tokens.ToListAsync();
+        var tokens = await _dbContext.Tokens.ToListAsync(context.CancellationToken);
         
         await context.RespondAsync(new Multiple<Token>(tokens.Select(Map).ToList()));
     }
@@ -174,9 +176,9 @@ public class TokenConsumer :
                 (x.Authorization != null && x.Authorization.Status != OpenIddictConstants.Statuses.Valid) ||
                 x.ExpiresAt < DateTime.UtcNow);
 
-        long count = await tokens.LongCountAsync();
+        long count = await tokens.LongCountAsync(context.CancellationToken);
         
-        await tokens.ExecuteDeleteAsync();
+        await tokens.ExecuteDeleteAsync(context.CancellationToken);
         
         await context.RespondAsync(new Count(count));
     }
@@ -186,16 +188,16 @@ public class TokenConsumer :
         var tokens = _dbContext.Tokens
             .Where(x => x.AuthorizationId == context.Message.AuthorizationId);
 
-        long count = await tokens.LongCountAsync();
+        long count = await tokens.LongCountAsync(context.CancellationToken);
         
-        await tokens.ExecuteDeleteAsync();
+        await tokens.ExecuteDeleteAsync(context.CancellationToken);
         
         await context.RespondAsync(new Count(count));
     }
 
     public async Task Consume(ConsumeContext<Token_Update> context)
     {
-        var token = await _dbContext.Tokens.FindAsync(context.Message.Id);
+        var token = await _dbContext.Tokens.FindAsync([context.Message.Id], context.CancellationToken);
 
         if (token is null)
         {
@@ -211,7 +213,7 @@ public class TokenConsumer :
         token.RedeemedAt = context.Message.RedeemedAt.IsChanged ? context.Message.RedeemedAt.Value : token.RedeemedAt;
         token.ExpiresAt = context.Message.ExpiresAt.IsChanged ? context.Message.ExpiresAt.Value : token.ExpiresAt;
 
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(context.CancellationToken);
         
         await context.RespondAsync(Map(token));
     }

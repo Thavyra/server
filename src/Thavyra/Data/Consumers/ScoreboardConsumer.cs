@@ -43,7 +43,7 @@ public class ScoreboardConsumer :
         };
     }
 
-    private Score MapScore(ScoreDto score)
+    private static Score MapScore(ScoreDto score)
     {
         return new Score
         {

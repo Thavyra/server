@@ -42,13 +42,13 @@ public class RegisterConsumer :
         var userResponse = await _createUser.GetResponse<User>(new User_Create
         {
             Username = context.Message.Username
-        });
+        }, context.CancellationToken);
 
         var passwordResponse = await _createPassword.GetResponse<PasswordLogin>(new PasswordLogin_Create
         {
             UserId = userResponse.Message.Id,
             Password = context.Message.Password
-        });
+        }, context.CancellationToken);
 
         await context.RespondAsync(new PasswordRegistration
         {
@@ -62,7 +62,7 @@ public class RegisterConsumer :
         Response existsResponse = await _getDiscord.GetResponse<DiscordLogin, NotFound>(new DiscordLogin_GetByDiscordId
         {
             DiscordId = context.Message.DiscordId
-        });
+        }, context.CancellationToken);
 
         var login = existsResponse switch
         {
@@ -76,12 +76,12 @@ public class RegisterConsumer :
             null => await _createUser.GetResponse<User>(new User_Create
             {
                 Username = context.Message.Username
-            }),
+            }, context.CancellationToken),
 
             not null => await _getUser.GetResponse<User>(new User_GetById
             {
                 Id = login.UserId
-            })
+            }, context.CancellationToken)
         };
 
         if (login is null)
@@ -90,7 +90,7 @@ public class RegisterConsumer :
             {
                 UserId = userResponse.Message.Id,
                 DiscordId = context.Message.DiscordId
-            });
+            }, context.CancellationToken);
 
             login = loginResponse.Message;
         }
@@ -107,7 +107,7 @@ public class RegisterConsumer :
         Response existsResponse = await _getGitHub.GetResponse<GitHubLogin, NotFound>(new GitHubLogin_GetByGitHubId
         {
             GitHubId = context.Message.GitHubId
-        });
+        }, context.CancellationToken);
 
         var login = existsResponse switch
         {
@@ -121,12 +121,12 @@ public class RegisterConsumer :
             null => await _createUser.GetResponse<User>(new User_Create
             {
                 Username = context.Message.Username
-            }),
+            }, context.CancellationToken),
 
             not null => await _getUser.GetResponse<User>(new User_GetById
             {
                 Id = login.UserId
-            })
+            }, context.CancellationToken)
         };
 
         if (login is null)
@@ -135,7 +135,7 @@ public class RegisterConsumer :
             {
                 UserId = userResponse.Message.Id,
                 GitHubId = context.Message.GitHubId
-            });
+            }, context.CancellationToken);
 
             login = loginResponse.Message;
         }
