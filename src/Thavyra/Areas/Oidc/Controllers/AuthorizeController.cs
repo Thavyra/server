@@ -4,8 +4,8 @@ using MassTransit.Internals;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
@@ -18,7 +18,6 @@ namespace Thavyra.Oidc.Controllers;
 
 [Area("Oidc")]
 [Route("/oauth/authorize")]
-[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
 public class AuthorizeController : Controller
 {
     private readonly IUserManager _userManager;
@@ -44,9 +43,29 @@ public class AuthorizeController : Controller
         var request = HttpContext.GetOpenIddictServerRequest()
                       ?? throw new InvalidOperationException("Could not retrieve OpenID Connect request.");
 
-        if (request.HasPrompt(Prompts.Login))
+        if (User.Identity?.IsAuthenticated is false || 
+            request.HasPrompt(Prompts.Login) || request.HasPrompt(Prompts.SelectAccount))
         {
-            return Challenge();
+            // Avoid endless redirects by removing prompt parameters
+            string prompt = string.Join(' ', request.GetPrompts()
+                .Remove(Prompts.Login)
+                .Remove(Prompts.SelectAccount));
+
+            var parameters = Request.HasFormContentType
+                ? Request.Form.Where(x => x.Key != Parameters.Prompt).ToList()
+                : Request.Query.Where(x => x.Key != Parameters.Prompt).ToList();
+
+            if (!string.IsNullOrWhiteSpace(prompt))
+            {
+                parameters.Add(KeyValuePair.Create(Parameters.Prompt, new StringValues(prompt)));
+            }
+
+            return Challenge(
+                authenticationSchemes: CookieAuthenticationDefaults.AuthenticationScheme,
+                properties: new AuthenticationProperties
+                {
+                    RedirectUri = Request.PathBase + Request.Path + QueryString.Create(parameters)
+                });
         }
 
         string subject = User.GetClaim(ClaimTypes.NameIdentifier)
@@ -60,7 +79,7 @@ public class AuthorizeController : Controller
         }
 
         string clientId = request.ClientId
-                        ?? throw new InvalidOperationException("Could not retrieve client from request.");
+                          ?? throw new InvalidOperationException("Could not retrieve client from request.");
 
         object? client = await _applicationManager.FindByClientIdAsync(clientId, cancellationToken);
 
@@ -87,7 +106,7 @@ public class AuthorizeController : Controller
         };
 
         var scopeNames = request.GetScopes();
-        
+
         var scopes = await GetScopesAsync(scopeNames, cancellationToken);
 
         var permanentAuthorizations = await GetPermanentAuthorizationsAsync(
@@ -103,25 +122,25 @@ public class AuthorizeController : Controller
             false when permanentAuthorizations.Any() => await AuthorizeAsync(
                 user: user,
                 clientId: clientId,
-                applicationId: applicationId, 
+                applicationId: applicationId,
                 scopeNames,
-                authorization: permanentAuthorizations.LastOrDefault(), 
+                authorization: permanentAuthorizations.LastOrDefault(),
                 cancellationToken),
-            
+
             false when application.ConsentType == ConsentTypes.Implicit => await AuthorizeAsync(
                 user: user,
                 clientId: clientId,
-                applicationId: applicationId, 
+                applicationId: applicationId,
                 scopeNames,
-                authorization: null, 
+                authorization: null,
                 cancellationToken),
-            
+
             _ => View(new AuthorizeViewModel
             {
                 Subject = user,
                 Client = application,
                 Scopes = scopes.AsReadOnly(),
-                ReturnUrl = HttpContext.Request.Path + HttpContext.Request.QueryString
+                ReturnUrl = Request.PathBase + Request.Path + Request.QueryString
             })
         };
     }
@@ -132,7 +151,7 @@ public class AuthorizeController : Controller
     {
         var request = HttpContext.GetOpenIddictServerRequest() ??
                       throw new InvalidOperationException("Could not retrieve OpenID Connect request.");
-        
+
         string subject = User.GetClaim(ClaimTypes.NameIdentifier)
                          ?? throw new InvalidOperationException("Could not retrieve subject claim.");
 
@@ -144,7 +163,7 @@ public class AuthorizeController : Controller
         }
 
         string clientId = request.ClientId
-                        ?? throw new InvalidOperationException("Could not retrieve client from request.");
+                          ?? throw new InvalidOperationException("Could not retrieve client from request.");
 
         object? application = await _applicationManager.FindByClientIdAsync(clientId, cancellationToken);
 
@@ -152,14 +171,14 @@ public class AuthorizeController : Controller
         {
             throw new InvalidOperationException("Could not retrieve application details.");
         }
-        
+
         string? applicationId = await _applicationManager.GetIdAsync(application, cancellationToken);
 
         if (applicationId is null)
         {
             throw new InvalidOperationException();
         }
-        
+
         var scopes = request.GetScopes();
 
         var permanentAuthorizations = await GetPermanentAuthorizationsAsync(
@@ -171,7 +190,7 @@ public class AuthorizeController : Controller
         return await AuthorizeAsync(
             user: user,
             clientId: clientId,
-            applicationId: applicationId, 
+            applicationId: applicationId,
             scopes,
             authorization: permanentAuthorizations.LastOrDefault(),
             cancellationToken);
@@ -186,7 +205,8 @@ public class AuthorizeController : Controller
             properties: new AuthenticationProperties(new Dictionary<string, string?>
             {
                 [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.AccessDenied,
-                [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The user denied the authorization request."
+                [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+                    "The user denied the authorization request."
             }));
     }
 
@@ -218,7 +238,7 @@ public class AuthorizeController : Controller
             {
                 throw new InvalidOperationException();
             }
-            
+
             result.Add(new ScopeModel
             {
                 Id = new Guid(id),
@@ -245,7 +265,7 @@ public class AuthorizeController : Controller
             roleType: Claims.Role);
 
         identity.SetClaim(Claims.Username, user.Username);
-        
+
         identity.SetClaim(Claims.Subject, user.Id.ToString());
         identity.SetClaim(Claims.ClientId, clientId);
         identity.SetClaim("application_id", applicationId);

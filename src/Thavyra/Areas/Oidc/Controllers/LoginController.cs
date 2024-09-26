@@ -31,11 +31,6 @@ public class LoginController : Controller
     [HttpGet("/login")]
     public IActionResult Login()
     {
-        if (User.Identity?.IsAuthenticated is true)
-        {
-            return Redirect(ReturnUrl);
-        }
-
         return View(new LoginViewModel
         {
             ReturnUrl = ReturnUrl
@@ -48,11 +43,6 @@ public class LoginController : Controller
         [FromServices] IValidator<LoginViewModel> validator,
         CancellationToken cancellationToken)
     {
-        if (User.Identity?.IsAuthenticated is true)
-        {
-            return Redirect(ReturnUrl);
-        }
-
         var validation = await validator.ValidateAsync(model, cancellationToken);
 
         if (!validation.IsValid)
@@ -92,11 +82,6 @@ public class LoginController : Controller
     [HttpGet("/register")]
     public IActionResult Register()
     {
-        if (User.Identity?.IsAuthenticated is true)
-        {
-            return Redirect(ReturnUrl);
-        }
-
         return View(new RegisterViewModel
         {
             ReturnUrl = ReturnUrl
@@ -109,11 +94,6 @@ public class LoginController : Controller
         [FromServices] IValidator<RegisterViewModel> validator,
         CancellationToken cancellationToken)
     {
-        if (User.Identity?.IsAuthenticated is true)
-        {
-            return Redirect(ReturnUrl);
-        }
-
         var validation = await validator.ValidateAsync(model, cancellationToken);
 
         if (!validation.IsValid)
@@ -162,9 +142,7 @@ public class LoginController : Controller
 
         var properties = new AuthenticationProperties
         {
-            ExpiresUtc = DateTimeOffset.UtcNow.AddMonths(6),
-            IsPersistent = true,
-            RedirectUri = ReturnUrl
+            RedirectUri = ReturnUrl,
         };
         
         return SignIn(new ClaimsPrincipal(identity), properties, CookieAuthenticationDefaults.AuthenticationScheme);
