@@ -26,27 +26,27 @@ public class Endpoint : Endpoint<ApplicationRequest, List<ObjectiveResponse>>
 
     public override async Task HandleAsync(ApplicationRequest req, CancellationToken ct)
     {
-        var state = ProcessorState<RequestState>();
+        var state = ProcessorState<AuthenticationState>();
 
         if (state.Application is not { } application)
         {
             throw new InvalidOperationException("Could not retrieve application.");
         }
 
+        var authorizationResult = 
+            await _authorizationService.AuthorizeAsync(User, application, Security.Policies.Operation.Application.ReadObjectives);
+
+        if (!authorizationResult.Succeeded)
+        {
+            await this.SendAuthorizationFailureAsync(authorizationResult.Failure, ct);
+            return;
+        }
+
         var collectRequest = new Objective_GetByApplication
         {
             ApplicationId = application.Id
         };
-
-        var authorizationResult = 
-            await _authorizationService.AuthorizeAsync(User, collectRequest, Security.Policies.Operation.Objective.Read);
-
-        if (authorizationResult.Failed())
-        {
-            await SendForbiddenAsync(ct);
-            return;
-        }
-
+        
         var response = await _client.GetResponse<Multiple<Objective>>(collectRequest, ct);
 
         await SendAsync(response.Message.Items.Select(x => new ObjectiveResponse

@@ -24,7 +24,7 @@ public class Endpoint : Endpoint<Request, ApplicationResponse>
 
     public override async Task HandleAsync(Request req, CancellationToken ct)
     {
-        var state = ProcessorState<RequestState>();
+        var state = ProcessorState<AuthenticationState>();
 
         if (state.Application is not { } application)
         {
@@ -34,15 +34,9 @@ public class Endpoint : Endpoint<Request, ApplicationResponse>
         var authorizationResult = await _authorizationService.AuthorizeAsync(User,
             application, Security.Policies.Operation.Application.Update);
 
-        if (authorizationResult.Failure?.FailureReasons is { } reasons)
-            foreach (var reason in reasons)
-            {
-                AddError(reason.Message);
-            }
-
-        if (authorizationResult.Failed())
+        if (!authorizationResult.Succeeded)
         {
-            await SendErrorsAsync(StatusCodes.Status403Forbidden, ct);
+            await this.SendAuthorizationFailureAsync(authorizationResult.Failure, ct);
             return;
         }
 

@@ -5,7 +5,7 @@ using Thavyra.Contracts.User;
 
 namespace Thavyra.Rest.Features.Users;
 
-public class UserSlugParser : GlobalPreProcessor<RequestState>
+public class UserSlugParser : GlobalPreProcessor<AuthenticationState>
 {
     private readonly IServiceScopeFactory _scopeFactory;
 
@@ -14,7 +14,7 @@ public class UserSlugParser : GlobalPreProcessor<RequestState>
         _scopeFactory = scopeFactory;
     }
 
-    public override async Task PreProcessAsync(IPreProcessorContext context, RequestState requestState, CancellationToken ct)
+    public override async Task PreProcessAsync(IPreProcessorContext context, AuthenticationState authenticationState, CancellationToken ct)
     {
         if (context.Request is not UserRequest request)
         {
@@ -67,7 +67,7 @@ public class UserSlugParser : GlobalPreProcessor<RequestState>
                 await context.HttpContext.Response.SendNotFoundAsync(cancellation: ct);
                 return;
             case (_, User user):
-                requestState.User = user;
+                authenticationState.User = user;
                 break;
         }
     }

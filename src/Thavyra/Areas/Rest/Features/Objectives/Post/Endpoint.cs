@@ -34,9 +34,9 @@ public class Endpoint : Endpoint<Request, ObjectiveResponse>
         var authorizationResult = 
             await _authorizationService.AuthorizeAsync(User, createRequest, Security.Policies.Operation.Objective.Create);
 
-        if (authorizationResult.Failed())
+        if (!authorizationResult.Succeeded)
         {
-            await SendForbiddenAsync(ct);
+            await this.SendAuthorizationFailureAsync(authorizationResult.Failure, ct);
             return;
         }
 

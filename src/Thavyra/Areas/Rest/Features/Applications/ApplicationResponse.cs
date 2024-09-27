@@ -11,7 +11,6 @@ public class ApplicationResponse
     
     public JsonOptional<bool> IsConfidential { get; set; }
     public JsonOptional<string> ClientId { get; set; }
-    public JsonOptional<string> ConsentType { get; set; }
     
     public required DateTime CreatedAt { get; set; }
 }

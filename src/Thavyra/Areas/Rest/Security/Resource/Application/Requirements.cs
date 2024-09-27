@@ -1,0 +1,11 @@
+namespace Thavyra.Rest.Security.Resource.Application;
+
+public class CreateApplicationRequirement : IOperationAuthorizationRequirement;
+public class ReadApplicationRequirement : IOperationAuthorizationRequirement;
+
+public class ReadApplicationObjectivesRequirement : IOperationAuthorizationRequirement;
+
+public class ReadApplicationTransactionsRequirement : IOperationAuthorizationRequirement;
+public class UpdateApplicationRequirement : IOperationAuthorizationRequirement;
+public class ResetClientSecretRequirement : IOperationAuthorizationRequirement;
+public class DeleteApplicationRequirement : IOperationAuthorizationRequirement;

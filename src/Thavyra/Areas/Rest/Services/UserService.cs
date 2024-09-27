@@ -65,11 +65,18 @@ public class UserService : IUserService
             Username = user.Username
         };
         
-        var profileAuthorizationResult = await _authorizationService.AuthorizeAsync(httpContext.User, user, Policies.Operation.User.Read);
+        var profileAuthorizationResult = await _authorizationService.AuthorizeAsync(httpContext.User, user, Policies.Operation.User.ReadProfile);
 
         if (profileAuthorizationResult.Succeeded)
         {
             response.Description = user.Description;
+        }
+
+        var balanceAuthorizationResult =
+            await _authorizationService.AuthorizeAsync(httpContext.User, user, Policies.Operation.User.ReadBalance);
+
+        if (balanceAuthorizationResult.Succeeded)
+        {
             response.Balance = user.Balance;
         }
 

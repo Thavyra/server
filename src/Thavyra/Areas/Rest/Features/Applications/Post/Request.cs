@@ -9,6 +9,5 @@ public class Request : UserRequest
     
     public string Name { get; set; } = null!;
     public string Type { get; set; } = null!;
-    public JsonOptional<string> ConsentType { get; set; }
     public JsonOptional<string> Description { get; set; }
 }

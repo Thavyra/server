@@ -23,7 +23,7 @@ public class Endpoint : Endpoint<UserRequest, UserResponse>
 
     public override async Task HandleAsync(UserRequest req, CancellationToken ct)
     {
-        var state = ProcessorState<RequestState>();
+        var state = ProcessorState<AuthenticationState>();
 
         if (state.User is not { } user)
         {

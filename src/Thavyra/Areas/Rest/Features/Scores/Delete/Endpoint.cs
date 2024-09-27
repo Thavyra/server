@@ -49,9 +49,9 @@ public class Endpoint : Endpoint<Request>
         var authorizationResult =
             await _authorizationService.AuthorizeAsync(User, score, Security.Policies.Operation.Score.Delete);
 
-        if (authorizationResult.Failed())
+        if (!authorizationResult.Succeeded)
         {
-            await SendForbiddenAsync(ct);
+            await this.SendAuthorizationFailureAsync(authorizationResult.Failure, ct);
             return;
         }
 

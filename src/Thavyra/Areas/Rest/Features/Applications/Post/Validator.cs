@@ -28,15 +28,6 @@ public class Validator : Validator<Request>
             .NotEmpty()
             .Must(x => types.Contains(x)).WithMessage($"Application type should be one of {string.Join(", ", types)}");
 
-        When(x => x.ConsentType.HasValue, () =>
-        {
-            string[] consentTypes =
-                [OpenIddictConstants.ConsentTypes.Explicit, OpenIddictConstants.ConsentTypes.Implicit];
-            RuleFor(req => req.ConsentType.Value)
-                .NotEmpty()
-                .Must(y => consentTypes.Contains(y)).WithMessage($"Consent type should be one of {string.Join(", ", consentTypes)}");
-        });
-
         When(x => x.Description.HasValue, () =>
         {
             RuleFor(req => req.Description.Value)

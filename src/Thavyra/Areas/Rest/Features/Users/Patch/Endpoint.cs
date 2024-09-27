@@ -1,10 +1,8 @@
 using FastEndpoints;
 using MassTransit;
 using Microsoft.AspNetCore.Authorization;
-using Thavyra.Contracts;
 using Thavyra.Contracts.User;
 using Thavyra.Rest.Security;
-using Thavyra.Rest.Security.Scopes;
 using Thavyra.Rest.Services;
 
 namespace Thavyra.Rest.Features.Users.Patch;
@@ -31,7 +29,7 @@ public class Endpoint : Endpoint<Request, UserResponse>
 
     public override async Task HandleAsync(Request req, CancellationToken ct)
     {
-        var state = ProcessorState<RequestState>();
+        var state = ProcessorState<AuthenticationState>();
 
         if (state.User is not { } user)
         {
@@ -41,17 +39,11 @@ public class Endpoint : Endpoint<Request, UserResponse>
         if (req.Username.HasValue)
         {
             var authorizationResult =
-                await _authorizationService.AuthorizeAsync(User, user, Security.Policies.Operation.User.Username);
+                await _authorizationService.AuthorizeAsync(User, user, Security.Policies.Operation.User.ChangeUsername);
 
-            if (authorizationResult.Failure?.FailureReasons is {} reasons)
-                foreach (var reason in reasons)
-                {
-                    AddError(reason.Message);
-                }
-
-            if (authorizationResult.Failed())
+            if (!authorizationResult.Succeeded)
             {
-                await SendErrorsAsync(StatusCodes.Status403Forbidden, ct);
+                await this.SendAuthorizationFailureAsync(authorizationResult.Failure, ct);
                 return;
             }
         }
@@ -59,17 +51,11 @@ public class Endpoint : Endpoint<Request, UserResponse>
         if (req.Description.HasValue)
         {
             var authorizationResult =
-                await _authorizationService.AuthorizeAsync(User, user, Security.Policies.Operation.User.Update);
-            
-            if (authorizationResult.Failure?.FailureReasons is {} reasons)
-                foreach (var reason in reasons)
-                {
-                    AddError(reason.Message);
-                }
+                await _authorizationService.AuthorizeAsync(User, user, Security.Policies.Operation.User.UpdateProfile);
 
-            if (authorizationResult.Failed())
+            if (!authorizationResult.Succeeded)
             {
-                await SendErrorsAsync(StatusCodes.Status403Forbidden, ct);
+                await this.SendAuthorizationFailureAsync(authorizationResult.Failure, ct);
                 return;
             }
         }

@@ -5,7 +5,7 @@ using Thavyra.Contracts.Application;
 
 namespace Thavyra.Rest.Features.Applications;
 
-public class ApplicationSlugParser : GlobalPreProcessor<RequestState>
+public class ApplicationSlugParser : GlobalPreProcessor<AuthenticationState>
 {
     private readonly IServiceScopeFactory _scopeFactory;
     
@@ -14,7 +14,7 @@ public class ApplicationSlugParser : GlobalPreProcessor<RequestState>
         _scopeFactory = scopeFactory;
     }
     
-    public override async Task PreProcessAsync(IPreProcessorContext context, RequestState requestState, CancellationToken ct)
+    public override async Task PreProcessAsync(IPreProcessorContext context, AuthenticationState authenticationState, CancellationToken ct)
     {
         if (context.Request is not ApplicationRequest request)
         {
@@ -55,7 +55,7 @@ public class ApplicationSlugParser : GlobalPreProcessor<RequestState>
                 await context.HttpContext.Response.SendNotFoundAsync(cancellation: ct);
                 return;
             case (_, Application application):
-                requestState.Application = application;
+                authenticationState.Application = application;
                 break;
         }
     }

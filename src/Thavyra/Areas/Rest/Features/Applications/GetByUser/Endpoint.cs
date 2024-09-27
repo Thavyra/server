@@ -5,7 +5,6 @@ using Thavyra.Contracts;
 using Thavyra.Contracts.Application;
 using Thavyra.Rest.Features.Users;
 using Thavyra.Rest.Security;
-using Thavyra.Rest.Security.Resource;
 
 namespace Thavyra.Rest.Features.Applications.GetByUser;
 
@@ -27,11 +26,20 @@ public class Endpoint : Endpoint<UserRequest, List<ApplicationResponse>>
 
     public override async Task HandleAsync(UserRequest req, CancellationToken ct)
     {
-        var state = ProcessorState<RequestState>();
+        var state = ProcessorState<AuthenticationState>();
 
         if (state.User is not { } user)
         {
             throw new InvalidOperationException("Could not retrieve user.");
+        }
+        
+        var authorizationResult = await _authorizationService.AuthorizeAsync(User, user,
+            Security.Policies.Operation.User.ReadApplications);
+
+        if (!authorizationResult.Succeeded)
+        {
+            await this.SendAuthorizationFailureAsync(authorizationResult.Failure, ct);
+            return;
         }
 
         var request = new Application_GetByOwner
@@ -39,21 +47,6 @@ public class Endpoint : Endpoint<UserRequest, List<ApplicationResponse>>
             OwnerId = user.Id,
         };
         
-        var authorizationResult = await _authorizationService.AuthorizeAsync(User, request,
-            Security.Policies.Operation.Application.Read);
-
-        if (authorizationResult.Failure?.FailureReasons is {} reasons)
-            foreach (var reason in reasons)
-            {
-                AddError(reason.Message);
-            }
-
-        if (authorizationResult.Failed())
-        {
-            await SendErrorsAsync(StatusCodes.Status403Forbidden, ct);
-            return;
-        }
-
         var applicationResponse = await _client.GetResponse<Multiple<Application>>(request, ct);
 
         await SendAsync(applicationResponse.Message.Items.Select(application =>

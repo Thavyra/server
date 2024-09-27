@@ -7,7 +7,7 @@ using Thavyra.Rest.Features.Applications;
 using Thavyra.Rest.Features.Users;
 using Thavyra.Rest.Json;
 using Thavyra.Rest.Processors;
-using Thavyra.Rest.Security.Scopes;
+using Thavyra.Rest.Security;
 using Thavyra.Rest.Services;
 
 namespace Thavyra.Rest.Configuration;
@@ -16,35 +16,7 @@ public static class Services
 {
     public static IServiceCollection AddRestApi(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<IAuthorizationHandler, ScopeAuthorizationHandler>();
-        
-        services.AddScoped<IAuthorizationHandler, Security.Resource.User.SameSubjectHandler>();
-
-        services.AddScoped<IAuthorizationHandler, Security.Resource.Login.SubjectHandler>();
-        
-        services.AddScoped<IAuthorizationHandler, Security.Resource.Application.OwnerHandler>();
-        services.AddScoped<IAuthorizationHandler, Security.Resource.Application.OwnerCreateHandler>();
-        services.AddScoped<IAuthorizationHandler, Security.Resource.Application.OwnerCollectHandler>();
-
-        services.AddScoped<IAuthorizationHandler, Security.Resource.Authorization.SubjectHandler>();
-        services.AddScoped<IAuthorizationHandler, Security.Resource.Authorization.SubjectCollectHandler>();
-
-        services.AddScoped<IAuthorizationHandler, Security.Resource.Transaction.OwnerCollectHandler>();
-        services.AddScoped<IAuthorizationHandler, Security.Resource.Transaction.OwnerReadHandler>();
-        services.AddScoped<IAuthorizationHandler, Security.Resource.Transaction.SubjectSendHandler>();
-        services.AddScoped<IAuthorizationHandler, Security.Resource.Transaction.SubjectTransferHandler>();
-        services.AddScoped<IAuthorizationHandler, Security.Resource.Transaction.SubjectOrRecipientCollectHandler>();
-        services.AddScoped<IAuthorizationHandler, Security.Resource.Transaction.SubjectOrRecipientReadHandler>();
-
-        services.AddScoped<IAuthorizationHandler, Security.Resource.Objective.ClientCollectHandler>();
-        services.AddScoped<IAuthorizationHandler, Security.Resource.Objective.ClientReadHandler>();
-        services.AddScoped<IAuthorizationHandler, Security.Resource.Objective.OwnerCollectHandler>();
-        services.AddScoped<IAuthorizationHandler, Security.Resource.Objective.OwnerCreateHandler>();
-        services.AddScoped<IAuthorizationHandler, Security.Resource.Objective.OwnerHandler>();
-
-        services.AddScoped<IAuthorizationHandler, Security.Resource.Score.ClientAndSubjectCreateHandler>();
-        services.AddScoped<IAuthorizationHandler, Security.Resource.Score.ClientAndSubjectDeleteHandler>();
-        services.AddScoped<IAuthorizationHandler, Security.Resource.Score.ClientReadHandler>();
+        services.AddAuthorizationHandlers();
 
         services.AddTransient<IUserService, UserService>();
         

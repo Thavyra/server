@@ -1,0 +1,13 @@
+using Microsoft.AspNetCore.Authorization;
+
+namespace Thavyra.Rest.Security.Resource.User;
+
+public class ReadUserProfileRequirement : IOperationAuthorizationRequirement;
+public class ReadUserBalanceRequirement : IOperationAuthorizationRequirement;
+public class ReadUserApplicationsRequirement : IOperationAuthorizationRequirement;
+public class ReadUserAuthorizationsRequirement : IOperationAuthorizationRequirement;
+public class ReadUserLoginsRequirement : IOperationAuthorizationRequirement;
+public class ReadUserTransactionsRequirement : IOperationAuthorizationRequirement;
+public class UpdateUserProfileRequirement : IOperationAuthorizationRequirement;
+public class ChangeUsernameRequirement : IOperationAuthorizationRequirement;
+public class DeleteUserRequirement : IOperationAuthorizationRequirement;

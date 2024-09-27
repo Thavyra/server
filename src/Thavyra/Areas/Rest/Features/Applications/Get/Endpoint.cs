@@ -1,21 +1,16 @@
 using FastEndpoints;
-using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using OpenIddict.Abstractions;
-using Thavyra.Contracts;
-using Thavyra.Contracts.Application;
 using Thavyra.Rest.Json;
 
 namespace Thavyra.Rest.Features.Applications.Get;
 
 public class Endpoint : Endpoint<ApplicationRequest, ApplicationResponse>
 {
-    private readonly IRequestClient<Application_GetById> _client;
     private readonly IAuthorizationService _authorizationService;
 
-    public Endpoint(IRequestClient<Application_GetById> client, IAuthorizationService authorizationService)
+    public Endpoint(IAuthorizationService authorizationService)
     {
-        _client = client;
         _authorizationService = authorizationService;
     }
 
@@ -27,7 +22,7 @@ public class Endpoint : Endpoint<ApplicationRequest, ApplicationResponse>
 
     public override async Task HandleAsync(ApplicationRequest req, CancellationToken ct)
     {
-        var state = ProcessorState<RequestState>();
+        var state = ProcessorState<AuthenticationState>();
 
         if (state.Application is not { } application)
         {
@@ -38,7 +33,7 @@ public class Endpoint : Endpoint<ApplicationRequest, ApplicationResponse>
             await _authorizationService.AuthorizeAsync(User, application, Security.Policies.Operation.Application.Read);
 
         bool readDetails = authorizationResult.Succeeded;
-
+        
         await SendAsync(new ApplicationResponse
         {
             Id = application.Id.ToString(),
@@ -54,7 +49,6 @@ public class Endpoint : Endpoint<ApplicationRequest, ApplicationResponse>
                 _ => default
             },
             ClientId = readDetails ? application.ClientId : default(JsonOptional<string>),
-            ConsentType = readDetails ? application.ConsentType : default(JsonOptional<string>),
 
             CreatedAt = application.CreatedAt
         }, cancellation: ct);

@@ -45,13 +45,13 @@ public class Endpoint : Endpoint<Request>
             await _authorizationService.AuthorizeAsync(User,
                 authorization, Security.Policies.Operation.Authorization.Delete);
 
-        if (authorizationResult.Failed())
+        if (!authorizationResult.Succeeded)
         {
-            await SendForbiddenAsync(ct);
+            await this.SendAuthorizationFailureAsync(authorizationResult.Failure, ct);
             return;
         }
 
-        var deleteResponse = await _deleteAuthorization.GetResponse<Success>(new Authorization_Delete
+        _ = await _deleteAuthorization.GetResponse<Success>(new Authorization_Delete
         {
             Id = authorization.Id
         }, ct);

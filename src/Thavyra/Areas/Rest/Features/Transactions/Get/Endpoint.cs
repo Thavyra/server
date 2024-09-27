@@ -45,16 +45,10 @@ public class Endpoint : Endpoint<Request, TransactionResponse>
 
         var authorizationResult =
             await _authorizationService.AuthorizeAsync(User, transaction, Security.Policies.Operation.Transaction.Read);
-        
-        if (authorizationResult.Failure?.FailureReasons is { } reasons)
-            foreach (var reason in reasons)
-            {
-                AddError(reason.Message);
-            }
 
-        if (authorizationResult.Failed())
+        if (!authorizationResult.Succeeded)
         {
-            await SendErrorsAsync(StatusCodes.Status403Forbidden, ct);
+            await this.SendAuthorizationFailureAsync(authorizationResult.Failure, ct);
             return;
         }
 

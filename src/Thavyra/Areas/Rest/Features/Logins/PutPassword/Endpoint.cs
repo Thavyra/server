@@ -30,7 +30,7 @@ public class Endpoint : Endpoint<Request>
 
     public override async Task HandleAsync(Request req, CancellationToken ct)
     {
-        var state = ProcessorState<RequestState>();
+        var state = ProcessorState<AuthenticationState>();
 
         if (state.User is not { } user)
         {
@@ -40,37 +40,37 @@ public class Endpoint : Endpoint<Request>
         var readResult =
             await _authorizationService.AuthorizeAsync(User, user, Security.Policies.Operation.Login.Read);
 
-        if (readResult.Failed())
+        if (!readResult.Succeeded)
         {
-            await SendForbiddenAsync(ct);
+            await this.SendAuthorizationFailureAsync(readResult.Failure, ct);
             return;
         }
 
-        var passwordResponse = await _getPassword.GetResponse<PasswordLogin, NotFound>(new PasswordLogin_GetByUser
+        Response passwordResponse = await _getPassword.GetResponse<PasswordLogin, NotFound>(new PasswordLogin_GetByUser
         {
             UserId = user.Id
         }, ct);
 
-        if (passwordResponse.Is(out Response<NotFound> _))
+        switch (passwordResponse)
         {
-            await SendNotFoundAsync(ct);
-            return;
-        }
+            case (_, PasswordLogin login):
+                var updateResult =
+                    await _authorizationService.AuthorizeAsync(User, login, Security.Policies.Operation.Login.SetPassword);
 
-        if (passwordResponse.Is(out Response<PasswordLogin>? login))
-        {
-            var updateResult =
-                await _authorizationService.AuthorizeAsync(User, login, Security.Policies.Operation.Login.Password);
+                if (!updateResult.Succeeded)
+                {
+                    await this.SendAuthorizationFailureAsync(updateResult.Failure, ct);
+                    return;
+                }
 
-            if (updateResult.Failed())
-            {
-                await SendForbiddenAsync(ct);
+                break;
+            
+            case (_, NotFound):
+                await SendNotFoundAsync(ct);
                 return;
-            }
-        }
-        else
-        {
-            return;
+            
+            default:
+                throw new InvalidOperationException();
         }
 
         var updateResponse = await _updatePassword.GetResponse<PasswordLogin>(new PasswordLogin_Update

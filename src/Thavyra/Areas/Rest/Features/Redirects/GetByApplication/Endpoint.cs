@@ -26,7 +26,7 @@ public class Endpoint : Endpoint<ApplicationRequest, List<RedirectResponse>>
 
     public override async Task HandleAsync(ApplicationRequest req, CancellationToken ct)
     {
-        var state = ProcessorState<RequestState>();
+        var state = ProcessorState<AuthenticationState>();
 
         if (state.Application is not { } application)
         {
@@ -37,9 +37,9 @@ public class Endpoint : Endpoint<ApplicationRequest, List<RedirectResponse>>
             await _authorizationService.AuthorizeAsync(User, application,
                 Security.Policies.Operation.Application.Update);
 
-        if (authorizationResult.Failed())
+        if (!authorizationResult.Succeeded)
         {
-            await SendForbiddenAsync(ct);
+            await this.SendAuthorizationFailureAsync(authorizationResult.Failure, ct);
             return;
         }
 

@@ -26,7 +26,7 @@ public class Endpoint : Endpoint<UserRequest, PasswordLoginResponse>
 
     public override async Task HandleAsync(UserRequest req, CancellationToken ct)
     {
-        var state = ProcessorState<RequestState>();
+        var state = ProcessorState<AuthenticationState>();
 
         if (state.User is not { } user)
         {
@@ -34,11 +34,11 @@ public class Endpoint : Endpoint<UserRequest, PasswordLoginResponse>
         }
 
         var authorizationResult =
-            await _authorizationService.AuthorizeAsync(User, user, Security.Policies.Operation.Login.Read);
+            await _authorizationService.AuthorizeAsync(User, user, Security.Policies.Operation.User.ReadLogins);
 
-        if (authorizationResult.Failed())
+        if (!authorizationResult.Succeeded)
         {
-            await SendForbiddenAsync(ct);
+            await this.SendAuthorizationFailureAsync(authorizationResult.Failure, ct);
             return;
         }
 

@@ -3,27 +3,21 @@ using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using OpenIddict.Abstractions;
 using Thavyra.Contracts.Application;
-using Thavyra.Contracts.User;
 using Thavyra.Rest.Json;
 using Thavyra.Rest.Security;
-using Thavyra.Rest.Security.Resource;
 
 namespace Thavyra.Rest.Features.Applications.Post;
 
 public class Endpoint : Endpoint<Request, Response>
 {
-    private readonly IRequestClient<User_GetById> _userClient;
     private readonly IAuthorizationService _authorizationService;
-    private readonly IRequestClient<Application_Create> _applicationClient;
+    private readonly IRequestClient<Application_Create> _createApplication;
 
-    public Endpoint(
-        IRequestClient<User_GetById> userClient, 
-        IAuthorizationService authorizationService, 
-        IRequestClient<Application_Create> applicationClient)
+    public Endpoint(IAuthorizationService authorizationService, 
+        IRequestClient<Application_Create> createApplication)
     {
-        _userClient = userClient;
         _authorizationService = authorizationService;
-        _applicationClient = applicationClient;
+        _createApplication = createApplication;
     }
 
     public override void Configure()
@@ -40,32 +34,25 @@ public class Endpoint : Endpoint<Request, Response>
             await SendUnauthorizedAsync(ct);
             return;
         }
-
+        
         var createRequest = new Application_Create
         {
             OwnerId = ownerId,
             Name = req.Name,
             Type = req.Type,
-            ConsentType = req.ConsentType.HasValue ? req.ConsentType.Value : OpenIddictConstants.ConsentTypes.Explicit,
             Description = req.Description.HasValue ? req.Description.Value : null,
         };
         
         var authorizationResult = await _authorizationService.AuthorizeAsync(User,
             createRequest, Security.Policies.Operation.Application.Create);
 
-        if (authorizationResult.Failure?.FailureReasons is { } reasons)
-            foreach (var reason in reasons)
-            {
-                AddError(reason.Message);
-            }
-
-        if (authorizationResult.Failed())
+        if (!authorizationResult.Succeeded)
         {
-            await SendErrorsAsync(StatusCodes.Status403Forbidden, ct);
+            await this.SendAuthorizationFailureAsync(authorizationResult.Failure, ct);
             return;
         }
 
-        var applicationResponse = await _applicationClient.GetResponse<ApplicationCreated>(createRequest, ct);
+        var applicationResponse = await _createApplication.GetResponse<ApplicationCreated>(createRequest, ct);
 
         var application = applicationResponse.Message.Application;
 
@@ -84,8 +71,6 @@ public class Endpoint : Endpoint<Request, Response>
             },
             ClientId = application.ClientId,
             ClientSecret = applicationResponse.Message.ClientSecret ?? default(JsonOptional<string>),
-            ConsentType = application.ConsentType,
-            
             CreatedAt = application.CreatedAt
         }, cancellation: ct);
     }
