@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
-
 namespace Thavyra.Rest.Security;
 
 public static class Policies
@@ -17,6 +15,12 @@ public static class Policies
             public const string Delete = "operation.application.delete";
         }
         
+        public static class Permission
+        {
+            public const string Grant = "operation.permission.grant";
+            public const string Deny = "operation.permission.deny";
+        }
+        
         public static class Authorization
         {
             public const string Read = "operation.authorization.read";
@@ -27,6 +31,7 @@ public static class Policies
         {
             public const string ReadProfile = "operation.user.read";
             public const string ReadBalance = "operation.user.balance.read";
+            public const string ReadRoles = "operation.user.roles.read";
             public const string ReadApplications = "operation.user.applications.read";
             public const string ReadAuthorizations = "operation.user.authorizations.read";
             public const string ReadLogins = "operation.user.logins.read";
@@ -34,6 +39,12 @@ public static class Policies
             public const string UpdateProfile = "operation.user.update";
             public const string ChangeUsername = "operation.user.username";
             public const string Delete = "operation.user.delete";
+        }
+        
+        public static class Role
+        {
+            public const string Grant = "operation.roles.grant";
+            public const string Deny = "operation.roles.deny";
         }
         
         public static class Login

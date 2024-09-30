@@ -36,13 +36,10 @@ public static class Bogus
         string? type = null,
         string? clientId = null,
         string? clientType = null,
-        string? clientSecret = null,
-        string? consentType = null)
+        string? clientSecret = null)
     {
         string[] applicationTypes =
             [OpenIddictConstants.ApplicationTypes.Web, OpenIddictConstants.ApplicationTypes.Native];
-
-        string[] consentTypes = [OpenIddictConstants.ConsentTypes.Explicit, OpenIddictConstants.ConsentTypes.Implicit];
         
         return new Faker<ApplicationDto>()
             .RuleFor(a => a.Owner, _ => owner ?? User()[0])
@@ -52,17 +49,11 @@ public static class Bogus
             .RuleFor(a => a.Type, f => type ?? f.PickRandom(applicationTypes))
             .RuleFor(a => a.Name, f => name ?? f.Company.CompanyName())
             .RuleFor(a => a.ClientId, f => clientId ?? f.Random.AlphaNumeric(32))
-            .RuleFor(a => a.ClientType, (_, a) => clientType ?? a.Type switch
+            .RuleFor(a => a.ClientSecretHash, (f, a) => a.Type switch
             {
-                OpenIddictConstants.ApplicationTypes.Web => OpenIddictConstants.ClientTypes.Confidential,
-                _ => OpenIddictConstants.ClientTypes.Public
-            })
-            .RuleFor(a => a.ClientSecretHash, (f, a) => a.ClientType switch
-            {
-                OpenIddictConstants.ClientTypes.Confidential => BC.HashPassword(clientSecret ?? f.Random.Utf16String()),
+                OpenIddictConstants.ApplicationTypes.Web => BC.HashPassword(clientSecret ?? f.Random.Utf16String()),
                 _ => null
             })
-            .RuleFor(a => a.ConsentType, f => consentType ?? f.PickRandom(consentTypes))
             .RuleFor(a => a.Description, f => f.Lorem.Paragraph())
             .RuleFor(a => a.CreatedAt, _ => DateTime.UtcNow)
             .Generate(count);

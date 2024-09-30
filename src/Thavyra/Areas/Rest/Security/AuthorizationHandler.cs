@@ -64,15 +64,17 @@ public abstract class AuthorizationHandler<TOperationRequirement, TResource> : I
 
 public class AuthorizationHandlerState
 {
-    private readonly ClaimsPrincipal _user;
+    
 
     public AuthorizationHandlerState(ClaimsPrincipal user)
     {
-        _user = user;
+        User = user;
     }
 
     public bool Succeeded { get; private set; }
     public List<string> RequiredScopes { get; } = [];
+    public ClaimsPrincipal User { get; }
+    public Guid UserId => new(User.GetClaim(OpenIddictConstants.Claims.Subject) ?? throw new InvalidOperationException());
 
     public AuthorizationHandlerState Succeed()
     {
@@ -83,7 +85,7 @@ public class AuthorizationHandlerState
     
     public AuthorizationHandlerState AllowUser(Guid userId)
     {
-        if (_user.GetClaim(OpenIddictConstants.Claims.Subject) == userId.ToString())
+        if (User.GetClaim(OpenIddictConstants.Claims.Subject) == userId.ToString())
         {
             Succeed();
         }
@@ -93,7 +95,7 @@ public class AuthorizationHandlerState
 
     public AuthorizationHandlerState AllowClient(Guid applicationId)
     {
-        if (_user.GetClaim(Constants.Claims.ApplicationId) == applicationId.ToString())
+        if (User.GetClaim(Constants.Claims.ApplicationId) == applicationId.ToString())
         {
             Succeed();
         }
@@ -103,8 +105,8 @@ public class AuthorizationHandlerState
 
     public AuthorizationHandlerState AllowPrincipal(Guid userId, Guid applicationId)
     {
-        if (_user.GetClaim(OpenIddictConstants.Claims.Subject) == userId.ToString()
-            && _user.GetClaim(Constants.Claims.ApplicationId) == applicationId.ToString())
+        if (User.GetClaim(OpenIddictConstants.Claims.Subject) == userId.ToString()
+            && User.GetClaim(Constants.Claims.ApplicationId) == applicationId.ToString())
         {
             Succeed();
         }

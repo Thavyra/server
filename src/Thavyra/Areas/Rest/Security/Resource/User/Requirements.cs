@@ -4,6 +4,9 @@ namespace Thavyra.Rest.Security.Resource.User;
 
 public class ReadUserProfileRequirement : IOperationAuthorizationRequirement;
 public class ReadUserBalanceRequirement : IOperationAuthorizationRequirement;
+public class ReadUserRolesRequirement : IOperationAuthorizationRequirement;
+
+public class ManageUserRolesRequirement : IOperationAuthorizationRequirement;
 public class ReadUserApplicationsRequirement : IOperationAuthorizationRequirement;
 public class ReadUserAuthorizationsRequirement : IOperationAuthorizationRequirement;
 public class ReadUserLoginsRequirement : IOperationAuthorizationRequirement;

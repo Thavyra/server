@@ -20,5 +20,7 @@ public class UserDto
     public double Balance { get; set; }
     
     [Column("created_at")]
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public ICollection<RoleDto> Roles { get; set; } = [];
 }

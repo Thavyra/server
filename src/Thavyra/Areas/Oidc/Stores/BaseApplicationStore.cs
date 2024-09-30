@@ -18,23 +18,25 @@ public abstract class BaseApplicationStore : IOpenIddictApplicationStore<Applica
     public abstract ValueTask UpdateAsync(ApplicationModel application, CancellationToken cancellationToken);
 
     public abstract ValueTask DeleteAsync(ApplicationModel application, CancellationToken cancellationToken);
-    
+
     public abstract ValueTask<long> CountAsync(CancellationToken cancellationToken);
-    
+
     public abstract IAsyncEnumerable<ApplicationModel> ListAsync(int? count, int? offset,
         CancellationToken cancellationToken);
-    
+
     public abstract ValueTask<ApplicationModel?> FindByIdAsync(string identifier, CancellationToken cancellationToken);
 
-    public abstract ValueTask<ApplicationModel?> FindByClientIdAsync(string identifier, CancellationToken cancellationToken);
+    public abstract ValueTask<ApplicationModel?> FindByClientIdAsync(string identifier,
+        CancellationToken cancellationToken);
 
     public abstract IAsyncEnumerable<ApplicationModel> FindByPostLogoutRedirectUriAsync(string uri,
         CancellationToken cancellationToken);
 
-    public abstract IAsyncEnumerable<ApplicationModel> FindByRedirectUriAsync(string uri, CancellationToken cancellationToken);
-    
+    public abstract IAsyncEnumerable<ApplicationModel> FindByRedirectUriAsync(string uri,
+        CancellationToken cancellationToken);
+
     // Manage redirects, permissions and requirements
-    
+
     public abstract ValueTask<ImmutableArray<string>> GetRedirectUrisAsync(ApplicationModel application,
         CancellationToken cancellationToken);
 
@@ -45,12 +47,12 @@ public abstract class BaseApplicationStore : IOpenIddictApplicationStore<Applica
 
     public abstract ValueTask<ImmutableArray<string>> GetPermissionsAsync(ApplicationModel application,
         CancellationToken cancellationToken);
-    
+
     public ValueTask SetPermissionsAsync(ApplicationModel application, ImmutableArray<string> permissions,
         CancellationToken cancellationToken)
         => throw new NotSupportedException();
-    
-    
+
+
     public abstract ValueTask<ImmutableArray<string>> GetRequirementsAsync(ApplicationModel application,
         CancellationToken cancellationToken);
 
@@ -62,30 +64,30 @@ public abstract class BaseApplicationStore : IOpenIddictApplicationStore<Applica
     public virtual ValueTask<ImmutableArray<string>> GetPostLogoutRedirectUrisAsync(ApplicationModel application,
         CancellationToken cancellationToken)
         => new(ImmutableArray<string>.Empty);
-    
+
     public virtual ValueTask SetPostLogoutRedirectUrisAsync(ApplicationModel application, ImmutableArray<string> uris,
         CancellationToken cancellationToken)
         => throw new NotSupportedException();
-    
+
     // EF methods, unsupported by default
-    
+
     public virtual ValueTask<long> CountAsync<TResult>(
         Func<IQueryable<ApplicationModel>, IQueryable<TResult>> query,
         CancellationToken cancellationToken)
         => throw new NotSupportedException();
-    
+
     public virtual ValueTask<TResult?> GetAsync<TState, TResult>(
         Func<IQueryable<ApplicationModel>, TState, IQueryable<TResult>> query, TState state,
         CancellationToken cancellationToken)
         => throw new NotSupportedException();
-    
+
     public virtual IAsyncEnumerable<TResult> ListAsync<TState, TResult>(
         Func<IQueryable<ApplicationModel>, TState, IQueryable<TResult>> query, TState state,
         CancellationToken cancellationToken)
         => throw new NotSupportedException();
-    
+
     // Supported getters/setters
-    
+
     public ValueTask<string?> GetApplicationTypeAsync(ApplicationModel application,
         CancellationToken cancellationToken)
         => new(application.ApplicationType);
@@ -96,9 +98,9 @@ public abstract class BaseApplicationStore : IOpenIddictApplicationStore<Applica
         application.ApplicationType = type;
         return new ValueTask();
     }
-    
 
-    public ValueTask<string?> GetClientIdAsync(ApplicationModel application, CancellationToken cancellationToken) 
+
+    public ValueTask<string?> GetClientIdAsync(ApplicationModel application, CancellationToken cancellationToken)
         => new(application.ClientId);
 
     public ValueTask SetClientIdAsync(ApplicationModel application, string? identifier,
@@ -107,8 +109,8 @@ public abstract class BaseApplicationStore : IOpenIddictApplicationStore<Applica
         application.ClientId = identifier;
         return new ValueTask();
     }
-    
-    
+
+
     public ValueTask<string?> GetClientTypeAsync(ApplicationModel application,
         CancellationToken cancellationToken)
         => new(application.ClientType);
@@ -119,19 +121,15 @@ public abstract class BaseApplicationStore : IOpenIddictApplicationStore<Applica
         application.ClientType = type;
         return new ValueTask();
     }
-    
-    
-    public ValueTask<string?> GetConsentTypeAsync(ApplicationModel application,
-        CancellationToken cancellationToken)
-        => new(application.ConsentType);
+
+
+    public abstract ValueTask<string?> GetConsentTypeAsync(ApplicationModel application,
+        CancellationToken cancellationToken);
 
     public ValueTask SetConsentTypeAsync(ApplicationModel application, string? type,
         CancellationToken cancellationToken)
-    {
-        application.ConsentType = type;
-        return new ValueTask();
-    }
-    
+        => throw new NotSupportedException();
+
 
     public ValueTask<string?> GetDisplayNameAsync(ApplicationModel application, CancellationToken cancellationToken)
         => new(application.DisplayName);
@@ -142,23 +140,24 @@ public abstract class BaseApplicationStore : IOpenIddictApplicationStore<Applica
         application.DisplayName = name;
         return new ValueTask();
     }
-    
-    
+
+
     public ValueTask<string?> GetIdAsync(ApplicationModel application, CancellationToken cancellationToken)
         => new(application.Id.ToString());
 
-    
+
     // Unsupported getters/setters
-    
+
     public ValueTask<string?> GetClientSecretAsync(ApplicationModel application, CancellationToken cancellationToken)
         => throw new NotSupportedException();
-    
+
     public ValueTask SetClientSecretAsync(ApplicationModel application, string? secret,
         CancellationToken cancellationToken)
         => throw new NotSupportedException();
 
 
-    public virtual ValueTask<ImmutableDictionary<CultureInfo, string>> GetDisplayNamesAsync(ApplicationModel application,
+    public virtual ValueTask<ImmutableDictionary<CultureInfo, string>> GetDisplayNamesAsync(
+        ApplicationModel application,
         CancellationToken cancellationToken)
         => new(ImmutableDictionary.Create<CultureInfo, string>());
 
@@ -179,7 +178,7 @@ public abstract class BaseApplicationStore : IOpenIddictApplicationStore<Applica
     public ValueTask<ImmutableDictionary<string, JsonElement>> GetPropertiesAsync(ApplicationModel application,
         CancellationToken cancellationToken)
         => new(ImmutableDictionary<string, JsonElement>.Empty);
-    
+
     public ValueTask SetPropertiesAsync(ApplicationModel application,
         ImmutableDictionary<string, JsonElement> properties,
         CancellationToken cancellationToken)
@@ -193,5 +192,4 @@ public abstract class BaseApplicationStore : IOpenIddictApplicationStore<Applica
     public ValueTask SetSettingsAsync(ApplicationModel application, ImmutableDictionary<string, string> settings,
         CancellationToken cancellationToken)
         => throw new NotSupportedException();
-    
 }

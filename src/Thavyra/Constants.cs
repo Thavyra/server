@@ -7,6 +7,7 @@ public static class Constants
     public static class Scopes
     {
         public const string Sudo = "sudo";
+        public const string Admin = "admin";
         
         public static class Account
         {
@@ -37,14 +38,49 @@ public static class Constants
     
     public static class Permissions
     {
+        public const string System = "system";
+        
+        public static class Scopes
+        {
+            public const string Sudo = OpenIddictConstants.Permissions.Prefixes.Scope + Constants.Scopes.Sudo;
+            public const string Admin = OpenIddictConstants.Permissions.Prefixes.Scope + Constants.Scopes.Admin;
+            
+            public static class Account
+            {
+                public const string All = OpenIddictConstants.Permissions.Prefixes.Scope + Constants.Scopes.Account.All;
+                public const string Profile = OpenIddictConstants.Permissions.Prefixes.Scope + Constants.Scopes.Account.Profile;
+                public const string ReadProfile = OpenIddictConstants.Permissions.Prefixes.Scope + Constants.Scopes.Account.ReadProfile;
+                public const string ReadTransactions = OpenIddictConstants.Permissions.Prefixes.Scope + Constants.Scopes.Account.ReadTransactions;
+                public const string Logins = OpenIddictConstants.Permissions.Prefixes.Scope + Constants.Scopes.Account.Logins;
+            }
+            
+            public static class Applications
+            {
+                public const string All = OpenIddictConstants.Permissions.Prefixes.Scope + Constants.Scopes.Applications.All;
+                public const string Read = OpenIddictConstants.Permissions.Prefixes.Scope + Constants.Scopes.Applications.Read;
+            }
+            
+            public static class Authorizations
+            {
+                public const string All = OpenIddictConstants.Permissions.Prefixes.Scope + Constants.Scopes.Authorizations.All;
+                public const string Read = OpenIddictConstants.Permissions.Prefixes.Scope + Constants.Scopes.Authorizations.Read;
+            }
+            
+            public static class Transactions
+            {
+                public const string All = OpenIddictConstants.Permissions.Prefixes.Scope + Constants.Scopes.Transactions.All;
+            }
+        }
+        
         public static class ConsentTypes
         {
-            public const string Implicit = $"{Prefixes.ConsentType}{OpenIddictConstants.ConsentTypes.Implicit}";
+            public const string Implicit = Prefixes.ConsentType + OpenIddictConstants.ConsentTypes.Implicit;
         }
         
         public static class Prefixes
         {
             public const string ConsentType = "cst:";
+            public const string Operation = "op:";
         }
     }
 
@@ -56,5 +92,10 @@ public static class Constants
     public static class Claims
     {
         public const string ApplicationId = "application_id";
+    }
+    
+    public static class Roles
+    {
+        public const string Admin = "admin";
     }
 }

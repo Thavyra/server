@@ -4,6 +4,7 @@ using MassTransit;
 using OpenIddict.Abstractions;
 using Thavyra.Contracts;
 using Thavyra.Contracts.Application;
+using Thavyra.Contracts.Permission;
 using Thavyra.Contracts.Scope;
 using Thavyra.Oidc.Models.Internal;
 
@@ -26,7 +27,6 @@ public class ApplicationStore : BaseApplicationStore
             ApplicationType = application.Type,
             ClientType = application.ClientType,
             ClientId = application.ClientId,
-            ConsentType = application.ConsentType,
             DisplayName = application.Name
         };
     }
@@ -144,36 +144,23 @@ public class ApplicationStore : BaseApplicationStore
         return new ValueTask<ImmutableArray<string>>([]);
     }
 
+    public override async ValueTask<string?> GetConsentTypeAsync(ApplicationModel application, CancellationToken cancellationToken)
+    {
+        var permissions = await GetPermissionsAsync(application, cancellationToken);
+
+        return permissions.FirstOrDefault(x => x.StartsWith(Constants.Permissions.Prefixes.ConsentType));
+    }
+
     public override async ValueTask<ImmutableArray<string>> GetPermissionsAsync(ApplicationModel application, CancellationToken cancellationToken)
     {
-        var client = _clientFactory.CreateRequestClient<Scope_GetByApplication>();
+        var client = _clientFactory.CreateRequestClient<Permission_GetByApplication>();
 
-        var response = await client.GetResponse<Multiple<Scope>>(new Scope_GetByApplication
+        var response = await client.GetResponse<Multiple<Permission>>(new Permission_GetByApplication
         {
             ApplicationId = application.Id
         }, cancellationToken);
 
-        var permissions = response.Message.Items
-            .Select(scope => OpenIddictConstants.Permissions.Prefixes.Scope + scope.Name)
-            .ToList();
-        
-        permissions.AddRange([
-            OpenIddictConstants.Permissions.Endpoints.Authorization,
-            OpenIddictConstants.Permissions.Endpoints.Token,
-            
-            OpenIddictConstants.Permissions.Endpoints.Logout,
-            OpenIddictConstants.Permissions.Endpoints.Revocation,
-            
-            OpenIddictConstants.Permissions.ResponseTypes.Code,
-            OpenIddictConstants.Permissions.ResponseTypes.IdToken,
-            
-            OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
-            OpenIddictConstants.Permissions.GrantTypes.ClientCredentials,
-            OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
-            OpenIddictConstants.Permissions.GrantTypes.Implicit
-        ]);
-
-        return [..permissions];
+        return [..response.Message.Items.Select(x => x.Name)];
     }
 
     public override ValueTask<ApplicationModel> InstantiateAsync(CancellationToken cancellationToken)

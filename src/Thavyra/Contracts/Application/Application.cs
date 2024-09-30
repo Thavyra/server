@@ -7,7 +7,6 @@ public record Application
 
     public required string ClientId { get; init; }
     public required string ClientType { get; init; }
-    public required string ConsentType { get; init; }
 
     public required string Type { get; init; }
     public required string Name { get; init; }

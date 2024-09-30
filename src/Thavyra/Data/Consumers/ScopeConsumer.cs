@@ -35,8 +35,7 @@ public class ScopeConsumer :
             Id = scope.Id,
             Name = scope.Name,
             DisplayName = scope.DisplayName,
-            Description = scope.Description,
-            CreatedAt = scope.CreatedAt
+            Description = scope.Description
         };
     }
     
@@ -53,8 +52,7 @@ public class ScopeConsumer :
         {
             Name = context.Message.Name,
             DisplayName = context.Message.DisplayName,
-            Description = context.Message.Description,
-            CreatedAt = DateTime.UtcNow
+            Description = context.Message.Description
         };
         
         _dbContext.Scopes.Add(scope);

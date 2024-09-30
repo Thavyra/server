@@ -100,10 +100,11 @@ public class AuthorizeController : Controller
             Id = new Guid(applicationId),
             ClientId = clientId,
             ClientType = await _applicationManager.GetClientTypeAsync(client, cancellationToken),
-            ConsentType = await _applicationManager.GetConsentTypeAsync(client, cancellationToken),
             ApplicationType = await _applicationManager.GetApplicationTypeAsync(client, cancellationToken),
             DisplayName = await _applicationManager.GetDisplayNameAsync(client, cancellationToken),
         };
+
+        string? consentType = await _applicationManager.GetConsentTypeAsync(client, cancellationToken);
 
         var scopeNames = request.GetScopes();
 
@@ -127,7 +128,7 @@ public class AuthorizeController : Controller
                 authorization: permanentAuthorizations.LastOrDefault(),
                 cancellationToken),
 
-            false when application.ConsentType == ConsentTypes.Implicit => await AuthorizeAsync(
+            false when consentType == ConsentTypes.Implicit => await AuthorizeAsync(
                 user: user,
                 clientId: clientId,
                 applicationId: applicationId,

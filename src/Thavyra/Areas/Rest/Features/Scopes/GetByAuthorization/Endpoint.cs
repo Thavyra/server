@@ -63,8 +63,7 @@ public class Endpoint : Endpoint<Request, List<ScopeResponse>>
             Id = x.Id,
             Name = x.Name,
             DisplayName = x.DisplayName,
-            Description = x.Description,
-            CreatedAt = x.CreatedAt
+            Description = x.Description
         }).ToList(), cancellation: ct);
     }
 }

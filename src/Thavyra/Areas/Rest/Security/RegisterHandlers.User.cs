@@ -8,6 +8,7 @@ public static partial class RegisterHandlers
         .AddAuthorizationHandler<AnyoneCanReadProfile>()
         .AddAuthorizationHandler<SubjectCanChangeUsername>()
         .AddAuthorizationHandler<SubjectCanDeleteUser>()
+        .AddAuthorizationHandler<SubjectCanReadRoles>()
         .AddAuthorizationHandler<SubjectCanReadApplications>()
         .AddAuthorizationHandler<SubjectCanReadAuthorizations>()
         .AddAuthorizationHandler<SubjectCanReadBalance>()

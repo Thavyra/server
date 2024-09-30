@@ -16,11 +16,6 @@ public class ApplicationDto
     
     [Column("client_secret_hash")]
     public string? ClientSecretHash { get; set; }
-    
-    [Column("client_type")]
-    public string ClientType { get; set; } = default!;
-    [Column("consent_type")]
-    public string ConsentType { get; set; } = default!;
 
     [Column("type")]
     public string Type { get; set; } = default!;
@@ -30,9 +25,10 @@ public class ApplicationDto
     public string? Description { get; set; }
 
     [Column("created_at")]
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public UserDto Owner { get; set; } = default!;
     public ICollection<RedirectDto> Redirects { get; set; } = default!;
+    public ICollection<PermissionDto> Permissions { get; set; } = default!;
     public ICollection<ObjectiveDto> Objectives { get; set; } = default!;
 }

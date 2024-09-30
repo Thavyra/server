@@ -18,13 +18,6 @@ public class ApplicationModel
     public string? ClientType { get; set; }
 
     /// <summary>
-    /// Default consent type of the application (explicit/external/implicit/systematic).
-    /// Defaults to explicit and only implicit is additionally supported so any other values are ignored.
-    /// Implicit can also only be used by official applications.
-    /// </summary>
-    public string? ConsentType { get; set; }
-
-    /// <summary>
     /// Display name of the application (referred to only as "Name" in other contexts.
     /// </summary>
     public string? DisplayName { get; set; }

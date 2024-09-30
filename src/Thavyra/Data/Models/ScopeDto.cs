@@ -15,8 +15,6 @@ public class ScopeDto
     [Column("description")]
     public string Description { get; set; } = default!;
 
-    [Column("created_at")]
-    public DateTime CreatedAt { get; set; }
-
+    public PermissionDto Permission { get; set; } = null!;
     public ICollection<AuthorizationDto> Authorizations { get; set; } = [];
 }

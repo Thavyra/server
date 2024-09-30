@@ -47,8 +47,11 @@ public class ApplicationConsumer :
             OwnerId = application.OwnerId,
 
             ClientId = application.ClientId,
-            ClientType = application.ClientType,
-            ConsentType = application.ConsentType,
+            ClientType = application.ClientSecretHash switch
+            {
+                not null => OpenIddictConstants.ClientTypes.Confidential,
+                _ => OpenIddictConstants.ClientTypes.Public
+            },
             Type = application.Type,
             Name = application.Name,
             Description = application.Description,
@@ -98,7 +101,6 @@ public class ApplicationConsumer :
             OwnerId = context.Message.OwnerId,
 
             ClientId = Secret.NewSecret(20).ToString(),
-            ConsentType = context.Message.ConsentType,
 
             Type = context.Message.Type,
             Name = context.Message.Name,
@@ -112,16 +114,16 @@ public class ApplicationConsumer :
         switch (context.Message.Type)
         {
             case OpenIddictConstants.ApplicationTypes.Web:
+            case Constants.ApplicationTypes.Service:
+                
                 clientSecret = Secret.NewSecret(32).ToString();
                 string hash = await _hashService.HashAsync(clientSecret);
 
                 application.ClientSecretHash = hash;
-                application.ClientType = OpenIddictConstants.ClientTypes.Confidential;
 
                 break;
 
             case OpenIddictConstants.ApplicationTypes.Native:
-                application.ClientType = OpenIddictConstants.ClientTypes.Public;
                 break;
 
             default:
@@ -224,7 +226,6 @@ public class ApplicationConsumer :
         string hash = await _hashService.HashAsync(secret);
         
         application.ClientSecretHash = hash;
-        application.ClientType = OpenIddictConstants.ClientTypes.Confidential;
         
         await _dbContext.SaveChangesAsync(context.CancellationToken);
 

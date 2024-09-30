@@ -36,6 +36,7 @@ public class ApplicationConsumerTests : IAsyncLifetime
         await using var provider = new ServiceCollection()
             .AddDbContext<ThavyraDbContext>(builder => builder.UseNpgsql(_postgresContainer.GetConnectionString()))
             .AddSingleton<IHashService>(_ => Substitute.For<IHashService>())
+            .AddMemoryCache()
             .AddMassTransitTestHarness(x =>
             {
                 x.AddConsumer<ApplicationConsumer>();
@@ -78,6 +79,7 @@ public class ApplicationConsumerTests : IAsyncLifetime
         await using var provider = new ServiceCollection()
             .AddDbContext<ThavyraDbContext>(builder => builder.UseNpgsql(_postgresContainer.GetConnectionString()))
             .AddSingleton<IHashService, BCryptHashService>()
+            .AddMemoryCache()
             .AddMassTransitTestHarness(x =>
             {
                 x.AddConsumer<ApplicationConsumer>();
@@ -127,6 +129,7 @@ public class ApplicationConsumerTests : IAsyncLifetime
         await using var provider = new ServiceCollection()
             .AddDbContext<ThavyraDbContext>(builder => builder.UseNpgsql(_postgresContainer.GetConnectionString()))
             .AddSingleton<IHashService, BCryptHashService>()
+            .AddMemoryCache()
             .AddMassTransitTestHarness(x =>
             {
                 x.AddConsumer<ApplicationConsumer>();
@@ -172,6 +175,7 @@ public class ApplicationConsumerTests : IAsyncLifetime
         await using var provider = new ServiceCollection()
             .AddDbContext<ThavyraDbContext>(builder => builder.UseNpgsql(_postgresContainer.GetConnectionString()))
             .AddSingleton<IHashService>(_ => Substitute.For<IHashService>())
+            .AddMemoryCache()
             .AddMassTransitTestHarness(x =>
             {
                 x.AddConsumer<ApplicationConsumer>();
@@ -213,6 +217,7 @@ public class ApplicationConsumerTests : IAsyncLifetime
         await using var provider = new ServiceCollection()
             .AddDbContext<ThavyraDbContext>(builder => builder.UseNpgsql(_postgresContainer.GetConnectionString()))
             .AddSingleton<IHashService>(_ => Substitute.For<IHashService>())
+            .AddMemoryCache()
             .AddMassTransitTestHarness(x =>
             {
                 x.AddConsumer<ApplicationConsumer>();
@@ -257,6 +262,7 @@ public class ApplicationConsumerTests : IAsyncLifetime
             .AddDbContext<ThavyraDbContext>(builder => builder.UseNpgsql(_postgresContainer.GetConnectionString()))
             .Configure<BCryptOptions>(options => options.Rounds = 11)
             .AddSingleton<IHashService, BCryptHashService>()
+            .AddMemoryCache()
             .AddMassTransitTestHarness(x =>
             {
                 x.AddConsumer<ApplicationConsumer>();
@@ -289,7 +295,6 @@ public class ApplicationConsumerTests : IAsyncLifetime
             Type = OpenIddictConstants.ApplicationTypes.Web,
             Name = faker.Company.CompanyName(),
             Description = faker.Lorem.Paragraph(),
-            ConsentType = OpenIddictConstants.ConsentTypes.Explicit
         };
         
         var response = await client.GetResponse<ApplicationCreated>(request);
@@ -305,11 +310,11 @@ public class ApplicationConsumerTests : IAsyncLifetime
         response.Message.Application.Type.Should().Be(request.Type);
         response.Message.Application.Name.Should().Be(request.Name);
         response.Message.Application.Description.Should().Be(request.Description);
-        response.Message.Application.ConsentType.Should().Be(request.ConsentType);
         response.Message.Application.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromMinutes(1));
 
         response.Message.Application.ClientId.Should().NotBeNull();
         response.Message.Application.ClientType.Should().Be(OpenIddictConstants.ClientTypes.Confidential);
+        response.Message.ClientSecret.Should().NotBeNull();
 
         using var scope = provider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ThavyraDbContext>();
@@ -327,6 +332,7 @@ public class ApplicationConsumerTests : IAsyncLifetime
         await using var provider = new ServiceCollection()
             .AddDbContext<ThavyraDbContext>(builder => builder.UseNpgsql(_postgresContainer.GetConnectionString()))
             .AddSingleton<IHashService>(_ => Substitute.For<IHashService>())
+            .AddMemoryCache()
             .AddMassTransitTestHarness(x =>
             {
                 x.AddConsumer<ApplicationConsumer>();
@@ -359,7 +365,6 @@ public class ApplicationConsumerTests : IAsyncLifetime
             Type = OpenIddictConstants.ApplicationTypes.Native,
             Name = faker.Company.CompanyName(),
             Description = faker.Lorem.Paragraph(),
-            ConsentType = OpenIddictConstants.ConsentTypes.Explicit
         };
         
         var response = await client.GetResponse<ApplicationCreated>(request);
@@ -375,11 +380,11 @@ public class ApplicationConsumerTests : IAsyncLifetime
         response.Message.Application.Type.Should().Be(request.Type);
         response.Message.Application.Name.Should().Be(request.Name);
         response.Message.Application.Description.Should().Be(request.Description);
-        response.Message.Application.ConsentType.Should().Be(request.ConsentType);
         response.Message.Application.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromMinutes(1));
 
         response.Message.Application.ClientId.Should().NotBeNull();
         response.Message.Application.ClientType.Should().Be(OpenIddictConstants.ClientTypes.Public);
+        response.Message.ClientSecret.Should().BeNull();
 
         using var scope = provider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ThavyraDbContext>();
@@ -397,6 +402,7 @@ public class ApplicationConsumerTests : IAsyncLifetime
         await using var provider = new ServiceCollection()
             .AddDbContext<ThavyraDbContext>(builder => builder.UseNpgsql(_postgresContainer.GetConnectionString()))
             .AddSingleton<IHashService>(_ => Substitute.For<IHashService>())
+            .AddMemoryCache()
             .AddMassTransitTestHarness(x =>
             {
                 x.AddConsumer<ApplicationConsumer>();
@@ -446,6 +452,7 @@ public class ApplicationConsumerTests : IAsyncLifetime
         await using var provider = new ServiceCollection()
             .AddDbContext<ThavyraDbContext>(builder => builder.UseNpgsql(_postgresContainer.GetConnectionString()))
             .AddSingleton<IHashService>(_ => Substitute.For<IHashService>())
+            .AddMemoryCache()
             .AddMassTransitTestHarness(x =>
             {
                 x.AddConsumer<ApplicationConsumer>();
@@ -487,6 +494,7 @@ public class ApplicationConsumerTests : IAsyncLifetime
         await using var provider = new ServiceCollection()
             .AddDbContext<ThavyraDbContext>(builder => builder.UseNpgsql(_postgresContainer.GetConnectionString()))
             .AddSingleton<IHashService>(_ => Substitute.For<IHashService>())
+            .AddMemoryCache()
             .AddMassTransitTestHarness(x =>
             {
                 x.AddConsumer<ApplicationConsumer>();
@@ -532,9 +540,7 @@ public class ApplicationConsumerTests : IAsyncLifetime
         r.Message.Type.Should().Be(application.Type);
         r.Message.Name.Should().Be(application.Name);
         r.Message.Description.Should().Be(application.Description);
-        r.Message.ConsentType.Should().Be(application.ConsentType);
         r.Message.ClientId.Should().Be(application.ClientId);
-        r.Message.ClientType.Should().Be(application.ClientType);
 
         r.Message.CreatedAt.Should().BeCloseTo(application.CreatedAt, TimeSpan.FromSeconds(1));
     }
