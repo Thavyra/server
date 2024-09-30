@@ -46,7 +46,7 @@ public class Endpoint : Endpoint<UserRequest, List<AuthorizationResponse>>
         
         var request = new Authorization_GetByUser
         {
-            UserId = user.Id
+            Subject = user.Id
         };
 
         var response = await _getAuthorizations.GetResponse<Multiple<Authorization>>(request, ct);
@@ -55,7 +55,7 @@ public class Endpoint : Endpoint<UserRequest, List<AuthorizationResponse>>
         {
             Id = x.Id,
             ApplicationId = x.ApplicationId ?? default(JsonOptional<Guid>),
-            UserId = x.UserId ?? default(JsonOptional<Guid>),
+            UserId = x.Subject ?? default(JsonOptional<Guid>),
             Type = x.Type,
             Status = x.Status,
             CreatedAt = x.CreatedAt

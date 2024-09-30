@@ -7,6 +7,6 @@ public class UserCanSetPassword : AuthorizationHandler<SetPasswordRequirement, P
     protected override Task<AuthorizationHandlerState> HandleAsync(AuthorizationHandlerState state,
         PasswordLogin resource) => Task.FromResult(state
 
-        .AllowUser(resource.UserId)
+        .AllowSubject(resource.UserId)
         .RequireScope(Constants.Scopes.Account.Logins));
 }

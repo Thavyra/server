@@ -5,13 +5,13 @@ public class UserCanDelete : AuthorizationHandler<DeleteAuthorizationRequirement
     protected override Task<AuthorizationHandlerState> HandleAsync(AuthorizationHandlerState state,
         Contracts.Authorization.Authorization resource)
     {
-        if (!resource.UserId.HasValue)
+        if (!resource.Subject.HasValue)
         {
             return Task.FromResult(state);
         }
 
         return Task.FromResult(state
-            .AllowUser(resource.UserId.Value)
+            .AllowSubject(resource.Subject.Value)
             .RequireScope(Constants.Scopes.Authorizations.All));
     }
 }

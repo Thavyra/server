@@ -10,6 +10,6 @@ public class OwnerCanCreate : AuthorizationHandler<CreateApplicationRequirement,
     protected override Task<AuthorizationHandlerState> HandleAsync(AuthorizationHandlerState state,
         Application_Create resource) => Task.FromResult(state
 
-        .AllowUser(resource.OwnerId)
+        .AllowSubject(resource.OwnerId)
         .RequireScope(Constants.Scopes.Applications.All));
 }

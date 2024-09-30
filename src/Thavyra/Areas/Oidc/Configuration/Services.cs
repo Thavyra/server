@@ -69,6 +69,7 @@ public static class Services
                         
                         options.UseAspNetCore()
                             .EnableAuthorizationEndpointPassthrough()
+                            .EnableTokenEndpointPassthrough()
                             .EnableUserinfoEndpointPassthrough()
                             .DisableTransportSecurityRequirement();
                     })

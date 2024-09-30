@@ -10,6 +10,6 @@ public class SubjectCanTransfer : AuthorizationHandler<SendTransferRequirement, 
     protected override Task<AuthorizationHandlerState> HandleAsync(AuthorizationHandlerState state,
         Transfer_Create resource) => Task.FromResult(state
 
-        .AllowUser(resource.SubjectId)
+        .AllowSubject(resource.SubjectId)
         .RequireScope(Constants.Scopes.Transactions.All));
 }

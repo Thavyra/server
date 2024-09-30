@@ -5,6 +5,6 @@ public class SubjectCanReadLogins : AuthorizationHandler<ReadUserLoginsRequireme
     protected override Task<AuthorizationHandlerState> HandleAsync(AuthorizationHandlerState state,
         Contracts.User.User resource) => Task.FromResult(state
 
-        .AllowUser(resource.Id)
+        .AllowSubject(resource.Id)
         .RequireScope(Constants.Scopes.Account.Logins));
 }

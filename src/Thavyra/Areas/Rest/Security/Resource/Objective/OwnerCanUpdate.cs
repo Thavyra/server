@@ -24,7 +24,7 @@ public class OwnerCanUpdate : AuthorizationHandler<UpdateObjectiveRequirement, C
         });
 
         return state
-            .AllowUser(response.Message.OwnerId)
+            .AllowSubject(response.Message.OwnerId)
             .RequireScope(Constants.Scopes.Applications.All);
     }
 }

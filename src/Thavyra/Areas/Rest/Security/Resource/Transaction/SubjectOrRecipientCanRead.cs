@@ -8,11 +8,11 @@ public class SubjectOrRecipientCanRead : AuthorizationHandler<ReadTransactionReq
     protected override Task<AuthorizationHandlerState> HandleAsync(AuthorizationHandlerState state,
         Contracts.Transaction.Transaction resource)
     {
-        state.AllowUser(resource.SubjectId);
+        state.AllowSubject(resource.SubjectId);
 
         if (resource.RecipientId.HasValue)
         {
-            state.AllowUser(resource.RecipientId.Value);
+            state.AllowSubject(resource.RecipientId.Value);
         }
 
         return Task.FromResult(state.RequireScope(Constants.Scopes.Account.ReadTransactions));

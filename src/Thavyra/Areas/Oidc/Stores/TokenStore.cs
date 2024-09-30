@@ -32,7 +32,7 @@ public class TokenStore : BaseTokenStore
             Id = token.Id,
             ApplicationId = token.ApplicationId,
             AuthorizationId = token.AuthorizationId,
-            Subject = token.UserId,
+            Subject = token.Subject,
 
             ReferenceId = token.ReferenceId,
             Type = token.Type,
@@ -80,7 +80,7 @@ public class TokenStore : BaseTokenStore
         var response = await requestClient.GetResponse<Multiple<Token>>(new Token_Get
         {
             ApplicationId = applicationId,
-            UserId = userId,
+            Subject = userId,
             Status = status,
             Type = type
         }, cancellationToken);
@@ -198,11 +198,11 @@ public class TokenStore : BaseTokenStore
             yield break;
         }
         
-        var client = _clientFactory.CreateRequestClient<Token_GetByUser>();
+        var client = _clientFactory.CreateRequestClient<Token_GetBySubject>();
 
-        var response = await client.GetResponse<Multiple<Token>>(new Token_GetByUser
+        var response = await client.GetResponse<Multiple<Token>>(new Token_GetBySubject
         {
-            UserId = userId
+            Subject = userId
         }, cancellationToken);
 
         foreach (var token in response.Message.Items)
@@ -220,7 +220,7 @@ public class TokenStore : BaseTokenStore
             Id = token.Id,
             ApplicationId = token.ApplicationId,
             AuthorizationId = token.AuthorizationId,
-            UserId = token.Subject,
+            Subject = token.Subject,
 
             ReferenceId = token.ReferenceId,
             Type = token.Type,

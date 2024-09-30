@@ -4,7 +4,7 @@ namespace Thavyra.Contracts.Token;
 /// Finds all tokens for the specified user.
 /// </summary>
 /// <returns><see cref="Multiple{T}"/> of <see cref="Token"/></returns>
-public record Token_GetByUser
+public record Token_GetBySubject
 {
-    public required Guid UserId { get; init; }
+    public required Guid Subject { get; init; }
 }

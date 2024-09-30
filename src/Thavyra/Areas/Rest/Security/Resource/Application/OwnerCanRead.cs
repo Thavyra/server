@@ -8,6 +8,6 @@ public class OwnerCanRead : AuthorizationHandler<ReadApplicationRequirement, Con
     protected override Task<AuthorizationHandlerState> HandleAsync(AuthorizationHandlerState state,
         Contracts.Application.Application resource) => Task.FromResult(state
 
-        .AllowUser(resource.OwnerId)
+        .AllowSubject(resource.OwnerId)
         .RequireScope(Constants.Scopes.Applications.Read));
 }

@@ -9,7 +9,7 @@ public record Token_Create
     public required Guid Id { get; init; }
     public required Guid? ApplicationId { get; init; }
     public required Guid? AuthorizationId { get; init; }
-    public required Guid? UserId { get; init; }
+    public required Guid? Subject { get; init; }
 
     public required string? ReferenceId { get; init; }
     public required string? Type { get; init; }

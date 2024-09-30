@@ -25,7 +25,7 @@ public class OwnerCanCreate : AuthorizationHandler<CreateObjectiveRequirement, O
         });
 
         return state
-            .AllowUser(response.Message.OwnerId)
+            .AllowSubject(response.Message.OwnerId)
             .RequireScope(Constants.Scopes.Applications.All);
     }
 }

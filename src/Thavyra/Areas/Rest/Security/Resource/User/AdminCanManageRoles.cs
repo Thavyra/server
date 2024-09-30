@@ -15,9 +15,9 @@ public class AdminCanManageRoles : AuthorizationHandler<ManageUserRolesRequireme
     
     protected override async Task<AuthorizationHandlerState> HandleAsync(AuthorizationHandlerState state, Contracts.User.User resource)
     {
-        var response = await _hasRole.GetResponse<Correct, Incorrect>(new User_HasRole
+        var response = await _hasRole.GetResponse<Correct, Incorrect, NotFound>(new User_HasRole
         {
-            UserId = state.UserId,
+            UserId = state.Subject,
             RoleName = Constants.Roles.Admin
         });
 

@@ -74,7 +74,7 @@ public class AuthorizationHandlerState
     public bool Succeeded { get; private set; }
     public List<string> RequiredScopes { get; } = [];
     public ClaimsPrincipal User { get; }
-    public Guid UserId => new(User.GetClaim(OpenIddictConstants.Claims.Subject) ?? throw new InvalidOperationException());
+    public Guid Subject => new(User.GetClaim(OpenIddictConstants.Claims.Subject) ?? throw new InvalidOperationException());
 
     public AuthorizationHandlerState Succeed()
     {
@@ -83,9 +83,9 @@ public class AuthorizationHandlerState
         return this;
     }
     
-    public AuthorizationHandlerState AllowUser(Guid userId)
+    public AuthorizationHandlerState AllowSubject(Guid subject)
     {
-        if (User.GetClaim(OpenIddictConstants.Claims.Subject) == userId.ToString())
+        if (User.GetClaim(OpenIddictConstants.Claims.Subject) == subject.ToString())
         {
             Succeed();
         }
@@ -103,9 +103,9 @@ public class AuthorizationHandlerState
         return this;
     }
 
-    public AuthorizationHandlerState AllowPrincipal(Guid userId, Guid applicationId)
+    public AuthorizationHandlerState AllowPrincipal(Guid subject, Guid applicationId)
     {
-        if (User.GetClaim(OpenIddictConstants.Claims.Subject) == userId.ToString()
+        if (User.GetClaim(OpenIddictConstants.Claims.Subject) == subject.ToString()
             && User.GetClaim(Constants.Claims.ApplicationId) == applicationId.ToString())
         {
             Succeed();

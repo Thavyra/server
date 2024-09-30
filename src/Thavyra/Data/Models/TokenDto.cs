@@ -12,8 +12,8 @@ public class TokenDto
     public Guid? ApplicationId { get; set; }
     [Column("authorization_id")]
     public Guid? AuthorizationId { get; set; }
-    [Column("user_id")]
-    public Guid? UserId { get; set; }
+    [Column("subject")]
+    public Guid? Subject { get; set; }
     
     [Column("reference_id")]
     public string? ReferenceId { get; set; }
@@ -33,5 +33,4 @@ public class TokenDto
 
     public ApplicationDto? Application { get; set; }
     public AuthorizationDto? Authorization { get; set; }
-    public UserDto? User { get; set; }
 }

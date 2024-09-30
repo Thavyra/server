@@ -51,7 +51,7 @@ public class Endpoint : Endpoint<Request, AuthorizationResponse>
         {
             Id = authorization.Id,
             ApplicationId = authorization.ApplicationId ?? default(JsonOptional<Guid>),
-            UserId = authorization.UserId ?? default(JsonOptional<Guid>),
+            UserId = authorization.Subject ?? default(JsonOptional<Guid>),
             Type = authorization.Type,
             Status = authorization.Status,
             CreatedAt = authorization.CreatedAt

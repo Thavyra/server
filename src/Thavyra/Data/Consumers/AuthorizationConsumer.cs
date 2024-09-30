@@ -37,7 +37,7 @@ public class AuthorizationConsumer :
             Id = authorization.Id,
 
             ApplicationId = authorization.ApplicationId,
-            UserId = authorization.UserId,
+            Subject = authorization.Subject,
 
             Type = authorization.Type,
             Status = authorization.Status,
@@ -65,7 +65,7 @@ public class AuthorizationConsumer :
         {
             Id = context.Message.Id,
             ApplicationId = context.Message.ApplicationId,
-            UserId = context.Message.UserId,
+            Subject = context.Message.Subject,
             Type = context.Message.Type,
             Status = context.Message.Status,
             CreatedAt = DateTime.UtcNow,
@@ -92,7 +92,7 @@ public class AuthorizationConsumer :
     public async Task Consume(ConsumeContext<Authorization_Get> context)
     {
         var authorizations = await _dbContext.Authorizations
-            .Where(x => x.UserId == context.Message.UserId)
+            .Where(x => x.Subject == context.Message.Subject)
             .Where(x => x.ApplicationId == context.Message.ApplicationId)
             .Where(x => context.Message.Type == null || x.Type == context.Message.Type)
             .Where(x => context.Message.Status == null || x.Status == context.Message.Status)
@@ -137,7 +137,7 @@ public class AuthorizationConsumer :
     public async Task Consume(ConsumeContext<Authorization_GetByUser> context)
     {
         var authorizations = await _dbContext.Authorizations
-            .Where(x => x.UserId == context.Message.UserId)
+            .Where(x => x.Subject == context.Message.Subject)
             .Include(x => x.Scopes)
             .ToListAsync(context.CancellationToken);
         

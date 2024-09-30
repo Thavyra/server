@@ -4,6 +4,7 @@ using Thavyra.Rest.Security.Resource.Application;
 using Thavyra.Rest.Security.Resource.Authorization;
 using Thavyra.Rest.Security.Resource.Login;
 using Thavyra.Rest.Security.Resource.Objective;
+using Thavyra.Rest.Security.Resource.Permission;
 using Thavyra.Rest.Security.Resource.Score;
 using Thavyra.Rest.Security.Resource.Transaction;
 using Thavyra.Rest.Security.Resource.User;
@@ -29,6 +30,9 @@ public static class RegisterPolicies
             .AddPolicy(Policies.Operation.User.ReadBalance, policy =>
                 policy.AddOperation(new ReadUserBalanceRequirement()))
 
+            .AddPolicy(Policies.Operation.User.ReadRoles, policy =>
+                policy.AddOperation(new ReadUserRolesRequirement()))
+            
             .AddPolicy(Policies.Operation.User.ReadApplications, policy =>
                 policy.AddOperation(new ReadUserApplicationsRequirement()))
             
@@ -49,6 +53,14 @@ public static class RegisterPolicies
 
             .AddPolicy(Policies.Operation.User.Delete, policy =>
                 policy.AddOperation(new DeleteUserRequirement()))
+            
+            // Roles
+            
+            .AddPolicy(Policies.Operation.Role.Grant, policy =>
+                policy.AddOperation(new ManageUserRolesRequirement()))
+            
+            .AddPolicy(Policies.Operation.Role.Deny, policy =>
+                policy.AddOperation(new ManageUserRolesRequirement()))
 
             // Logins
 
@@ -80,6 +92,14 @@ public static class RegisterPolicies
 
             .AddPolicy(Policies.Operation.Application.Delete, policy =>
                 policy.AddOperation(new DeleteApplicationRequirement()))
+            
+            // Permissions
+            
+            .AddPolicy(Policies.Operation.Permission.Grant, policy => 
+                policy.AddOperation(new GrantPermissionRequirement()))
+            
+            .AddPolicy(Policies.Operation.Permission.Deny, policy =>
+                policy.AddOperation(new DenyPermissionRequirement()))
 
             // Authorizations
 

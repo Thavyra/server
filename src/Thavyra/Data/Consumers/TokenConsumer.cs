@@ -18,7 +18,7 @@ public class TokenConsumer :
     IConsumer<Token_GetByAuthorization>,
     IConsumer<Token_GetById>,
     IConsumer<Token_GetByReferenceId>,
-    IConsumer<Token_GetByUser>,
+    IConsumer<Token_GetBySubject>,
     IConsumer<Token_List>,
     IConsumer<Token_Prune>,
     IConsumer<Token_RevokeByAuthorization>,
@@ -40,7 +40,7 @@ public class TokenConsumer :
             Id = token.Id,
             ApplicationId = token.ApplicationId,
             AuthorizationId = token.AuthorizationId,
-            UserId = token.UserId,
+            Subject = token.Subject,
 
             ReferenceId = token.ReferenceId,
             Type = token.Type,
@@ -67,7 +67,7 @@ public class TokenConsumer :
             Id = context.Message.Id,
             ApplicationId = context.Message.ApplicationId,
             AuthorizationId = context.Message.AuthorizationId,
-            UserId = context.Message.UserId,
+            Subject = context.Message.Subject,
 
             ReferenceId = context.Message.ReferenceId,
             Type = context.Message.Type,
@@ -96,7 +96,7 @@ public class TokenConsumer :
     public async Task Consume(ConsumeContext<Token_Get> context)
     {
         var tokens = await _dbContext.Tokens
-            .Where(x => x.UserId == context.Message.UserId)
+            .Where(x => x.Subject == context.Message.Subject)
             .Where(x => x.ApplicationId == context.Message.ApplicationId)
             .Where(x => context.Message.Type == null || x.Type == context.Message.Type)
             .Where(x => context.Message.Status == null || x.Status == context.Message.Status)
@@ -151,10 +151,10 @@ public class TokenConsumer :
         await context.RespondAsync(Map(token));
     }
 
-    public async Task Consume(ConsumeContext<Token_GetByUser> context)
+    public async Task Consume(ConsumeContext<Token_GetBySubject> context)
     {
         var tokens = await _dbContext.Tokens
-            .Where(x => x.UserId == context.Message.UserId)
+            .Where(x => x.Subject == context.Message.Subject)
             .ToListAsync(context.CancellationToken);
         
         await context.RespondAsync(new Multiple<Token>(tokens.Select(Map).ToList()));

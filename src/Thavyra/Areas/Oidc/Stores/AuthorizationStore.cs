@@ -32,7 +32,7 @@ public class AuthorizationStore : BaseAuthorizationStore
         {
             Id = authorization.Id,
             ApplicationId = authorization.ApplicationId,
-            Subject = authorization.UserId,
+            Subject = authorization.Subject,
 
             Type = authorization.Type,
             Status = authorization.Status,
@@ -78,7 +78,7 @@ public class AuthorizationStore : BaseAuthorizationStore
         var response = await requestClient.GetResponse<Multiple<Authorization>>(new Authorization_Get
         {
             ApplicationId = applicationId,
-            UserId = userId,
+            Subject = userId,
             Status = status,
             Type = type
         }, cancellationToken);
@@ -131,7 +131,7 @@ public class AuthorizationStore : BaseAuthorizationStore
             yield break;
         }
         
-        var client = _clientFactory.CreateRequestClient<Authorization_GetById>();
+        var client = _clientFactory.CreateRequestClient<Authorization_GetByApplication>();
 
         var response = await client.GetResponse<Multiple<Authorization>>(new Authorization_GetByApplication
         {
@@ -179,7 +179,7 @@ public class AuthorizationStore : BaseAuthorizationStore
 
         var response = await client.GetResponse<Multiple<Authorization>>(new Authorization_GetByUser
         {
-            UserId = userId
+            Subject = userId
         }, cancellationToken);
 
         foreach (var authorization in response.Message.Items)
@@ -196,7 +196,7 @@ public class AuthorizationStore : BaseAuthorizationStore
         {
             Id = authorization.Id,
             ApplicationId = authorization.ApplicationId ?? null,
-            UserId = authorization.Subject ?? null,
+            Subject = authorization.Subject ?? null,
             Type = authorization.Type,
             Status = authorization.Status,
             Scopes = authorization.Scopes.ToList(),

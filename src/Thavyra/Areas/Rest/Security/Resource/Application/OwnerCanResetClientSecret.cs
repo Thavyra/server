@@ -5,6 +5,6 @@ public class OwnerCanResetClientSecret : AuthorizationHandler<ResetClientSecretR
     protected override Task<AuthorizationHandlerState> HandleAsync(AuthorizationHandlerState state,
         Contracts.Application.Application resource) => Task.FromResult(state
 
-        .AllowUser(resource.OwnerId)
+        .AllowSubject(resource.OwnerId)
         .RequireScope(Constants.Scopes.Sudo));
 }
