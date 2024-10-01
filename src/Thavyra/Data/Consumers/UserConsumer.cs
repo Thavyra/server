@@ -1,9 +1,11 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using Thavyra.Contracts;
 using Thavyra.Contracts.Transaction;
 using Thavyra.Contracts.User;
+using Thavyra.Data.Configuration;
 using Thavyra.Data.Contexts;
 using Thavyra.Data.Models;
 
@@ -20,12 +22,14 @@ public class UserConsumer :
     private readonly ThavyraDbContext _dbContext;
     private readonly IMemoryCache _cache;
     private readonly IPublishEndpoint _publishEndpoint;
+    private readonly SystemOptions _options;
 
-    public UserConsumer(ThavyraDbContext dbContext, IMemoryCache cache, IPublishEndpoint publishEndpoint)
+    public UserConsumer(ThavyraDbContext dbContext, IMemoryCache cache, IPublishEndpoint publishEndpoint, IOptions<SystemOptions> options)
     {
         _dbContext = dbContext;
         _cache = cache;
         _publishEndpoint = publishEndpoint;
+        _options = options.Value;
     }
 
     private static User Map(UserDto user)
@@ -53,13 +57,13 @@ public class UserConsumer :
         await _dbContext.SaveChangesAsync(context.CancellationToken);
 
         await context.RespondAsync(Map(user));
-
+        
         await _publishEndpoint.Publish(new Transaction_Create
         {
-            ApplicationId = new Guid("96ab99e3-6b3e-4265-a36a-8524e9a74f60"),
+            ApplicationId = _options.ApplicationId,
             SubjectId = user.Id,
-            Description = "Welcome to Thavyra!",
-            Amount = 1000
+            Description = _options.WelcomeTransaction?.Message,
+            Amount = _options.WelcomeTransaction?.Amount ?? double.Pi
         }, context.CancellationToken);
     }
 

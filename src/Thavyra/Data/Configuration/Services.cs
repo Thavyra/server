@@ -13,6 +13,10 @@ public static class Services
         foreach (var section in configuration.GetChildren())
             switch (section.Key)
             {
+                case "System":
+                    services.Configure<SystemOptions>(section);
+                    break;
+                
                 case "Postgres":
                     services.AddDbContext<ThavyraDbContext>(options =>
                     {

@@ -38,7 +38,7 @@ public static class Constants
     
     public static class Permissions
     {
-        public const string System = "system";
+        public const string Setup = "setup";
         
         public static class Scopes
         {

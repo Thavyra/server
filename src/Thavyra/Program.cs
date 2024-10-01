@@ -4,8 +4,6 @@ using Microsoft.Net.Http.Headers;
 using OpenIddict.Validation.AspNetCore;
 using Tailwind;
 using Thavyra.Data.Configuration;
-using Thavyra.Data.Contexts;
-using Thavyra.Data.Seeds;
 using Thavyra.Oidc.Configuration;
 using Thavyra.Rest.Configuration;
 using Thavyra.Rest.Security;
@@ -69,15 +67,6 @@ builder.Services.AddAuthorizationBuilder()
     .AddOperationPolicies();
 
 var app = builder.Build();
-
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-
-    var context = services.GetRequiredService<ThavyraDbContext>();
-    context.Database.EnsureCreated();
-    DbInitializer.Initialize(context);
-}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
