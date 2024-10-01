@@ -9,7 +9,9 @@ public abstract class AuthorizationHandler<TOperationRequirement, TResource> : I
 {
     private static bool HasScopes(ClaimsPrincipal user, IEnumerable<string> scopes)
     {
-        foreach (string name in scopes)
+        var results = scopes.ToDictionary(key => key, _ => false);
+        
+        foreach (string name in results.Keys)
         {
             // Scopes are formed of n parts separated by '.' e.g. account.profile.read
             string[] parts = name.Split('.');
@@ -20,16 +22,17 @@ public abstract class AuthorizationHandler<TOperationRequirement, TResource> : I
             // Incrementally recombine the parts of the required scope until the user possesses it or authorization fails
             for (int i = 1; i <= parts.Length; i++)
             {
-                string combined = string.Join('.', parts.Take(i));
+                string combined = string.Join('.', parts[..i]);
 
-                if (!user.HasScope(combined))
+                if (user.HasScope(combined))
                 {
-                    return false;
+                    results[name] = true;
+                    break;
                 }
             }
         }
 
-        return true;
+        return results.All(x => x.Value);
     }
     
     public async Task HandleAsync(AuthorizationHandlerContext context)

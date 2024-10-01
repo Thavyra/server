@@ -13,6 +13,7 @@ public static partial class RegisterHandlers
     public static IServiceCollection AddAuthorizationHandlers(this IServiceCollection services) => services
         .AddUserHandlers()
         .AddApplicationHandlers()
+        .AddPermissionHandlers()
         .AddAuthorizationEntityHandlers()
         .AddLoginHandlers()
         .AddObjectiveHandlers()

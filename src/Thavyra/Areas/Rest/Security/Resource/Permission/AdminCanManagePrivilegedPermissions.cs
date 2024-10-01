@@ -49,7 +49,7 @@ public class
             RoleName = Constants.Roles.Admin
         });
 
-        if (!response.Is(out Response<Success> _))
+        if (!response.Is(out Response<Correct> _))
         {
             return state;
         }
