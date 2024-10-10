@@ -1,9 +1,11 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Thavyra.Contracts;
 using Thavyra.Contracts.Application;
 using Thavyra.Contracts.Permission;
 using Thavyra.Data.Contexts;
+using Thavyra.Data.Models;
 
 namespace Thavyra.Data.Consumers;
 
@@ -13,23 +15,32 @@ public class PermissionConsumer :
     IConsumer<Application_ModifyPermissions>
 {
     private readonly ThavyraDbContext _dbContext;
+    private readonly IMemoryCache _cache;
 
-    public PermissionConsumer(ThavyraDbContext dbContext)
+    public PermissionConsumer(ThavyraDbContext dbContext, IMemoryCache cache)
     {
         _dbContext = dbContext;
+        _cache = cache;
     }
 
     public async Task Consume(ConsumeContext<Permission_GetByApplication> context)
     {
-        var permissions = await _dbContext.Applications
-            .Where(x => x.Id == context.Message.ApplicationId)
-            .Select(x => x.Permissions)
-            .FirstOrDefaultAsync(context.CancellationToken);
+        var permissions = _cache.Get<List<PermissionDto>>($"permissions:{context.Message.ApplicationId}");
 
         if (permissions is null)
         {
-            await context.RespondAsync(new NotFound());
-            return;
+            permissions = await _dbContext.Applications
+                .Where(x => x.Id == context.Message.ApplicationId)
+                .Select(x => x.Permissions.ToList())
+                .FirstOrDefaultAsync(context.CancellationToken);
+
+            if (permissions is null)
+            {
+                await context.RespondAsync(new NotFound());
+                return;
+            }
+            
+            _cache.Set($"permissions:{context.Message.ApplicationId}", permissions, TimeSpan.FromMinutes(1));
         }
 
         await context.RespondAsync(new Multiple<Permission>(permissions.Select(x => new Permission
@@ -103,7 +114,16 @@ public class PermissionConsumer :
                 Id = x.Id,
                 Name = x.Name,
                 DisplayName = x.DisplayName
+            }).ToList(),
+            
+            CurrentPermissions = application.Permissions.Select(x => new Permission
+            {
+                Id = x.Id,
+                Name = x.Name,
+                DisplayName = x.DisplayName
             }).ToList()
         });
+        
+        _cache.Remove($"permissions:{application.Id}");
     }
 }

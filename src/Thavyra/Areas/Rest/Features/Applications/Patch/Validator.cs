@@ -17,7 +17,7 @@ public class Validator : Validator<Request>
         When(x => x.Description.HasValue, () =>
         {
             RuleFor(req => req.Description.Value)
-                .NotEmpty()
+                .MinimumLength(1)
                 .MaximumLength(400).WithMessage("Description must not exceed 400 characters.");
         });
     }
