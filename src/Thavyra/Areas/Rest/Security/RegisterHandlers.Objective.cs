@@ -6,6 +6,8 @@ public static partial class RegisterHandlers
 {
     private static IServiceCollection AddObjectiveHandlers(this IServiceCollection services) => services
         .AddAuthorizationHandler<ClientCanRead>()
+        .AddAuthorizationHandler<OwnerCanRead>()
         .AddAuthorizationHandler<OwnerCanCreate>()
-        .AddAuthorizationHandler<OwnerCanUpdate>();
+        .AddAuthorizationHandler<OwnerCanUpdate>()
+        .AddAuthorizationHandler<OwnerCanDelete>();
 }

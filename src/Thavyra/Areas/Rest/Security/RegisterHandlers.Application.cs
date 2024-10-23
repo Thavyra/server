@@ -11,6 +11,7 @@ public static partial class RegisterHandlers
         .AddAuthorizationHandler<OwnerCanDelete>()
         .AddAuthorizationHandler<OwnerCanRead>()
         .AddAuthorizationHandler<OwnerCanReadTransactions>()
+        .AddAuthorizationHandler<OwnerCanReadObjectives>()
         .AddAuthorizationHandler<OwnerCanResetClientSecret>()
         .AddAuthorizationHandler<OwnerCanUpdate>()
     
