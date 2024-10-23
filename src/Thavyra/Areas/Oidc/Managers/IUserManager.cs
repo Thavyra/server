@@ -10,4 +10,5 @@ public interface IUserManager
     Task<UserModel> RegisterWithDiscordAsync(DiscordLoginModel login, CancellationToken cancellationToken);
     Task<UserModel> RegisterWithGitHubAsync(GitHubLoginModel login, CancellationToken cancellationToken);
     Task<bool> IsUsernameUniqueAsync(string username, CancellationToken cancellationToken);
+    Task<IReadOnlyList<RoleModel>> GetRolesAsync(Guid userId, CancellationToken cancellationToken);
 }

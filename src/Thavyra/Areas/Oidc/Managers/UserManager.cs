@@ -1,6 +1,7 @@
 using MassTransit;
 using Thavyra.Contracts;
 using Thavyra.Contracts.Login;
+using Thavyra.Contracts.Role;
 using Thavyra.Contracts.User;
 using Thavyra.Contracts.User.Register;
 using Thavyra.Oidc.Models.Internal;
@@ -153,5 +154,21 @@ public class UserManager : IUserManager
             (_, NotFound) => true, // Username is unique
             _ => throw new InvalidOperationException()
         };
+    }
+
+    public async Task<IReadOnlyList<RoleModel>> GetRolesAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var client = _clientFactory.CreateRequestClient<Role_GetByUser>();
+
+        var response = await client.GetResponse<Multiple<Role>>(new Role_GetByUser
+        {
+            UserId = userId
+        }, cancellationToken);
+
+        return response.Message.Items.Select(x => new RoleModel
+        {
+            Id = x.Id,
+            Name = x.Name
+        }).ToList();
     }
 }
