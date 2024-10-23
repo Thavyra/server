@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-    background: linear-gradient(-45deg, #590000, #3C003C, #000059);
+    background: linear-gradient(-45deg, hsl(0, 100%, 17%), hsl(225, 100%, 17%));
     background-size: 400% 400%;
     animation: gradient 50s ease infinite;
     @apply h-screen flex items-center justify-center
@@ -38,10 +38,12 @@ body {
 
     @apply bg-dark-900;
 
-    @apply transition-colors;
+    @apply transition;
+    @apply shadow-md;
 
     @apply focus:outline-none;
     @apply focus:bg-dark-950;
+    @apply focus:shadow-none;
 }
 
 .input-validation-error {
@@ -74,24 +76,27 @@ body {
     @apply rounded;
 
     @apply text-lg;
+
+    @apply border;
+    @apply hover:shadow-lg;
+    @apply active:bg-dark-750;
 }
 
 .btn-primary {
     @apply text-bright;
     
-    @apply bg-primary;
-    @apply hover:bg-primary-hover;
-    @apply focus:bg-primary-focus;
+    @apply border-dark-700;
+    @apply hover:border-light;
 }
 
 .btn-discord {
-    @apply bg-discord;
-    @apply hover:bg-discord-hover;
+    @apply border-discord-hover;
+    @apply hover:border-discord;
 }
 
 .btn-github {
-    @apply bg-github;
-    @apply hover:bg-github-hover;
+    @apply border-dark-700;
+    @apply hover:border-light;
 }
 
 .link {
