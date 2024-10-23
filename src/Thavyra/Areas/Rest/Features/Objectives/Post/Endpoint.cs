@@ -19,14 +19,19 @@ public class Endpoint : Endpoint<Request, ObjectiveResponse>
 
     public override void Configure()
     {
-        Post("/objectives");
+        Post("/applications/{Application}/objectives");
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)
     {
+        if (ProcessorState<AuthenticationState>().Application is not { } application)
+        {
+            throw new InvalidOperationException();
+        }
+        
         var createRequest = new Objective_Create
         {
-            ApplicationId = req.ApplicationId,
+            ApplicationId = application.Id,
             Name = req.Name,
             DisplayName = req.DisplayName
         };
@@ -47,7 +52,7 @@ public class Endpoint : Endpoint<Request, ObjectiveResponse>
             Id = response.Message.Id,
             ApplicationId = response.Message.ApplicationId,
             Name = response.Message.Name,
-            DisplayName = response.Message.Name,
+            DisplayName = response.Message.DisplayName,
             CreatedAt = response.Message.CreatedAt
         }, cancellation: ct);
     }
