@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using FastEndpoints;
-using Microsoft.AspNetCore.Authorization;
 using OpenIddict.Validation.AspNetCore;
 using Thavyra.Rest.Features.Applications;
 using Thavyra.Rest.Features.Users;
@@ -28,7 +27,7 @@ public static class Services
     public static IApplicationBuilder UseRestApi(this WebApplication app)
     {
         return app
-            .UseDefaultExceptionHandler(useGenericReason: !app.Environment.IsDevelopment())
+            .UseRestExceptionHandler(useGenericReason: !app.Environment.IsDevelopment())
             .UseFastEndpoints(options =>
             {
                 options.Endpoints.RoutePrefix = "api";
