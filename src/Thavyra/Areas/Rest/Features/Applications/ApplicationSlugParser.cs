@@ -51,7 +51,7 @@ public class ApplicationSlugParser : GlobalPreProcessor<AuthenticationState>
         
         switch (applicationResponse)
         {
-            case (_, NotFound):
+            case null or (_, NotFound):
                 await context.HttpContext.Response.SendNotFoundAsync(cancellation: ct);
                 return;
             case (_, Application application):
