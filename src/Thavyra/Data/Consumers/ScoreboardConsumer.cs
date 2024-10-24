@@ -1,5 +1,4 @@
 using MassTransit;
-using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
 using Thavyra.Contracts;
 using Thavyra.Contracts.Scoreboard;
@@ -63,6 +62,7 @@ public class ScoreboardConsumer :
         {
             ApplicationId = context.Message.ApplicationId,
             Name = context.Message.Name,
+            DisplayName = context.Message.DisplayName,
             CreatedAt = DateTime.UtcNow
         };
 
