@@ -2,7 +2,6 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Thavyra.Contracts;
 using Thavyra.Contracts.Transaction;
-using Thavyra.Contracts.User;
 using Thavyra.Data.Contexts;
 using Thavyra.Data.Models;
 
@@ -155,6 +154,7 @@ public class TransactionConsumer :
     {
         var transactions = await _dbContext.Transactions
             .Where(x => x.SubjectId == context.Message.UserId || x.RecipientId == context.Message.UserId)
+            .OrderByDescending(x => x.CreatedAt)
             .ToListAsync(context.CancellationToken);
         
         await context.RespondAsync(new Multiple<Transaction>(transactions.Select(Map).ToList()));
