@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
+using Thavyra.Rest.Security.Resource;
 
 namespace Thavyra.Rest.Security;
 
-public static partial class RegisterHandlers
+public static class RegisterHandlers
 {
     private static IServiceCollection AddAuthorizationHandler<T>(this IServiceCollection services)
         where T : class, IAuthorizationHandler
@@ -11,12 +12,47 @@ public static partial class RegisterHandlers
     }
 
     public static IServiceCollection AddAuthorizationHandlers(this IServiceCollection services) => services
-        .AddUserHandlers()
-        .AddApplicationHandlers()
-        .AddPermissionHandlers()
-        .AddAuthorizationEntityHandlers()
-        .AddLoginHandlers()
-        .AddObjectiveHandlers()
-        .AddScoreHandlers()
-        .AddTransactionHandlers();
+        .AddAuthorizationHandler<AnyoneCanReadProfile>()
+        .AddAuthorizationHandler<AdminCanManageUserRoles>()
+        .AddAuthorizationHandler<SubjectCanReadUserApplications>()
+        .AddAuthorizationHandler<SubjectCanReadUserBalance>()
+        .AddAuthorizationHandler<SubjectCanReadUserLogins>()
+        .AddAuthorizationHandler<SubjectCanReadUserAuthorizations>()
+        .AddAuthorizationHandler<SubjectCanReadUserRoles>()
+        .AddAuthorizationHandler<SubjectCanReadUserTransactions>()
+        .AddAuthorizationHandler<SubjectCanUpdateUserProfile>()
+
+        .AddAuthorizationHandler<AdminCanReadApplication>()
+        .AddAuthorizationHandler<OwnerCanCreateApplication>()
+        .AddAuthorizationHandler<OwnerCanReadApplication>()
+        .AddAuthorizationHandler<OwnerCanReadApplicationObjectives>()
+        .AddAuthorizationHandler<OwnerCanReadApplicationTransactions>()
+        .AddAuthorizationHandler<OwnerCanReadClientSecret>()
+        .AddAuthorizationHandler<OwnerCanUpdateApplication>()
+        .AddAuthorizationHandler<OwnerCanDeleteApplication>()
+        .AddAuthorizationHandler<ClientCanReadApplicationObjectives>()
+        .AddAuthorizationHandler<SubjectCanReadApplication>()
+        .AddAuthorizationHandler<SubjectCanReadApplicationObjectives>()
+        .AddAuthorizationHandler<SubjectCanReadApplicationTransactions>()
+        .AddAuthorizationHandler<SubjectCanResetClientSecret>()
+        .AddAuthorizationHandler<SubjectCanUpdateApplication>()
+
+        .AddAuthorizationHandler<AdminCanManagePrivilegedPermissions>()
+        .AddAuthorizationHandler<AnyoneCanManageBasicPermissions>()
+
+        .AddAuthorizationHandler<SubjectCanReadAuthorization>()
+        .AddAuthorizationHandler<SubjectCanRevokeAuthorization>()
+
+        .AddAuthorizationHandler<SubjectCanSendTransaction>()
+        .AddAuthorizationHandler<SubjectCanSendTransfer>()
+        .AddAuthorizationHandler<SubjectOrRecipientCanReadTransaction>()
+
+        .AddAuthorizationHandler<ApplicationOwnerCanCreateObjective>()
+        .AddAuthorizationHandler<ApplicationOwnerCanReadObjective>()
+        .AddAuthorizationHandler<ApplicationOwnerCanUpdateObjective>()
+        .AddAuthorizationHandler<ApplicationOwnerCanDeleteObjective>()
+        .AddAuthorizationHandler<ClientCanReadObjective>()
+
+        .AddAuthorizationHandler<PrincipalCanCreateScore>()
+        .AddAuthorizationHandler<ClientCanReadScore>();
 }

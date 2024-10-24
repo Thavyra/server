@@ -10,14 +10,15 @@ public static class EndpointExtensions
     {
         endpoint.HttpContext.MarkResponseStart();
 
-        foreach (var requirement in failure.FailedRequirements)
+        foreach (var reason in failure.FailureReasons)
         {
-            endpoint.ValidationFailures.Add(requirement switch
-            {
-                ScopeAuthorizationRequirement => new ValidationFailure("scope", "Token does not have the required scope for this operation."),
-                IOperationAuthorizationRequirement => new ValidationFailure("operation", "Not permitted to perform this operation."),
-                _ => new ValidationFailure("forbidden", "Authorization failed.")
-            });
+            endpoint.ValidationFailures.Add(new ValidationFailure("Message", reason.Message));
+        }
+
+        if (endpoint.ValidationFailures.Count == 0)
+        {
+            endpoint.ValidationFailures.Add(
+                new ValidationFailure("Forbidden", "Not authorized to perform this action."));
         }
         
         return endpoint.HttpContext.Response.SendErrorsAsync(endpoint.ValidationFailures, statusCode: 403,
