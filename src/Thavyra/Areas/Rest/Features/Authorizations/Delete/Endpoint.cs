@@ -1,6 +1,7 @@
 using FastEndpoints;
 using MassTransit;
 using Microsoft.AspNetCore.Authorization;
+using OpenIddict.Abstractions;
 using Thavyra.Contracts;
 using Thavyra.Contracts.Authorization;
 using Thavyra.Rest.Security;
@@ -11,16 +12,16 @@ public class Endpoint : Endpoint<Request>
 {
     private readonly IRequestClient<Authorization_GetById> _getAuthorization;
     private readonly IAuthorizationService _authorizationService;
-    private readonly IRequestClient<Authorization_Delete> _deleteAuthorization;
+    private readonly IRequestClient<Authorization_Revoke> _revokeAuthorization;
 
     public Endpoint(
         IRequestClient<Authorization_GetById> getAuthorization, 
         IAuthorizationService authorizationService, 
-        IRequestClient<Authorization_Delete> deleteAuthorization)
+        IRequestClient<Authorization_Revoke> revokeAuthorization)
     {
         _getAuthorization = getAuthorization;
         _authorizationService = authorizationService;
-        _deleteAuthorization = deleteAuthorization;
+        _revokeAuthorization = revokeAuthorization;
     }
 
     public override void Configure()
@@ -43,7 +44,7 @@ public class Endpoint : Endpoint<Request>
 
         var authorizationResult =
             await _authorizationService.AuthorizeAsync(User,
-                authorization, Security.Policies.Operation.Authorization.Delete);
+                authorization, Security.Policies.Operation.Authorization.Revoke);
 
         if (!authorizationResult.Succeeded)
         {
@@ -51,9 +52,9 @@ public class Endpoint : Endpoint<Request>
             return;
         }
 
-        _ = await _deleteAuthorization.GetResponse<Success>(new Authorization_Delete
+        await _revokeAuthorization.GetResponse<Success>(new Authorization_Revoke
         {
-            Id = authorization.Id
+            AuthorizationId = authorization.Id
         }, ct);
 
         await SendNoContentAsync(ct);

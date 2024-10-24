@@ -19,7 +19,8 @@ public class AuthorizationConsumer :
     IConsumer<Authorization_GetByUser>,
     IConsumer<Authorization_List>,
     IConsumer<Authorization_Prune>,
-    IConsumer<Authorization_Update>
+    IConsumer<Authorization_Update>,
+    IConsumer<Authorization_Revoke>
 {
     private readonly ThavyraDbContext _dbContext;
     private readonly IMemoryCache _cache;
@@ -138,6 +139,7 @@ public class AuthorizationConsumer :
     {
         var authorizations = await _dbContext.Authorizations
             .Where(x => x.Subject == context.Message.Subject)
+            .Where(x => x.Status == OpenIddictConstants.Statuses.Valid)
             .Include(x => x.Scopes)
             .ToListAsync(context.CancellationToken);
         
@@ -184,5 +186,29 @@ public class AuthorizationConsumer :
         _cache.Remove(authorization.Id);
         
         await context.RespondAsync(Map(authorization));
+    }
+
+    public async Task Consume(ConsumeContext<Authorization_Revoke> context)
+    {
+        var authorization =
+            await _dbContext.Authorizations.FindAsync([context.Message.AuthorizationId], context.CancellationToken);
+
+        if (authorization is null)
+        {
+            await context.RespondAsync(new NotFound());
+            return;
+        }
+
+        if (authorization.Type == OpenIddictConstants.Statuses.Revoked)
+        {
+            await context.RespondAsync(new Success());
+            return;
+        }
+        
+        authorization.Status = OpenIddictConstants.Statuses.Revoked;
+
+        await _dbContext.SaveChangesAsync(context.CancellationToken);
+
+        await context.RespondAsync(new Success());
     }
 }

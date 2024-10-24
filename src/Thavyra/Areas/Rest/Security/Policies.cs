@@ -24,7 +24,7 @@ public static class Policies
         public static class Authorization
         {
             public const string Read = "operation.authorization.read";
-            public const string Delete = "operation.authorization.delete";
+            public const string Revoke = "operation.authorization.revoke";
         }
     
         public static class User

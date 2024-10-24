@@ -93,7 +93,7 @@ public static class RegisterPolicies
             .AddPolicy(Policies.Operation.Authorization.Read, policy =>
                 policy.AddRequirements(new ReadAuthorizationRequirement()))
 
-            .AddPolicy(Policies.Operation.Authorization.Delete, policy =>
+            .AddPolicy(Policies.Operation.Authorization.Revoke, policy =>
                 policy.AddRequirements(new RevokeAuthorizationRequirement()))
 
             // Transactions
