@@ -7,12 +7,10 @@ namespace Thavyra.Data.Consumers;
 
 public class ApplicationCreatedConsumer : IConsumer<ApplicationCreated>
 {
-    private readonly IPublishEndpoint _publishEndpoint;
     private readonly SystemOptions _options;
 
-    public ApplicationCreatedConsumer(IOptions<SystemOptions> options, IPublishEndpoint publishEndpoint)
+    public ApplicationCreatedConsumer(IOptions<SystemOptions> options)
     {
-        _publishEndpoint = publishEndpoint;
         _options = options.Value;
     }
     
@@ -23,11 +21,11 @@ public class ApplicationCreatedConsumer : IConsumer<ApplicationCreated>
             return;
         }
 
-        await _publishEndpoint.Publish(new Application_ModifyPermissions
+        await context.Publish(new Application_ModifyPermissions
         {
             ApplicationId = context.Message.Application.Id,
             Grant = _options.DefaultPermissions,
             Deny = []
-        }, context.CancellationToken);
+        });
     }
 }

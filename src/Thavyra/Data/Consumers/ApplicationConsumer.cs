@@ -134,12 +134,15 @@ public class ApplicationConsumer :
         
         await _dbContext.SaveChangesAsync(context.CancellationToken);
 
-        await context.RespondAsync(new ApplicationCreated
+        var message = new ApplicationCreated
         {
             Id = application.Id,
             Application = Map(application),
             ClientSecret = clientSecret
-        });
+        };
+        
+        await context.RespondAsync(message);
+        await context.Publish(message);
     }
 
     public async Task Consume(ConsumeContext<Application_Delete> context)
@@ -286,6 +289,8 @@ public class ApplicationConsumer :
             .Where(x => x.ApplicationId == context.Message.ApplicationId)
             .Where(x => x.Id == context.Message.Id)
             .ExecuteDeleteAsync(context.CancellationToken);
+
+        await context.RespondAsync(new Success());
     }
 
     public async Task Consume(ConsumeContext<Redirect_GetByApplication> context)
