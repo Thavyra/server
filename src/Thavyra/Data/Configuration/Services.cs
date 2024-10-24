@@ -49,6 +49,7 @@ public static class Services
     public static IBusRegistrationConfigurator AddDataConsumers(this IBusRegistrationConfigurator configurator)
     {
         configurator.AddConsumer<ApplicationConsumer>();
+        configurator.AddConsumer<ApplicationCreatedConsumer>();
         configurator.AddConsumer<PermissionConsumer>();
         configurator.AddConsumer<AuthorizationConsumer>();
         configurator.AddConsumer<LoginConsumer>();
