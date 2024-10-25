@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using Thavyra.Contracts.Application;
 using Thavyra.Data.Configuration;
 
-namespace Thavyra.Data.Consumers;
+namespace Thavyra.Data.Consumers.Application;
 
 public class ApplicationCreatedConsumer : IConsumer<ApplicationCreated>
 {

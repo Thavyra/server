@@ -16,10 +16,8 @@ public class ThavyraDbContext : DbContext
 
     public DbSet<UserDto> Users { get; set; }
     public DbSet<RoleDto> Roles { get; set; }
-    
-    public DbSet<PasswordLoginDto> Passwords { get; set; }
-    public DbSet<DiscordLoginDto> DiscordLogins { get; set; }
-    public DbSet<GitHubLoginDto> GitHubLogins { get; set; }
+
+    public DbSet<LoginDto> Logins { get; set; }
     
     public DbSet<ApplicationDto> Applications { get; set; }
     public DbSet<RedirectDto> Redirects { get; set; }
@@ -41,9 +39,8 @@ public class ThavyraDbContext : DbContext
         ConfigureRoles(builder.Entity<RoleDto>());
         
         ConfigureUsers(builder.Entity<UserDto>());
-        
-        ConfigureDiscordLogins(builder.Entity<DiscordLoginDto>());
-        ConfigureGitHubLogins(builder.Entity<GitHubLoginDto>());
+
+        ConfigureLogins(builder.Entity<LoginDto>());
 
         ConfigurePermissions(builder.Entity<PermissionDto>());
 
@@ -82,21 +79,15 @@ public class ThavyraDbContext : DbContext
 
         return entity;
     }
-    
-    protected EntityTypeBuilder<DiscordLoginDto> ConfigureDiscordLogins(EntityTypeBuilder<DiscordLoginDto> entity)
+
+    protected EntityTypeBuilder<LoginDto> ConfigureLogins(EntityTypeBuilder<LoginDto> entity)
     {
         entity
-            .HasIndex(e => e.DiscordId)
+            .HasIndex(e => e.ProviderAccountId)
             .IsUnique();
 
-        return entity;
-    }
-    
-    protected EntityTypeBuilder<GitHubLoginDto> ConfigureGitHubLogins(EntityTypeBuilder<GitHubLoginDto> entity)
-    {
         entity
-            .HasIndex(e => e.GitHubId)
-            .IsUnique();
+            .HasIndex(e => e.ProviderUsername);
 
         return entity;
     }

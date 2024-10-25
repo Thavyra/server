@@ -1,6 +1,6 @@
-namespace Thavyra.Contracts.Login;
+namespace Thavyra.Contracts.Login.Data;
 
-public record PasswordLogin_Create
+public record ChangePassword
 {
     public required Guid UserId { get; init; }
     public required string Password { get; init; }

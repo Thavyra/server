@@ -11,7 +11,7 @@ public class UserDto
     
     [Column("username")]
     [MaxLength(40)]
-    public string Username { get; set; } = default!;
+    public string? Username { get; set; }
     [Column("description")]
     [MaxLength(400)]
     public string? Description { get; set; }

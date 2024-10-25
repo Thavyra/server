@@ -12,7 +12,7 @@ using Thavyra.Data.Models;
 namespace Thavyra.Data.Consumers;
 
 public class UserConsumer :
-    IConsumer<User_Create>,
+    IConsumer<CreateUser>,
     IConsumer<User_Delete>,
     IConsumer<User_ExistsByUsername>,
     IConsumer<User_GetById>,
@@ -21,20 +21,21 @@ public class UserConsumer :
 {
     private readonly ThavyraDbContext _dbContext;
     private readonly IMemoryCache _cache;
-    private readonly IPublishEndpoint _publishEndpoint;
     private readonly SystemOptions _options;
 
-    public UserConsumer(ThavyraDbContext dbContext, IMemoryCache cache, IPublishEndpoint publishEndpoint, IOptions<SystemOptions> options)
+    public UserConsumer(
+        ThavyraDbContext dbContext, 
+        IMemoryCache cache,
+        IOptions<SystemOptions> options)
     {
         _dbContext = dbContext;
         _cache = cache;
-        _publishEndpoint = publishEndpoint;
         _options = options.Value;
     }
 
-    private static User Map(UserDto user)
+    private static UserResult Map(UserDto user)
     {
-        return new User
+        return new UserResult
         {
             Id = user.Id,
             Username = user.Username,
@@ -44,21 +45,25 @@ public class UserConsumer :
         };
     }
     
-    public async Task Consume(ConsumeContext<User_Create> context)
+    public async Task Consume(ConsumeContext<CreateUser> context)
     {
         var user = new UserDto
         {
             Username = context.Message.Username,
             CreatedAt = DateTime.UtcNow
         };
-        
+
         _dbContext.Users.Add(user);
-        
+
         await _dbContext.SaveChangesAsync(context.CancellationToken);
 
-        await context.RespondAsync(Map(user));
-        
-        await _publishEndpoint.Publish(new Transaction_Create
+        await context.RespondAsync(new UserCreated
+        {
+            UserId = user.Id,
+            Timestamp = user.CreatedAt
+        });
+
+        await context.Publish(new Transaction_Create
         {
             ApplicationId = _options.ApplicationId,
             SubjectId = user.Id,
@@ -92,7 +97,7 @@ public class UserConsumer :
         {
             user = await _dbContext.Users
                 .FirstOrDefaultAsync(x => x.Id == context.Message.Id, context.CancellationToken);
-            
+
             if (user is null)
             {
                 await context.RespondAsync(new NotFound());
@@ -101,7 +106,7 @@ public class UserConsumer :
 
             _cache.Set(user.Id, user, TimeSpan.FromMinutes(1));
         }
-        
+
         await context.RespondAsync(Map(user));
     }
 
@@ -128,14 +133,14 @@ public class UserConsumer :
             await context.RespondAsync(new NotFound());
             return;
         }
-        
+
         user.Username = context.Message.Username.IsChanged ? context.Message.Username.Value : user.Username;
         user.Description = context.Message.Description.IsChanged ? context.Message.Description.Value : user.Description;
 
         await _dbContext.SaveChangesAsync(context.CancellationToken);
-        
+
         await context.RespondAsync(Map(user));
-        
+
         _cache.Remove(user.Id);
     }
 }

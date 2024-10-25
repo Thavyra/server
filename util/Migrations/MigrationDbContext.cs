@@ -35,8 +35,7 @@ public class MigrationDbContext : ThavyraDbContext
         ConfigureUsers(builder.Entity<UserDto>())
             .HasData(_entityOptions.Users);
 
-        ConfigureDiscordLogins(builder.Entity<DiscordLoginDto>());
-        ConfigureGitHubLogins(builder.Entity<GitHubLoginDto>());
+        ConfigureLogins(builder.Entity<LoginDto>());
 
         ConfigurePermissions(builder.Entity<PermissionDto>())
             .HasData(_entityOptions.Permissions);

@@ -1,6 +1,8 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Thavyra.Data.Consumers;
+using Thavyra.Data.Consumers.Application;
+using Thavyra.Data.Consumers.Login;
 using Thavyra.Data.Contexts;
 using Thavyra.Data.Security.Hashing;
 
@@ -50,14 +52,18 @@ public static class Services
     {
         configurator.AddConsumer<ApplicationConsumer>();
         configurator.AddConsumer<ApplicationCreatedConsumer>();
+
+        configurator.AddConsumer<PasswordConsumer>();
+        configurator.AddConsumer<ProvidersConsumer>();
+        configurator.AddConsumer<LoginDataConsumer>();
+        configurator.AddConsumer<ChangePasswordConsumer>();
+        
         configurator.AddConsumer<PermissionConsumer>();
         configurator.AddConsumer<AuthorizationConsumer>();
-        configurator.AddConsumer<LoginConsumer>();
         configurator.AddConsumer<ScopeConsumer>();
         configurator.AddConsumer<TokenConsumer>();
         configurator.AddConsumer<UserConsumer>();
         configurator.AddConsumer<RoleConsumer>();
-        configurator.AddConsumer<RegisterConsumer>();
         configurator.AddConsumer<TransactionConsumer>();
         configurator.AddConsumer<ScoreboardConsumer>();
         

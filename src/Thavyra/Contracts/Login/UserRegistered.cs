@@ -1,7 +1,7 @@
 namespace Thavyra.Contracts.Login;
 
-public record GitHubLogin_Create
+public record UserRegistered
 {
     public required Guid UserId { get; init; }
-    public required string GitHubId { get; init; }
+    public required string Username { get; init; }
 }

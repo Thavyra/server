@@ -98,4 +98,11 @@ public static class Constants
     {
         public const string Admin = "admin";
     }
+    
+    public static class LoginTypes
+    {
+        public const string Password = "password";
+        public const string Discord = "discord";
+        public const string GitHub = "github";
+    }
 }

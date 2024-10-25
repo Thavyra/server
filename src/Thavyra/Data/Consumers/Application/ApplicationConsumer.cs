@@ -9,7 +9,7 @@ using Thavyra.Data.Models;
 using Thavyra.Data.Security;
 using Thavyra.Data.Security.Hashing;
 
-namespace Thavyra.Data.Consumers;
+namespace Thavyra.Data.Consumers.Application;
 
 public class ApplicationConsumer :
     IConsumer<Application_CheckClientSecret>,
@@ -39,9 +39,9 @@ public class ApplicationConsumer :
         _hashService = hashService;
     }
 
-    private static Application Map(ApplicationDto application)
+    private static Contracts.Application.Application Map(ApplicationDto application)
     {
-        return new Application
+        return new Contracts.Application.Application
         {
             Id = application.Id,
             OwnerId = application.OwnerId,
@@ -195,7 +195,7 @@ public class ApplicationConsumer :
             .Where(x => x.OwnerId == context.Message.OwnerId)
             .ToListAsync(context.CancellationToken);
 
-        await context.RespondAsync(new Multiple<Application>(applications.Select(Map).ToList()));
+        await context.RespondAsync(new Multiple<Contracts.Application.Application>(applications.Select(Map).ToList()));
     }
 
     public async Task Consume(ConsumeContext<Application_GetByRedirect> context)
@@ -205,14 +205,14 @@ public class ApplicationConsumer :
             .Select(x => x.Application)
             .ToListAsync(context.CancellationToken);
 
-        await context.RespondAsync(new Multiple<Application>(applications.Select(Map).ToList()));
+        await context.RespondAsync(new Multiple<Contracts.Application.Application>(applications.Select(Map).ToList()));
     }
 
     public async Task Consume(ConsumeContext<Application_List> context)
     {
         var applications = await _dbContext.Applications.ToListAsync(context.CancellationToken);
 
-        await context.RespondAsync(new Multiple<Application>(applications.Select(Map).ToList()));
+        await context.RespondAsync(new Multiple<Contracts.Application.Application>(applications.Select(Map).ToList()));
     }
     
     public async Task Consume(ConsumeContext<Application_ResetClientSecret> context)
