@@ -20,6 +20,7 @@ public class ThavyraDbContext : DbContext
     public DbSet<RoleDto> Roles { get; set; }
 
     public DbSet<LoginDto> Logins { get; set; }
+    public DbSet<LoginAttemptDto> LoginAttempts { get; set; }
     
     public DbSet<ApplicationDto> Applications { get; set; }
     public DbSet<RedirectDto> Redirects { get; set; }

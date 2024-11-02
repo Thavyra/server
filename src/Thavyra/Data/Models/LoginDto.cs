@@ -27,11 +27,9 @@ public class LoginDto
     [Column("updated_at")]
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     
-    [Column("used_at")]
-    public DateTime UsedAt { get; set; } = DateTime.UtcNow;
-    
     [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public UserDto User { get; set; } = null!;
+    public ICollection<LoginAttemptDto> Attempts { get; set; } = [];
 }

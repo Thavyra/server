@@ -19,8 +19,9 @@ public class LoginDataConsumer :
     {
         var logins = await _dbContext.Logins
             .Where(x => x.UserId == context.Message.UserId)
+            .Include(x => x.Attempts)
             .ToListAsync(context.CancellationToken);
-
+        
         await context.RespondAsync(new UserLoginResult
         {
             Logins = logins.Select(login => new LoginResult
@@ -33,7 +34,7 @@ public class LoginDataConsumer :
                 ProviderAvatarUrl = login.ProviderAvatarUrl,
                 CreatedAt = login.CreatedAt,
                 UpdatedAt = login.UpdatedAt,
-                UsedAt = login.UsedAt,
+                UsedAt = login.Attempts.FirstOrDefault()?.CreatedAt ?? login.CreatedAt,
             }).ToList()
         });
     }

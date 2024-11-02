@@ -64,7 +64,6 @@ public static class Services
         configurator.AddConsumer<PasswordConsumer>();
         configurator.AddConsumer<ProvidersConsumer>();
         configurator.AddConsumer<LoginDataConsumer>();
-        configurator.AddConsumer<ChangePasswordConsumer>();
         
         configurator.AddConsumer<PermissionConsumer>();
         configurator.AddConsumer<AuthorizationConsumer>();

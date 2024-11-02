@@ -45,7 +45,6 @@ public class ProvidersConsumer :
                 ProviderAvatarUrl = context.Message.AvatarUrl,
 
                 CreatedAt = user.Message.Timestamp,
-                UsedAt = user.Message.Timestamp,
                 UpdatedAt = user.Message.Timestamp
             };
 
@@ -64,13 +63,21 @@ public class ProvidersConsumer :
 
         login.ProviderUsername = context.Message.Username;
         login.ProviderAvatarUrl = context.Message.AvatarUrl;
-        login.UsedAt = DateTime.UtcNow;
 
         await context.RespondAsync(new LoginSucceeded
         {
             UserId = login.UserId,
             Username = login.User.Username ?? login.ProviderUsername
         });
+
+        var attempt = new LoginAttemptDto
+        {
+            LoginId = login.Id,
+            Succeeded = true,
+            CreatedAt = DateTime.UtcNow,
+        };
+        
+        _dbContext.LoginAttempts.Add(attempt);
         
         await _dbContext.SaveChangesAsync(context.CancellationToken);
     }
@@ -100,7 +107,6 @@ public class ProvidersConsumer :
             ProviderAvatarUrl = context.Message.AvatarUrl,
 
             CreatedAt = now,
-            UsedAt = now,
             UpdatedAt = now
         };
 
