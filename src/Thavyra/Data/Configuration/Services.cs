@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Thavyra.Data.Consumers;
 using Thavyra.Data.Consumers.Application;
 using Thavyra.Data.Consumers.Login;
+using Thavyra.Data.Consumers.User;
 using Thavyra.Data.Contexts;
 using Thavyra.Data.Security.Hashing;
 
@@ -15,8 +16,12 @@ public static class Services
         foreach (var section in configuration.GetChildren())
             switch (section.Key)
             {
-                case "System":
-                    services.Configure<SystemOptions>(section);
+                case "Users":
+                    services.Configure<UserOptions>(section);
+                    break;
+                
+                case "Applications":
+                    services.Configure<ApplicationOptions>(section);
                     break;
                 
                 case "Postgres":
@@ -53,6 +58,9 @@ public static class Services
         configurator.AddConsumer<ApplicationConsumer>();
         configurator.AddConsumer<ApplicationCreatedConsumer>();
 
+        configurator.AddConsumer<UserConsumer>();
+        configurator.AddConsumer<UserCreatedConsumer>();
+        
         configurator.AddConsumer<PasswordConsumer>();
         configurator.AddConsumer<ProvidersConsumer>();
         configurator.AddConsumer<LoginDataConsumer>();
@@ -62,7 +70,6 @@ public static class Services
         configurator.AddConsumer<AuthorizationConsumer>();
         configurator.AddConsumer<ScopeConsumer>();
         configurator.AddConsumer<TokenConsumer>();
-        configurator.AddConsumer<UserConsumer>();
         configurator.AddConsumer<RoleConsumer>();
         configurator.AddConsumer<TransactionConsumer>();
         configurator.AddConsumer<ScoreboardConsumer>();

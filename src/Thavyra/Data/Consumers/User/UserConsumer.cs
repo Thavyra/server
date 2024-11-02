@@ -1,15 +1,12 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Options;
 using Thavyra.Contracts;
-using Thavyra.Contracts.Transaction;
 using Thavyra.Contracts.User;
-using Thavyra.Data.Configuration;
 using Thavyra.Data.Contexts;
 using Thavyra.Data.Models;
 
-namespace Thavyra.Data.Consumers;
+namespace Thavyra.Data.Consumers.User;
 
 public class UserConsumer :
     IConsumer<CreateUser>,
@@ -21,21 +18,18 @@ public class UserConsumer :
 {
     private readonly ThavyraDbContext _dbContext;
     private readonly IMemoryCache _cache;
-    private readonly SystemOptions _options;
 
     public UserConsumer(
         ThavyraDbContext dbContext, 
-        IMemoryCache cache,
-        IOptions<SystemOptions> options)
+        IMemoryCache cache)
     {
         _dbContext = dbContext;
         _cache = cache;
-        _options = options.Value;
     }
 
-    private static UserResult Map(UserDto user)
+    private static Contracts.User.User Map(UserDto user)
     {
-        return new UserResult
+        return new Contracts.User.User
         {
             Id = user.Id,
             Username = user.Username,
@@ -57,19 +51,14 @@ public class UserConsumer :
 
         await _dbContext.SaveChangesAsync(context.CancellationToken);
 
-        await context.RespondAsync(new UserCreated
+        var message = new UserCreated
         {
             UserId = user.Id,
             Timestamp = user.CreatedAt
-        });
-
-        await context.Publish(new Transaction_Create
-        {
-            ApplicationId = _options.ApplicationId,
-            SubjectId = user.Id,
-            Description = _options.WelcomeTransaction?.Message,
-            Amount = _options.WelcomeTransaction?.Amount ?? double.Pi
-        }, context.CancellationToken);
+        };
+        
+        await context.RespondAsync(message);
+        await context.Publish(message);
     }
 
     public async Task Consume(ConsumeContext<User_Delete> context)

@@ -14,6 +14,8 @@ public class ThavyraDbContext : DbContext
         
     }
 
+    public DbSet<SystemDto> System { get; set; }
+    
     public DbSet<UserDto> Users { get; set; }
     public DbSet<RoleDto> Roles { get; set; }
 
