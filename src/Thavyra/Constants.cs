@@ -8,6 +8,7 @@ public static class Constants
     {
         public const string Sudo = "sudo";
         public const string Admin = "admin";
+        public const string LinkProvider = "link_provider";
         
         public static class Account
         {
@@ -44,6 +45,8 @@ public static class Constants
         {
             public const string Sudo = OpenIddictConstants.Permissions.Prefixes.Scope + Constants.Scopes.Sudo;
             public const string Admin = OpenIddictConstants.Permissions.Prefixes.Scope + Constants.Scopes.Admin;
+            public const string LinkProvider =
+                OpenIddictConstants.Permissions.Prefixes.Scope + Constants.Scopes.LinkProvider;
             
             public static class Account
             {
@@ -87,6 +90,17 @@ public static class Constants
     public static class ApplicationTypes
     {
         public const string Service = "service";
+    }
+
+    public static class Parameters
+    {
+        public const string Provider = "provider";
+    }
+    
+    public static class Providers
+    {
+        public const string Discord = "discord";
+        public const string GitHub = "github";
     }
     
     public static class Claims

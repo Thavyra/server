@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Abstractions;
+using OpenIddict.Core;
 using OpenIddict.Server.AspNetCore;
 using Thavyra.Oidc.Managers;
 using Thavyra.Oidc.Models.Internal;
@@ -21,15 +22,15 @@ namespace Thavyra.Oidc.Controllers;
 public class AuthorizeController : Controller
 {
     private readonly IUserManager _userManager;
-    private readonly IOpenIddictApplicationManager _applicationManager;
-    private readonly IOpenIddictAuthorizationManager _authorizationManager;
-    private readonly IOpenIddictScopeManager _scopeManager;
+    private readonly OpenIddictApplicationManager<ApplicationModel> _applicationManager;
+    private readonly OpenIddictAuthorizationManager<AuthorizationModel> _authorizationManager;
+    private readonly OpenIddictScopeManager<ScopeModel> _scopeManager;
 
     public AuthorizeController(
         IUserManager userManager,
-        IOpenIddictApplicationManager applicationManager,
-        IOpenIddictAuthorizationManager authorizationManager,
-        IOpenIddictScopeManager scopeManager)
+        OpenIddictApplicationManager<ApplicationModel> applicationManager,
+        OpenIddictAuthorizationManager<AuthorizationModel> authorizationManager,
+        OpenIddictScopeManager<ScopeModel> scopeManager)
     {
         _userManager = userManager;
         _applicationManager = applicationManager;
@@ -40,10 +41,15 @@ public class AuthorizeController : Controller
     [HttpGet]
     public async Task<IActionResult> IndexAsync(CancellationToken cancellationToken)
     {
+        var authenticationResult =
+            await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
         var request = HttpContext.GetOpenIddictServerRequest()
                       ?? throw new InvalidOperationException("Could not retrieve OpenID Connect request.");
 
-        if (User.Identity?.IsAuthenticated is false || 
+        // Authenticate subject, handle prompts
+
+        if (!authenticationResult.Succeeded ||
             request.HasPrompt(Prompts.Login) || request.HasPrompt(Prompts.SelectAccount))
         {
             // Avoid endless redirects by removing prompt parameters
@@ -68,77 +74,86 @@ public class AuthorizeController : Controller
                 });
         }
 
-        string subject = User.GetClaim(ClaimTypes.NameIdentifier)
-                         ?? throw new InvalidOperationException("Could not retrieve subject claim.");
+        // Retrieve subject & request details
 
-        var user = await _userManager.FindByIdAsync(subject, cancellationToken);
+        var userId = User.GetClaim(ClaimTypes.NameIdentifier)
+                     ?? throw new InvalidOperationException("Could not retrieve user ID.");
 
-        if (user is null)
-        {
-            throw new InvalidOperationException("Could not retrieve user details.");
-        }
+        var username = User.GetClaim(ClaimTypes.Name);
 
         string clientId = request.ClientId
                           ?? throw new InvalidOperationException("Could not retrieve client from request.");
 
-        object? client = await _applicationManager.FindByClientIdAsync(clientId, cancellationToken);
+        var application = await _applicationManager.FindByClientIdAsync(clientId, cancellationToken);
 
-        if (client is null)
+        if (application is null)
         {
             throw new InvalidOperationException("Could not retrieve application details.");
         }
 
-        string? applicationId = await _applicationManager.GetIdAsync(client, cancellationToken);
-
-        if (applicationId is null)
+        if (request.HasScope(Constants.Scopes.LinkProvider))
         {
-            throw new InvalidOperationException();
+            if (!request.HasResponseType(ResponseTypes.None))
+            {
+                return Forbid(
+                    authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+                    properties: new AuthenticationProperties(new Dictionary<string, string?>
+                    {
+                        [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidRequest,
+                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+                            $"Invalid response type for {Constants.Scopes.LinkProvider} flow."
+                    }));
+            }
+
+            if (request.GetParameter(Constants.Parameters.Provider) is not
+                { Value: Constants.Providers.Discord or Constants.Providers.GitHub })
+            {
+                return Forbid(
+                    authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+                    properties: new AuthenticationProperties(new Dictionary<string, string?>
+                    {
+                        [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidRequest,
+                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+                            "Provider is invalid or not specified."
+                    }));
+            }
         }
 
-        var application = new ApplicationModel
-        {
-            Id = new Guid(applicationId),
-            ClientId = clientId,
-            ClientType = await _applicationManager.GetClientTypeAsync(client, cancellationToken),
-            ApplicationType = await _applicationManager.GetApplicationTypeAsync(client, cancellationToken),
-            DisplayName = await _applicationManager.GetDisplayNameAsync(client, cancellationToken),
-        };
-
-        string? consentType = await _applicationManager.GetConsentTypeAsync(client, cancellationToken);
-
+        // Names of requested scopes
         var scopeNames = request.GetScopes();
 
+        // Scopes retrieved from database - will not include openid, offline_access
         var scopes = await GetScopesAsync(scopeNames, cancellationToken);
 
         var permanentAuthorizations = await GetPermanentAuthorizationsAsync(
-            subject,
-            applicationId,
-            scopeNames,
+            userId,
+            application.Id,
+            scopes: [..scopes.Select(x => x.Name!)],
             cancellationToken);
 
         // Implicitly authorize when enabled/application already accepted
+        
+        var consentType = await _applicationManager.GetConsentTypeAsync(application, cancellationToken);
 
         return request.HasPrompt(Prompts.Consent) switch
         {
             false when permanentAuthorizations.Any() => await AuthorizeAsync(
-                user: user,
-                clientId: clientId,
-                applicationId: applicationId,
+                application,
                 scopeNames,
                 authorization: permanentAuthorizations.LastOrDefault(),
+                type: AuthorizationTypes.Permanent,
                 cancellationToken),
 
             false when consentType == ConsentTypes.Implicit => await AuthorizeAsync(
-                user: user,
-                clientId: clientId,
-                applicationId: applicationId,
+                application,
                 scopeNames,
                 authorization: null,
+                type: AuthorizationTypes.AdHoc,
                 cancellationToken),
 
             _ => View(new AuthorizeViewModel
             {
-                Subject = user,
+                Username = username,
                 Client = application,
                 Scopes = scopes.AsReadOnly(),
                 ReturnUrl = Request.PathBase + Request.Path + Request.QueryString
@@ -146,54 +161,100 @@ public class AuthorizeController : Controller
         };
     }
 
+
     [HttpPostWithField("submit.Accept")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> AcceptAsync(CancellationToken cancellationToken)
     {
+        var authenticationResult =
+            await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+        // Authenticate subject
+
+        if (!authenticationResult.Succeeded)
+        {
+            return Challenge(
+                authenticationSchemes: CookieAuthenticationDefaults.AuthenticationScheme,
+                properties: new AuthenticationProperties
+                {
+                    RedirectUri = Request.PathBase + Request.Path + Request.QueryString
+                });
+        }
+
         var request = HttpContext.GetOpenIddictServerRequest() ??
                       throw new InvalidOperationException("Could not retrieve OpenID Connect request.");
 
-        string subject = User.GetClaim(ClaimTypes.NameIdentifier)
-                         ?? throw new InvalidOperationException("Could not retrieve subject claim.");
+        // Retrieve request details
 
-        var user = await _userManager.FindByIdAsync(subject, cancellationToken);
-
-        if (user is null)
-        {
-            throw new InvalidOperationException("Could not retrieve user details.");
-        }
+        var userId = User.GetClaim(ClaimTypes.NameIdentifier)
+                     ?? throw new InvalidOperationException("Could not retrieve user ID.");
 
         string clientId = request.ClientId
                           ?? throw new InvalidOperationException("Could not retrieve client from request.");
 
-        object? application = await _applicationManager.FindByClientIdAsync(clientId, cancellationToken);
+        var application = await _applicationManager.FindByClientIdAsync(clientId, cancellationToken);
 
         if (application is null)
         {
             throw new InvalidOperationException("Could not retrieve application details.");
         }
-
-        string? applicationId = await _applicationManager.GetIdAsync(application, cancellationToken);
-
-        if (applicationId is null)
+        
+        if (request.HasScope(Constants.Scopes.LinkProvider))
         {
-            throw new InvalidOperationException();
-        }
+            if (!request.HasResponseType(ResponseTypes.None))
+            {
+                return Forbid(
+                    authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+                    properties: new AuthenticationProperties(new Dictionary<string, string?>
+                    {
+                        [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidRequest,
+                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+                            $"Invalid response type for {Constants.Scopes.LinkProvider} flow."
+                    }));
+            }
 
-        var scopes = request.GetScopes();
+            return request.GetParameter(Constants.Parameters.Provider) switch
+            {
+                { Value: Constants.Providers.Discord } => Challenge(
+                    authenticationSchemes: OidcConstants.AuthenticationSchemes.LinkDiscord,
+                    properties: new AuthenticationProperties
+                    {
+                        RedirectUri = request.RedirectUri
+                    }),
+
+                { Value: Constants.Providers.GitHub } => Challenge(
+                    authenticationSchemes: OidcConstants.AuthenticationSchemes.LinkGitHub,
+                    properties: new AuthenticationProperties
+                    {
+                        RedirectUri = request.RedirectUri
+                    }),
+
+                _ => Forbid(
+                    authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+                    properties: new AuthenticationProperties(new Dictionary<string, string?>
+                    {
+                        [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidRequest,
+                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+                            "Provider is invalid or not specified."
+                    }))
+            };
+        }
+        
+        var scopeNames = request.GetScopes();
+
+        var scopes = await GetScopesAsync(scopeNames, cancellationToken);
 
         var permanentAuthorizations = await GetPermanentAuthorizationsAsync(
-            subject,
-            applicationId,
-            scopes,
+            userId,
+            application.Id,
+            scopes: [..scopes.Select(x => x.Name!)],
             cancellationToken);
 
         return await AuthorizeAsync(
-            user: user,
-            clientId: clientId,
-            applicationId: applicationId,
-            scopes,
+            application,
+            scopes: [..scopes.Select(x => x.Name!)],
             authorization: permanentAuthorizations.LastOrDefault(),
+            type: AuthorizationTypes.Permanent,
             cancellationToken);
     }
 
@@ -211,15 +272,15 @@ public class AuthorizeController : Controller
             }));
     }
 
-    private async Task<IList<object>> GetPermanentAuthorizationsAsync(
+    private async Task<IList<AuthorizationModel>> GetPermanentAuthorizationsAsync(
         string subject,
-        string client,
+        Guid applicationId,
         ImmutableArray<string> scopes,
         CancellationToken ct)
     {
         return await _authorizationManager.FindAsync(
             subject: subject,
-            client: client,
+            client: applicationId.ToString(),
             status: Statuses.Valid,
             type: AuthorizationTypes.Permanent,
             scopes: scopes,
@@ -231,65 +292,64 @@ public class AuthorizeController : Controller
     {
         List<ScopeModel> result = [];
 
-        await foreach (object scope in _scopeManager.FindByNamesAsync(scopes, cancellationToken))
+        await foreach (var scope in _scopeManager.FindByNamesAsync(scopes, cancellationToken))
         {
-            string? id = await _scopeManager.GetIdAsync(scope, cancellationToken);
-
-            if (id is null)
-            {
-                throw new InvalidOperationException();
-            }
-
-            result.Add(new ScopeModel
-            {
-                Id = new Guid(id),
-                Name = await _scopeManager.GetNameAsync(scope, cancellationToken),
-                DisplayName = await _scopeManager.GetDisplayNameAsync(scope, cancellationToken),
-                Description = await _scopeManager.GetDescriptionAsync(scope, cancellationToken)
-            });
+            result.Add(scope);
         }
 
         return result;
     }
 
     private async Task<IActionResult> AuthorizeAsync(
-        UserModel user,
-        string clientId,
-        string applicationId,
+        ApplicationModel application,
         ImmutableArray<string> scopes,
-        object? authorization,
+        AuthorizationModel? authorization,
+        string type,
         CancellationToken ct)
     {
+        var userId = new Guid(User.GetClaim(ClaimTypes.NameIdentifier)!);
+
+        var roles = await _userManager.GetRolesAsync(userId, ct);
+
         var identity = new ClaimsIdentity(
             authenticationType: TokenValidationParameters.DefaultAuthenticationType,
             nameType: Claims.Username,
             roleType: Claims.Role);
 
-        identity.SetClaim(Claims.Username, user.Username);
+        identity.SetClaim(Claims.Username, User.GetClaim(ClaimTypes.Name));
 
-        identity.SetClaim(Claims.Subject, user.Id.ToString());
-        identity.SetClaim(Claims.ClientId, clientId);
-        identity.SetClaim(Constants.Claims.ApplicationId, applicationId);
+        identity.SetClaim(Claims.Subject, userId.ToString());
+        identity.SetClaim(Claims.ClientId, application.ClientId);
+        identity.SetClaim(Constants.Claims.ApplicationId, application.Id.ToString());
+
+        foreach (var role in roles)
+        {
+            identity.AddClaim(Claims.Role, role.Name);
+        }
 
         identity.SetScopes(scopes);
 
         identity.SetDestinations(static claim => claim.Type switch
         {
             Claims.Subject => [Destinations.IdentityToken, Destinations.AccessToken],
-            Claims.Username => [Destinations.IdentityToken],
+            Claims.Username => [Destinations.IdentityToken, Destinations.AccessToken],
+            Claims.Role => [Destinations.IdentityToken],
 
             _ => [Destinations.AccessToken]
         });
 
-        authorization ??= await _authorizationManager.CreateAsync(
-            identity: identity,
-            subject: user.Id.ToString(),
-            client: applicationId,
-            type: AuthorizationTypes.Permanent,
-            scopes: scopes,
-            cancellationToken: ct);
+        if (authorization is null || type == AuthorizationTypes.AdHoc)
+        {
+            authorization = await _authorizationManager.CreateAsync(
+                identity: identity,
+                subject: userId.ToString(),
+                client: application.Id.ToString(),
+                type: type,
+                scopes: scopes,
+                cancellationToken: ct);
+        }
 
-        identity.SetAuthorizationId(await _authorizationManager.GetIdAsync(authorization, ct));
+        identity.SetAuthorizationId(authorization.Id.ToString());
 
         return SignIn(new ClaimsPrincipal(identity), OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
     }

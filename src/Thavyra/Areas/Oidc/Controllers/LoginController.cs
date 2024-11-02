@@ -1,11 +1,13 @@
 using System.Security.Claims;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Thavyra.Contracts.Login;
+using Thavyra.Contracts.Login.Password;
 using Thavyra.Oidc.Managers;
-using Thavyra.Oidc.Models.Internal;
 using Thavyra.Oidc.Models.View;
 
 namespace Thavyra.Oidc.Controllers;
@@ -14,10 +16,16 @@ namespace Thavyra.Oidc.Controllers;
 public class LoginController : Controller
 {
     private readonly IUserManager _userManager;
+    private readonly IRequestClient<PasswordLogin> _login;
+    private readonly IRequestClient<RegisterUser> _register;
 
-    public LoginController(IUserManager userManager)
+    public LoginController(IUserManager userManager,
+        IRequestClient<PasswordLogin> login,
+        IRequestClient<RegisterUser> register)
     {
         _userManager = userManager;
+        _login = login;
+        _register = register;
     }
 
     private string? _returnUrl;
@@ -57,26 +65,34 @@ public class LoginController : Controller
         ArgumentException.ThrowIfNullOrEmpty(model.Username);
         ArgumentException.ThrowIfNullOrEmpty(model.Password);
 
-        var user = await _userManager.FindByLoginAsync(new PasswordLoginModel
+        try
         {
-            Username = model.Username,
-            Password = model.Password
-        }, cancellationToken);
-
-        if (user is null)
-        {
-            const string message = "Username or password incorrect.";
-
-            ModelState.AddModelError(nameof(model.Username), message);
-            ModelState.AddModelError(nameof(model.Password), message);
-
-            return View(new LoginViewModel
+            Response response = await _login.GetResponse<LoginSucceeded, LoginFailed, LoginNotFound>(new PasswordLogin
             {
-                ReturnUrl = ReturnUrl
-            });
+                Username = model.Username,
+                Password = model.Password
+            }, cancellationToken);
+
+            switch (response)
+            {
+                case (_, LoginFailed or LoginNotFound):
+                    const string message = "Username or password incorrect.";
+
+                    ModelState.AddModelError(nameof(model.Username), message);
+                    ModelState.AddModelError(nameof(model.Password), message);
+
+                    return View(model);
+                
+                case (_, LoginSucceeded login):
+                    return SignIn(login.UserId, login.Username);
+            }
+        }
+        catch (RequestFaultException)
+        {
+            model.Message = "Uh oh! Something went wrong while logging in. Please try again.";
         }
 
-        return SignIn(user.Id);
+        return View(model);
     }
 
     [HttpGet("/register")]
@@ -108,13 +124,22 @@ public class LoginController : Controller
         ArgumentException.ThrowIfNullOrEmpty(model.Username);
         ArgumentException.ThrowIfNullOrEmpty(model.Password);
 
-        var user = await _userManager.RegisterAsync(new PasswordRegisterModel
+        try
         {
-            Username = model.Username,
-            Password = model.Password
-        }, cancellationToken);
+            var response = await _register.GetResponse<UserRegistered>(new RegisterUser
+            {
+                Username = model.Username,
+                Password = model.Password
+            }, cancellationToken);
 
-        return SignIn(user.Id);
+            return SignIn(response.Message.UserId, response.Message.Username);
+        }
+        catch (RequestFaultException)
+        {
+            model.Message = "Uh oh! Something went wrong during registration. Please try again.";
+        }
+        
+        return View(model);
     }
 
     [HttpPost("/register/check-username")]
@@ -135,9 +160,13 @@ public class LoginController : Controller
         }, CookieAuthenticationDefaults.AuthenticationScheme);
     }
 
-    private SignInResult SignIn(Guid userId)
+    private SignInResult SignIn(Guid userId, string username)
     {
-        var identity = new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, userId.ToString())],
+        var identity = new ClaimsIdentity(
+            [
+                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+                new Claim(ClaimTypes.Name, username)
+            ],
             CookieAuthenticationDefaults.AuthenticationScheme);
 
         var properties = new AuthenticationProperties

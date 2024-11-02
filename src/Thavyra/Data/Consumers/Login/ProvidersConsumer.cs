@@ -9,7 +9,8 @@ using Thavyra.Data.Models;
 namespace Thavyra.Data.Consumers.Login;
 
 public class ProvidersConsumer :
-    IConsumer<ProviderLogin>
+    IConsumer<ProviderLogin>,
+    IConsumer<LinkProvider>
 {
     private readonly ThavyraDbContext _dbContext;
     private readonly IRequestClient<CreateUser> _createUser;
@@ -27,6 +28,7 @@ public class ProvidersConsumer :
         var login = await _dbContext.Logins
             .Where(x => x.Type == context.Message.Provider)
             .Where(x => x.ProviderAccountId == context.Message.AccountId)
+            .Include(x => x.User)
             .FirstOrDefaultAsync(context.CancellationToken);
         
         if (login is null)
@@ -67,9 +69,54 @@ public class ProvidersConsumer :
         await context.RespondAsync(new LoginSucceeded
         {
             UserId = login.UserId,
-            Username = login.ProviderUsername
+            Username = login.User.Username ?? login.ProviderUsername
         });
         
         await _dbContext.SaveChangesAsync(context.CancellationToken);
+    }
+
+    public async Task Consume(ConsumeContext<LinkProvider> context)
+    {
+        var login = await _dbContext.Logins
+            .Where(x => x.Type == context.Message.Provider)
+            .Where(x => x.ProviderAccountId == context.Message.AccountId)
+            .FirstOrDefaultAsync(context.CancellationToken);
+
+        if (login is not null)
+        {
+            await context.RespondAsync(new AccountAlreadyRegistered());
+            return;
+        }
+
+        var now = DateTime.UtcNow;
+
+        login = new LoginDto
+        {
+            UserId = context.Message.UserId,
+            Type = context.Message.Provider,
+
+            ProviderAccountId = context.Message.AccountId,
+            ProviderUsername = context.Message.Username,
+            ProviderAvatarUrl = context.Message.AvatarUrl,
+
+            CreatedAt = now,
+            UsedAt = now,
+            UpdatedAt = now
+        };
+
+        _dbContext.Logins.Add(login);
+
+        await _dbContext.SaveChangesAsync(context.CancellationToken);
+
+        var user = await _dbContext.Logins
+            .Where(x => x.Id == login.Id)
+            .Select(x => x.User)
+            .FirstOrDefaultAsync(context.CancellationToken);
+
+        await context.RespondAsync(new ProviderLinked
+        {
+            UserId = context.Message.UserId,
+            Username = user?.Username ?? context.Message.Username
+        });
     }
 }

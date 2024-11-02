@@ -1,6 +1,6 @@
 namespace Thavyra.Contracts.User;
 
-public record UserResult
+public record User
 {
     public required Guid Id { get; init; }
 

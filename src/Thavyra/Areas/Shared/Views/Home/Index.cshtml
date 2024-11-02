@@ -6,13 +6,9 @@
 
 <div class="text-center">
     <h1 class="text-2xl font-extralight">
-        Welcome
-        @if (Model.User is not null)
-        {
-            @Model.User.Username
-        }
+        Welcome @Model.Username
     </h1>
-    <p>Learn about <a class="link" href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <p>Your ID is @Model.Id.</p>
     
     <a class="link" asp-area="Oidc" asp-controller="Login" asp-action="Logout">Log Out</a>
 </div>

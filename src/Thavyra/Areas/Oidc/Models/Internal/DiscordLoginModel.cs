@@ -9,4 +9,9 @@ public class DiscordLoginModel
     
     [JsonPropertyName("username")]
     public required string Username { get; set; }
+
+    [JsonPropertyName("avatar")]
+    public required string AvatarHash { get; set; }
+
+    public string AvatarUrl => $"https://cdn.discordapp.com/avatars/{Id}/{AvatarHash}.png";
 }

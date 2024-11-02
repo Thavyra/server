@@ -8,6 +8,7 @@ namespace Thavyra.Oidc.Models.View;
 public partial class RegisterViewModel
 {
     public required string ReturnUrl { get; set; }
+    public string? Message { get; set; }
 
     [Remote("CheckUsername", "Login", 
         ErrorMessage = "Username already taken.",

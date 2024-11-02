@@ -4,6 +4,13 @@
 
 <form method="post">
 
+    @if (Model.Message is not null)
+    {
+        <div class="text-negative mb-3">
+            @Model.Message
+        </div>
+    }
+    
     <div class="my-3">
         <label class="block text-md mb-1.5"
                asp-for="Username">

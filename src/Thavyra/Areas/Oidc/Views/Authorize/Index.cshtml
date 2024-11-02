@@ -2,13 +2,15 @@
 @using Microsoft.Extensions.Primitives
 @model Thavyra.Oidc.Models.View.AuthorizeViewModel
 
+@(ViewData["Title"] = $"Connect to {Model.Client.DisplayName}")
+
 <h2 class="text-bright text-3xl font-extralight mb-7 text-center">Connect to <span class="font-bold">@Model.Client.DisplayName</span></h2>
 
 <p class="my-1.5 text-sm text-center">A third party application wants to access your Thavyra account.</p>
 
 <p class="my-1.5 text-center">
     Signed in as
-    <span class="text-bright">@Model.Subject.Username</span>
+    <span class="text-bright">@Model.Username</span>
     <a class="link ml-0.5" asp-controller="Login" asp-action="Logout" asp-route-ReturnUrl="@Model.ReturnUrl">
         Change
     </a>

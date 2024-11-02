@@ -1,26 +1,31 @@
 using System.Security.Claims;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Abstractions;
 using OpenIddict.Client.AspNetCore;
 using OpenIddict.Client.WebIntegration;
-using Thavyra.Oidc.Managers;
-using Thavyra.Oidc.Models.Internal;
+using Thavyra.Contracts.Login;
+using Thavyra.Contracts.Login.Providers;
 
 namespace Thavyra.Oidc.Controllers;
 
 public class GitHubController : Controller
 {
-    private readonly IUserManager _userManager;
+    private readonly IRequestClient<ProviderLogin> _providerLogin;
+    private readonly IRequestClient<LinkProvider> _linkProvider;
 
-    public GitHubController(IUserManager userManager)
+    public GitHubController(
+        IRequestClient<ProviderLogin> providerLogin,
+        IRequestClient<LinkProvider> linkProvider)
     {
-        _userManager = userManager;
+        _providerLogin = providerLogin;
+        _linkProvider = linkProvider;
     }
-    
+
     [FromQuery] public string? ReturnUrl { get; set; }
-    
+
     [HttpGet("/login/github")]
     public IActionResult GitHubAsync()
     {
@@ -37,29 +42,112 @@ public class GitHubController : Controller
     {
         var result = await HttpContext.AuthenticateAsync(OpenIddictClientAspNetCoreDefaults.AuthenticationScheme);
 
-        if (result.Principal is not { Identity.IsAuthenticated: true } 
+        var redirectUri = new Uri(result.Properties?.RedirectUri ?? "/");
+        
+        if (result.Principal is not { Identity.IsAuthenticated: true }
             || result.Principal.GetClaim("id") is not { } githubId
-            || result.Principal.GetClaim("login") is not { } username)
+            || result.Principal.GetClaim("login") is not { } username
+            || result.Principal.GetClaim("avatar_url") is not { } avatarUrl)
         {
             throw new InvalidOperationException("The external authorization data cannot be used for authentication.");
         }
 
-        var login = new GitHubLoginModel
+        Response response = await _providerLogin.GetResponse<UserRegistered, LoginSucceeded>(new ProviderLogin
         {
-            Id = githubId,
-            Username = username
+            Provider = Constants.LoginTypes.GitHub,
+            AccountId = githubId,
+            Username = username,
+            AvatarUrl = avatarUrl
+        }, cancellationToken);
+
+        return response switch
+        {
+            (_, UserRegistered message) => SignInWithGitHub(message.UserId, message.Username, redirectUri),
+            (_, LoginSucceeded message) => SignInWithGitHub(message.UserId, message.Username, redirectUri),
+            _ => throw new InvalidOperationException()
         };
+    }
 
-        var user = await _userManager.RegisterWithGitHubAsync(login, cancellationToken);
+    [HttpGet("/callback/github/link")]
+    public async Task<IActionResult> LinkGitHubAsync(CancellationToken cancellationToken)
+    {
+        var cookieResult = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-        var identity =
-            new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())], "GitHub");
+        if (!cookieResult.Succeeded
+            || !Guid.TryParse(cookieResult.Principal.GetClaim(ClaimTypes.NameIdentifier), out var userId))
+        {
+            return Challenge(new AuthenticationProperties
+            {
+                RedirectUri = Request.PathBase + Request.Path + Request.QueryString
+            }, CookieAuthenticationDefaults.AuthenticationScheme);
+        }
+
+        var githubResult = await HttpContext.AuthenticateAsync(OpenIddictClientAspNetCoreDefaults.AuthenticationScheme);
+
+        if (!Uri.TryCreate(githubResult.Properties?.RedirectUri, UriKind.Absolute, out var redirectUri))
+        {
+            throw new InvalidOperationException("Redirect URI is not valid.");
+        }
+        
+        if (githubResult.Principal is not { Identity.IsAuthenticated: true }
+            || githubResult.Principal.GetClaim("id") is not { } githubId
+            || githubResult.Principal.GetClaim("login") is not { } username
+            || githubResult.Principal.GetClaim("avatar_url") is not { } avatarUrl)
+        {
+            throw new InvalidOperationException("The external authorization data cannot be used for authentication.");
+        }
+
+        Response response = await _linkProvider.GetResponse<ProviderLinked, AccountAlreadyRegistered>(new LinkProvider
+        {
+            UserId = userId,
+            Provider = Constants.LoginTypes.GitHub,
+            AccountId = githubId,
+            Username = username,
+            AvatarUrl = avatarUrl
+        }, cancellationToken);
+
+        return response switch
+        {
+            (_, ProviderLinked message) => SignInWithGitHub(
+                message.UserId,
+                cookieResult.Principal.GetClaim(ClaimTypes.Name) ?? message.Username,
+                redirectUri),
+            (_, AccountAlreadyRegistered) => Fail(
+                error: "link_github_error",
+                errorDescription: "This GitHub account is already in use by another user.",
+                redirectUri),
+            _ => throw new InvalidOperationException()
+        };
+    }
+
+    private SignInResult SignInWithGitHub(Guid userId, string username, Uri redirectUri)
+    {
+        var identity = new ClaimsIdentity(
+            [
+                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+                new Claim(ClaimTypes.Name, username),
+            ],
+            authenticationType: "GitHub");
 
         var properties = new AuthenticationProperties
         {
-            RedirectUri = result.Properties?.RedirectUri ?? "/"
+            RedirectUri = redirectUri.OriginalString
         };
-        
+
         return SignIn(new ClaimsPrincipal(identity), properties, CookieAuthenticationDefaults.AuthenticationScheme);
+    }
+    
+    private RedirectResult Fail(string error, string errorDescription, Uri redirectUri)
+    {
+        var uriBuilder = new UriBuilder(redirectUri);
+        
+        var query = QueryString.FromUriComponent(redirectUri.Query);
+        
+        query = query.Add(OpenIddictConstants.Parameters.Error, error);
+        query = query.Add(OpenIddictConstants.Parameters.ErrorDescription, errorDescription);
+
+        uriBuilder.Query = query.ToUriComponent();
+
+        return Redirect(uriBuilder.ToString());
     }
 }

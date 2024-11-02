@@ -4,5 +4,6 @@ namespace Thavyra.Shared.Models;
 
 public class UserViewModel
 {
-    public User? User { get; set; }
+    public string? Id { get; set; }
+    public string? Username { get; set; }
 }

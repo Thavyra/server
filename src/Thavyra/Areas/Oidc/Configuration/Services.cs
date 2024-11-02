@@ -61,7 +61,8 @@ public static class Services
                             .AllowAuthorizationCodeFlow()
                             .AllowImplicitFlow()
                             .AllowClientCredentialsFlow()
-                            .AllowRefreshTokenFlow();
+                            .AllowRefreshTokenFlow()
+                            .AllowNoneFlow();
 
                         options
                             .AddDevelopmentEncryptionCertificate()
@@ -99,25 +100,79 @@ public static class Services
                             switch (provider.Key)
                             {
                                 case "Discord":
+                                    var discordClientId = provider["ClientId"]
+                                                          ?? throw new Exception("Discord ClientId not provided.");
+                                    
+                                    var discordClientSecret = provider["ClientSecret"]
+                                                              ?? throw new Exception("Discord ClientSecret not provided.");
+
+                                    var discordScopes = provider.GetValue<string[]>("Scopes") ?? [];
+
                                     providers.AddDiscord(discord => discord
-                                        .SetClientId(provider["ClientId"]
-                                                     ?? throw new Exception("Discord ClientId not provided."))
-                                        .SetClientSecret(provider["ClientSecret"]
-                                                         ?? throw new Exception("Discord ClientSecret not provided."))
+                                            
+                                        // ReSharper disable once AccessToModifiedClosure
+                                        .SetClientId(discordClientId)
+                                        
+                                        // ReSharper disable once AccessToModifiedClosure
+                                        .SetClientSecret(discordClientSecret)
+                                        
                                         .SetRedirectUri("callback/discord")
-                                        .AddScopes(provider.GetValue<string[]>("Scopes") ?? []));
+                                        
+                                        // ReSharper disable once AccessToModifiedClosure
+                                        .AddScopes(discordScopes));
+
+                                    providers.AddDiscord(linkDiscord => linkDiscord
+                                            
+                                        // ReSharper disable once AccessToModifiedClosure
+                                        .SetClientId(discordClientId)
+                                        
+                                        // ReSharper disable once AccessToModifiedClosure
+                                        .SetClientSecret(discordClientSecret)
+                                        
+                                        .SetRedirectUri("callback/discord/link")
+                                        
+                                        // ReSharper disable once AccessToModifiedClosure
+                                        .AddScopes(discordScopes)
+                                        
+                                        .SetProviderName(OidcConstants.AuthenticationSchemes.LinkDiscord));
 
                                     break;
 
                                 case "GitHub":
-                                    providers.AddGitHub(github => github
-                                        .SetClientId(provider["ClientId"]
-                                                     ?? throw new Exception("GitHub ClientId not provided."))
-                                        .SetClientSecret(provider["ClientSecret"]
-                                                         ?? throw new Exception("GitHub ClientSecret not provided."))
-                                        .SetRedirectUri("callback/github")
-                                        .AddScopes(provider.GetValue<string[]>("Scopes") ?? []));
+                                    var githubClientId = provider["ClientId"]
+                                                         ?? throw new Exception("GitHub ClientId not provided.");
 
+                                    var githubClientSecret = provider["ClientSecret"]
+                                                             ?? throw new Exception(
+                                                                 "GitHub ClientSecret not provided.");
+                                    
+                                    var githubScopes = provider.GetValue<string[]>("Scopes") ?? [];
+                                    
+                                    providers.AddGitHub(github => github
+                                            
+                                        // ReSharper disable once AccessToModifiedClosure
+                                        .SetClientId(githubClientId)
+                                        
+                                        // ReSharper disable once AccessToModifiedClosure
+                                        .SetClientSecret(githubClientSecret)
+                                        .SetRedirectUri("callback/github")
+                                        
+                                        // ReSharper disable once AccessToModifiedClosure
+                                        .AddScopes(githubScopes));
+
+                                    providers.AddGitHub(linkGitHub => linkGitHub
+                                            
+                                        // ReSharper disable once AccessToModifiedClosure
+                                        .SetClientId(githubClientId)
+                                        
+                                        // ReSharper disable once AccessToModifiedClosure
+                                        .SetClientSecret(githubClientSecret)
+                                        .SetRedirectUri("callback/github/link")
+                                        
+                                        // ReSharper disable once AccessToModifiedClosure
+                                        .AddScopes(githubScopes)
+                                        .SetProviderName(OidcConstants.AuthenticationSchemes.LinkGitHub));
+                                    
                                     break;
                             }
                     });
