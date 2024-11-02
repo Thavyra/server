@@ -26,6 +26,9 @@ public class ApplicationDto
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    
+    [Column("deleted_at")] 
+    public DateTime? DeletedAt { get; set; }
 
     public UserDto Owner { get; set; } = default!;
     public ICollection<RedirectDto> Redirects { get; set; } = default!;

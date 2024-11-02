@@ -22,5 +22,8 @@ public class UserDto
     [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    [Column("deleted_at")]
+    public DateTime? DeletedAt { get; set; }
+
     public ICollection<RoleDto> Roles { get; set; } = [];
 }

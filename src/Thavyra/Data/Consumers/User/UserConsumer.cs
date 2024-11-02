@@ -65,8 +65,12 @@ public class UserConsumer :
     {
         await _dbContext.Users
             .Where(x => x.Id == context.Message.Id)
-            .ExecuteDeleteAsync(context.CancellationToken);
-
+            .ExecuteUpdateAsync(
+                x => x.SetProperty(user => user.DeletedAt, DateTime.UtcNow), 
+                context.CancellationToken);
+        
+        _cache.Remove(context.Message.Id);
+        
         await context.RespondAsync(new Success());
     }
 
@@ -85,6 +89,7 @@ public class UserConsumer :
         if (user is null)
         {
             user = await _dbContext.Users
+                .Where(x => !x.DeletedAt.HasValue)
                 .FirstOrDefaultAsync(x => x.Id == context.Message.Id, context.CancellationToken);
 
             if (user is null)
@@ -102,6 +107,7 @@ public class UserConsumer :
     public async Task Consume(ConsumeContext<User_GetByUsername> context)
     {
         var user = await _dbContext.Users
+            .Where(x => !x.DeletedAt.HasValue)
             .FirstOrDefaultAsync(x => x.Username == context.Message.Username, context.CancellationToken);
 
         if (user is null)
@@ -115,7 +121,9 @@ public class UserConsumer :
 
     public async Task Consume(ConsumeContext<User_Update> context)
     {
-        var user = await _dbContext.Users.FindAsync([context.Message.Id], context.CancellationToken);
+        var user = await _dbContext.Users
+            .Where(x => !x.DeletedAt.HasValue)
+            .FirstOrDefaultAsync(x => x.Id == context.Message.Id, context.CancellationToken);
 
         if (user is null)
         {
