@@ -31,11 +31,13 @@ public class FluentAuthorizationHandler<TRequirement, TResource>
 {
     protected void Scope(params string[] scope) =>
         RuleFor(x => x.Context.User)
-            .Must(user => scope.Any(user.HasRelativeScope));
+            .Must(user => scope.Any(user.HasRelativeScope))
+            .WithMessage($"User did not have required scope '{scope}'.");
 
     protected void Subject(Func<TResource, Guid> subject) =>
         RuleFor(x => x.Context.User)
-            .Must((context, user) => user.HasSubject(subject(context.Resource)));
+            .Must((context, user) => user.HasSubject(subject(context.Resource)))
+            .WithMessage("Subject claim did not match predicate.");
 
     protected void SubjectAsync(Func<TResource, CancellationToken, Task<Guid>> subjectTask) =>
         RuleFor(x => x.Context.User)
@@ -44,11 +46,13 @@ public class FluentAuthorizationHandler<TRequirement, TResource>
                 var subject = await subjectTask(context.Resource, cancellationToken);
 
                 return user.HasSubject(subject);
-            });
+            })
+            .WithMessage("Subject claim did not match predicate.");
 
     protected void Client(Func<TResource, Guid> client) =>
         RuleFor(x => x.Context.User)
-            .Must((context, user) => user.HasClient(client(context.Resource)));
+            .Must((context, user) => user.HasClient(client(context.Resource)))
+            .WithMessage("ApplicationId claim did not match predicate.");
 
     protected void ClientAsync(Func<TResource, CancellationToken, Task<Guid>> clientTask) =>
         RuleFor(x => x.Context.User)
@@ -57,7 +61,8 @@ public class FluentAuthorizationHandler<TRequirement, TResource>
                 var client = await clientTask(context.Resource, cancellationToken);
 
                 return user.HasClient(client);
-            });
+            })
+            .WithMessage("ApplicationId claim did not match predicate.");
 
     
     public async Task HandleAsync(AuthorizationHandlerContext context)

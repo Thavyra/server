@@ -48,6 +48,21 @@ public static class ClaimsPrincipalExtensions
 
         return subject;
     }
+
+    public static Guid GetClient(this ClaimsPrincipal user)
+    {
+        if (user.GetClaim(Constants.Claims.ApplicationId) is not { } claim)
+        {
+            throw new InvalidOperationException("Principal does not have client claim.");
+        }
+
+        if (!Guid.TryParse(claim, out var client))
+        {
+            throw new InvalidOperationException("Client claim is not a Guid.");
+        }
+
+        return client;
+    }
     
     public static bool HasSubject(this ClaimsPrincipal user, Guid subject)
     {

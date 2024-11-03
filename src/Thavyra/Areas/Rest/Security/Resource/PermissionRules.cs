@@ -2,6 +2,7 @@ using FluentValidation;
 using MassTransit;
 using OpenIddict.Abstractions;
 using Thavyra.Contracts;
+using Thavyra.Contracts.Permission;
 using Thavyra.Contracts.Role;
 
 namespace Thavyra.Rest.Security.Resource;
@@ -11,8 +12,7 @@ public class GrantPermissionRequirement : ManagePermissionRequirement;
 public class DenyPermissionRequirement : ManagePermissionRequirement;
 
 public class
-    AdminCanManagePrivilegedPermissions : FluentAuthorizationHandler<ManagePermissionRequirement,
-    Contracts.Permission.Permission>
+    AdminCanManagePrivilegedPermissions : FluentAuthorizationHandler<ManagePermissionRequirement, Permission>
 {
     private static readonly string[] Permissions =
     [
@@ -20,6 +20,7 @@ public class
         OpenIddictConstants.Permissions.Endpoints.Logout,
         
         OpenIddictConstants.Permissions.ResponseTypes.IdToken,
+        OpenIddictConstants.Permissions.ResponseTypes.None,
         
         OpenIddictConstants.Permissions.GrantTypes.Implicit,
         
@@ -34,7 +35,8 @@ public class
         Constants.Permissions.Scopes.Authorizations.Read
     ];
     
-    public AdminCanManagePrivilegedPermissions(IRequestClient<User_HasRole> hasRole)
+    public AdminCanManagePrivilegedPermissions(
+        IRequestClient<User_HasRole> hasRole)
     {
         Scope(Constants.Scopes.Admin);
 
@@ -48,7 +50,8 @@ public class
                 }, ct);
 
                 return response.Is(out Response<Correct> _);
-            });
+            })
+            .Unless(x => x.Context.User.GetSubject() == x.Context.User.GetClient());
             
         RuleFor(x => x.Resource)
             .Must(x => Permissions.Contains(x.Name));
@@ -56,8 +59,7 @@ public class
 }
 
 public class
-    AnyoneCanManageBasicPermissions : FluentAuthorizationHandler<ManagePermissionRequirement,
-    Contracts.Permission.Permission>
+    AnyoneCanManageBasicPermissions : FluentAuthorizationHandler<ManagePermissionRequirement, Permission>
 {
     private static readonly string[] Permissions =
     [
