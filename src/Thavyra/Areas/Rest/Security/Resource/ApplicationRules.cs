@@ -124,7 +124,7 @@ public class SubjectCanReadApplication : FluentAuthorizationHandler<ReadApplicat
 {
     public SubjectCanReadApplication()
     {
-        Scope(Constants.Scopes.Applications.Read);
+        // Scope(Constants.Scopes.Applications.Read);
         Subject(x => x.Id);
     }
 }
@@ -134,7 +134,7 @@ public class SubjectCanReadApplicationObjectives : FluentAuthorizationHandler<Re
 {
     public SubjectCanReadApplicationObjectives()
     {
-        Scope(Constants.Scopes.Applications.Read);
+        // Scope(Constants.Scopes.Applications.Read);
         Subject(x => x.Id);
     }
 }
@@ -144,7 +144,7 @@ public class SubjectCanReadApplicationTransactions : FluentAuthorizationHandler<
 {
     public SubjectCanReadApplicationTransactions()
     {
-        Scope(Constants.Scopes.Applications.Read);
+        // Scope(Constants.Scopes.Applications.Read);
         Subject(x => x.Id);
     }
 }
@@ -155,7 +155,7 @@ public class
 {
     public SubjectCanResetClientSecret()
     {
-        Scope(Constants.Scopes.Sudo);
+        // Scope(Constants.Scopes.Sudo);
         Subject(x => x.Id);
     }
 }
@@ -165,7 +165,7 @@ public class
 {
     public SubjectCanUpdateApplication()
     {
-        Scope(Constants.Scopes.Applications.All);
+        // Scope(Constants.Scopes.Applications.All);
         Subject(x => x.Id);
     }
 }
