@@ -116,7 +116,7 @@ public static class Services
                                         // ReSharper disable once AccessToModifiedClosure
                                         .SetClientSecret(discordClientSecret)
                                         
-                                        .SetRedirectUri("callback/discord")
+                                        .SetRedirectUri($"callback/{Constants.Providers.Discord}")
                                         
                                         // ReSharper disable once AccessToModifiedClosure
                                         .AddScopes(discordScopes));
@@ -129,7 +129,7 @@ public static class Services
                                         // ReSharper disable once AccessToModifiedClosure
                                         .SetClientSecret(discordClientSecret)
                                         
-                                        .SetRedirectUri("callback/discord/link")
+                                        .SetRedirectUri($"callback/{Constants.Providers.Discord}/link")
                                         
                                         // ReSharper disable once AccessToModifiedClosure
                                         .AddScopes(discordScopes)
@@ -155,7 +155,7 @@ public static class Services
                                         
                                         // ReSharper disable once AccessToModifiedClosure
                                         .SetClientSecret(githubClientSecret)
-                                        .SetRedirectUri("callback/github")
+                                        .SetRedirectUri($"callback/{Constants.Providers.GitHub}")
                                         
                                         // ReSharper disable once AccessToModifiedClosure
                                         .AddScopes(githubScopes));
@@ -167,7 +167,7 @@ public static class Services
                                         
                                         // ReSharper disable once AccessToModifiedClosure
                                         .SetClientSecret(githubClientSecret)
-                                        .SetRedirectUri("callback/github/link")
+                                        .SetRedirectUri($"callback/{Constants.Providers.GitHub}/link")
                                         
                                         // ReSharper disable once AccessToModifiedClosure
                                         .AddScopes(githubScopes)

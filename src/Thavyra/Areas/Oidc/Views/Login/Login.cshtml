@@ -1,56 +1,64 @@
+@using Thavyra
 @model Thavyra.Oidc.Models.View.LoginViewModel
 
 <h2 class="text-3xl font-extralight mb-7 text-center">Log In</h2>
 
-<form method="post">
+<div>
+    <form method="post">
 
-    @if (Model.Message is not null)
-    {
-        <div class="text-negative mb-3">
-            @Model.Message
+        @if (Model.Message is not null)
+        {
+            <div class="text-negative mb-3">
+                @Model.Message
+            </div>
+        }
+
+        <div class="my-3">
+            <label class="block text-md mb-1.5"
+                   asp-for="Username">
+                Username
+            </label>
+            <input class="form-control"
+                   type="text" asp-for="Username"/>
+            <span class="text-sm text-negative"
+                  asp-validation-for="Username">
+            </span>
         </div>
-    }
-    
-    <div class="my-3">
-        <label class="block text-md mb-1.5"
-               asp-for="Username">
-            Username
-        </label>
-        <input class="form-control"
-               type="text" asp-for="Username"/>
-        <span class="text-sm text-negative"
-              asp-validation-for="Username"></span>
-    </div>
 
-    <div class="my-3">
-        <label class="block text-md mb-1.5"
-               asp-for="Password">
-            Password
-        </label>
-        <input class="form-control"
-               type="password" asp-for="Password"/>
-        <span class="text-sm text-negative" asp-validation-for="Password"></span>
-    </div>
+        <div class="my-3">
+            <label class="block text-md mb-1.5"
+                   asp-for="Password">
+                Password
+            </label>
+            <input class="form-control"
+                   type="password" asp-for="Password"/>
+            <span class="text-sm text-negative" asp-validation-for="Password"></span>
+        </div>
 
-    <button type="submit" class="btn btn-primary my-3 w-full text-bright">Log In</button>
-    
+        <button type="submit" class="btn btn-primary my-3 w-full text-bright">Log In</button>
+    </form>
+
     <div class="flex py-3 items-center">
         <div class="flex-grow border-t border-dark-700"></div>
         <span class="flex-shrink mx-3">or sign in with</span>
         <div class="flex-grow border-t border-dark-700"></div>
     </div>
-    
-    <a class="btn btn-discord my-3 w-full text-center" asp-controller="Discord" asp-action="Discord" asp-route-ReturnUrl="@Model.ReturnUrl">
-        <img src="img/discord-logo-blue.png" alt="Discord" class="inline" style="height: 1.3rem;"/>
-    </a>
-    
-    <a class="btn btn-github my-3 w-full text-center" asp-controller="GitHub" asp-action="GitHub" asp-route-ReturnUrl="@Model.ReturnUrl">
-        <img src="img/github-mark-white.png" alt="" class="inline" style="height: 1.5rem;"/>
-        <img src="img/GitHub_Logo_White.png" alt="GitHub" class="inline" style="height: 1.4rem;"/>
-    </a>
+
+    <form asp-controller="Provider" asp-action="Login" asp-route-provider="@Constants.Providers.Discord" asp-route-returnUrl="@Model.ReturnUrl">
+        <button type="submit" class="btn btn-discord my-3 w-full text-center">
+            <img src="img/discord-logo-blue.png" alt="Discord" class="inline" style="height: 1.3rem;"/>
+        </button>
+    </form>
+
+    <form asp-controller="Provider" asp-action="Login" asp-route-provider="@Constants.Providers.GitHub" asp-route-returnUrl="@Model.ReturnUrl">
+        <button type="submit" class="btn btn-github my-3 w-full text-center">
+            <img src="img/github-mark-white.png" alt="GitHub Logo" class="inline" style="height: 1.5rem;"/>
+            <img src="img/GitHub_Logo_White.png" alt="GitHub" class="inline" style="height: 1.4rem;"/>
+        </button>
+    </form>
 
     <p>Don't have an account? <a class="link" asp-controller="Login" asp-action="Register" asp-route-ReturnUrl="@Model.ReturnUrl">Register</a></p>
-</form>
+</div>
 
 @section Scripts
 {
