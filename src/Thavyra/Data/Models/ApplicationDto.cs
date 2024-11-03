@@ -31,7 +31,7 @@ public class ApplicationDto
     public DateTime? DeletedAt { get; set; }
 
     public UserDto Owner { get; set; } = default!;
-    public ICollection<RedirectDto> Redirects { get; set; } = default!;
-    public ICollection<PermissionDto> Permissions { get; set; } = default!;
-    public ICollection<ObjectiveDto> Objectives { get; set; } = default!;
+    public ICollection<RedirectDto> Redirects { get; set; } = [];
+    public ICollection<PermissionDto> Permissions { get; set; } = [];
+    public ICollection<ObjectiveDto> Objectives { get; set; } = [];
 }

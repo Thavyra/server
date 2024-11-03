@@ -283,7 +283,7 @@ public class ApplicationConsumer :
     {
         var application = await _dbContext.Applications
             .Where(x => !x.DeletedAt.HasValue)
-            .FirstOrDefaultAsync(x => x.Id == context.Message.ApplicationId);
+            .FirstOrDefaultAsync(x => x.Id == context.Message.ApplicationId, context.CancellationToken);
 
         if (application is null)
         {
