@@ -9,6 +9,7 @@ public class Validator : Validator<Request>
     {
         RuleFor(x => x.Password)
             .NotEmpty()
-            .Length(8, 100);
+            .MinimumLength(8)
+            .MaximumLength(100);
     }
 }

@@ -1,26 +1,26 @@
 using FastEndpoints;
 using MassTransit;
 using Microsoft.AspNetCore.Authorization;
-using Thavyra.Contracts;
 using Thavyra.Contracts.Login;
+using Thavyra.Contracts.Login.Data;
 using Thavyra.Rest.Security;
 
 namespace Thavyra.Rest.Features.Logins.PutPassword;
 
-public class Endpoint : Endpoint<Request>
+public class Endpoint : Endpoint<Request, LoginResponse>
 {
-    private readonly IRequestClient<PasswordLogin_GetByUser> _getPassword;
     private readonly IAuthorizationService _authorizationService;
-    private readonly IRequestClient<PasswordLogin_Update> _updatePassword;
+    private readonly IRequestClient<ChangePassword> _changePassword;
+    private readonly IRequestClient<GetLoginById> _getLogin;
 
     public Endpoint(
-        IRequestClient<PasswordLogin_GetByUser> getPassword, 
         IAuthorizationService authorizationService,
-        IRequestClient<PasswordLogin_Update> updatePassword)
+        IRequestClient<ChangePassword> changePassword,
+        IRequestClient<GetLoginById> getLogin)
     {
-        _getPassword = getPassword;
         _authorizationService = authorizationService;
-        _updatePassword = updatePassword;
+        _changePassword = changePassword;
+        _getLogin = getLogin;
     }
 
     public override void Configure()
@@ -30,59 +30,56 @@ public class Endpoint : Endpoint<Request>
 
     public override async Task HandleAsync(Request req, CancellationToken ct)
     {
-        var state = ProcessorState<AuthenticationState>();
-
-        if (state.User is not { } user)
+        if (ProcessorState<AuthenticationState>().User is not { } user)
         {
-            throw new InvalidOperationException("Could not retrieve user.");
+            throw new InvalidOperationException();
         }
 
-        var readResult =
-            await _authorizationService.AuthorizeAsync(User, user, Security.Policies.Operation.Login.Read);
-
-        if (!readResult.Succeeded)
+        if (await _authorizationService.AuthorizeAsync(User, user, Security.Policies.Operation.Login.SetPassword) 
+            is { Succeeded: false, Failure: var failure })
         {
-            await this.SendAuthorizationFailureAsync(readResult.Failure, ct);
+            await this.SendAuthorizationFailureAsync(failure, ct);
             return;
         }
 
-        Response passwordResponse = await _getPassword.GetResponse<PasswordLogin, NotFound>(new PasswordLogin_GetByUser
+        Response response = await _changePassword.GetResponse<PasswordChanged, LoginFailed, LoginNotFound>(
+            new ChangePassword
+            {
+                UserId = user.Id,
+                CurrentPassword = req.CurrentPassword,
+                Password = req.Password
+            }, ct);
+
+        switch (response)
         {
-            UserId = user.Id
-        }, ct);
-
-        switch (passwordResponse)
-        {
-            case (_, PasswordLogin login):
-                var updateResult =
-                    await _authorizationService.AuthorizeAsync(User, login, Security.Policies.Operation.Login.SetPassword);
-
-                if (!updateResult.Succeeded)
-                {
-                    await this.SendAuthorizationFailureAsync(updateResult.Failure, ct);
-                    return;
-                }
-
-                break;
-            
-            case (_, NotFound):
+            case (_, LoginNotFound):
                 await SendNotFoundAsync(ct);
                 return;
             
-            default:
-                throw new InvalidOperationException();
+            case (_, LoginFailed):
+                AddError(x => x.CurrentPassword, 
+                    req.CurrentPassword is null ? "Current password is required." : "Current password is incorrect.");
+
+                await SendErrorsAsync(cancellation: ct);
+                
+                return;
+            
+            case (_, PasswordChanged success):
+                var login = await _getLogin.GetResponse<LoginResult>(new GetLoginById
+                {
+                    LoginId = success.LoginId
+                }, ct);
+
+                await SendAsync(new LoginResponse
+                {
+                    Id = success.LoginId.ToString(),
+                    Type = Constants.LoginTypes.Password,
+
+                    ChangedAt = success.Timestamp,
+                    UsedAt = login.Message.UsedAt
+                }, cancellation: ct);
+                
+                break;
         }
-
-        var updateResponse = await _updatePassword.GetResponse<PasswordLogin>(new PasswordLogin_Update
-        {
-            Id = user.Id,
-            Password = req.Password
-        }, ct);
-
-        await SendAsync(new PasswordLoginResponse
-        {
-            ChangedAt = updateResponse.Message.ChangedAt,
-            CreatedAt = updateResponse.Message.CreatedAt
-        }, cancellation: ct);
     }
 }

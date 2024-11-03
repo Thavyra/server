@@ -21,6 +21,8 @@ public static class RegisterHandlers
         .AddAuthorizationHandler<SubjectCanReadUserRoles>()
         .AddAuthorizationHandler<SubjectCanReadUserTransactions>()
         .AddAuthorizationHandler<SubjectCanUpdateUserProfile>()
+        
+        .AddAuthorizationHandler<SubjectCanSetPassword>()
 
         .AddAuthorizationHandler<AdminCanReadApplication>()
         .AddAuthorizationHandler<OwnerCanCreateApplication>()

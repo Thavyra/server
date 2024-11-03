@@ -37,7 +37,7 @@ public class PasswordConsumer :
         }, context.CancellationToken);
 
         var hash = await _hashService.HashAsync(context.Message.Password);
-        
+
         var login = new LoginDto
         {
             UserId = user.Message.UserId,
@@ -96,14 +96,14 @@ public class PasswordConsumer :
             {
                 login.PasswordHash = rehash;
             }
-            
+
             var attempt = new LoginAttemptDto
             {
                 LoginId = login.Id,
                 Succeeded = true,
                 CreatedAt = DateTime.UtcNow
             };
-            
+
             _dbContext.LoginAttempts.Add(attempt);
         }
         else
@@ -123,13 +123,13 @@ public class PasswordConsumer :
                 Succeeded = false,
                 CreatedAt = DateTime.UtcNow
             };
-            
+
             _dbContext.LoginAttempts.Add(attempt);
         }
-        
+
         await _dbContext.SaveChangesAsync(context.CancellationToken);
     }
-    
+
     public async Task Consume(ConsumeContext<ChangePassword> context)
     {
         var login = await _dbContext.Logins
@@ -137,46 +137,54 @@ public class PasswordConsumer :
             .Where(x => x.UserId == context.Message.UserId)
             .FirstOrDefaultAsync(context.CancellationToken);
 
-        if (login?.PasswordHash is null)
+        var now = DateTime.UtcNow;
+
+        switch (login)
         {
-            if (context.IsResponseAccepted<LoginNotFound>())
-            {
-                await context.RespondAsync(new LoginNotFound());
-                return;
-            }
-
-            throw new InvalidOperationException("Login not found.");
-        }
-
-        var hashResult = await _hashService.CheckAsync(context.Message.CurrentPassword, login.PasswordHash);
-
-        if (!hashResult.Succeeded)
-        {
-            if (context.IsResponseAccepted<LoginFailed>())
-            {
-                await context.RespondAsync(new LoginFailed
-                {
-                    LoginId = login.Id,
-                    Timestamp = DateTime.UtcNow
-                });
+            case null:
                 
-                return;
-            }
+                login = new LoginDto
+                {
+                    UserId = context.Message.UserId,
+                    Type = Constants.LoginTypes.Password,
+                    CreatedAt = now
+                };
 
-            throw new InvalidOperationException("Current password is incorrect.");
+                _dbContext.Logins.Add(login);
+                
+                break;
+            case { PasswordHash: not null } when context.Message.CurrentPassword is not null 
+                && await _hashService.CheckAsync(
+                    context.Message.CurrentPassword, login.PasswordHash) is { Succeeded: true }:
+
+                break;
+            default:
+                
+                if (context.IsResponseAccepted<LoginFailed>())
+                {
+                    await context.RespondAsync(new LoginFailed
+                    {
+                        LoginId = login.Id,
+                        Timestamp = now
+                    });
+
+                    return;
+                }
+
+                throw new InvalidOperationException("Current password is incorrect.");
         }
-        
+
         var hash = await _hashService.HashAsync(context.Message.Password);
-        
+
         login.PasswordHash = hash;
-        login.UpdatedAt = DateTime.UtcNow;
+        login.UpdatedAt = now;
 
         await _dbContext.SaveChangesAsync(context.CancellationToken);
 
         await context.RespondAsync(new PasswordChanged
         {
             LoginId = login.Id,
-            Timestamp = DateTime.UtcNow
+            Timestamp = now
         });
     }
 }

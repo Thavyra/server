@@ -51,9 +51,6 @@ public static class RegisterPolicies
 
             // Logins
 
-            .AddPolicy(Policies.Operation.Login.Read, policy =>
-                policy.AddRequirements(new ReadLoginRequirement()))
-
             .AddPolicy(Policies.Operation.Login.SetPassword, policy =>
                 policy.AddRequirements(new SetPasswordRequirement()))
 
