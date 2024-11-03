@@ -20,6 +20,15 @@ public static class Services
         services.AddTransient<IUserService, UserService>();
         
         services.AddFastEndpoints();
+
+        foreach (var section in configuration.GetChildren())
+            switch (section.Key)
+            {
+                case "DiceBear":
+                    services.Configure<DiceBearOptions>(section);
+                    services.AddHttpClient<IIconService, DiceBearIconService>();
+                    break;
+            }
         
         return services;
     }

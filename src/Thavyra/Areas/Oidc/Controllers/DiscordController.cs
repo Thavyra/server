@@ -60,8 +60,8 @@ public class DiscordController : Controller
         
         return response switch
         {
-            (_, UserRegistered message) => SignInWithDiscord(message.UserId, message.Username, redirectUri),
-            (_, LoginSucceeded message) => SignInWithDiscord(message.UserId, message.Username, redirectUri),
+            (_, UserRegistered message) => SignInWithDiscord(message.UserId, message.Username, login.AvatarUrl, redirectUri),
+            (_, LoginSucceeded message) => SignInWithDiscord(message.UserId, message.Username, login.AvatarUrl, redirectUri),
             _ => throw new InvalidOperationException()
         };
     }
@@ -101,8 +101,9 @@ public class DiscordController : Controller
         return response switch
         {
             (_, ProviderLinked message) => SignInWithDiscord(
-                message.UserId, 
-                cookieResult.Principal.GetClaim(ClaimTypes.Name) ?? message.Username, 
+                userId: message.UserId, 
+                username: cookieResult.Principal.GetClaim(ClaimTypes.Name) ?? message.Username, 
+                avatarUrl: null,
                 redirectUri),
             (_, AccountAlreadyRegistered) => Fail(
                 error: "link_discord_error",
@@ -129,14 +130,13 @@ public class DiscordController : Controller
         return login;
     }
 
-    private SignInResult SignInWithDiscord(Guid userId, string username, Uri redirectUri)
+    private SignInResult SignInWithDiscord(Guid userId, string username, string? avatarUrl, Uri redirectUri)
     {
-        var identity = new ClaimsIdentity(
-            [
-                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                new Claim(ClaimTypes.Name, username)
-            ],
-            authenticationType: "Discord");
+        var identity = new ClaimsIdentity(authenticationType: "Discord");
+
+        identity.SetClaim(ClaimTypes.NameIdentifier, userId.ToString());
+        identity.SetClaim(ClaimTypes.Name, username);
+        identity.SetClaim(OpenIddictConstants.Claims.Picture, avatarUrl);
 
         var properties = new AuthenticationProperties
         {

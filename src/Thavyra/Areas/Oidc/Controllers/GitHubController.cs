@@ -62,8 +62,8 @@ public class GitHubController : Controller
 
         return response switch
         {
-            (_, UserRegistered message) => SignInWithGitHub(message.UserId, message.Username, redirectUri),
-            (_, LoginSucceeded message) => SignInWithGitHub(message.UserId, message.Username, redirectUri),
+            (_, UserRegistered message) => SignInWithGitHub(message.UserId, message.Username, avatarUrl, redirectUri),
+            (_, LoginSucceeded message) => SignInWithGitHub(message.UserId, message.Username, avatarUrl, redirectUri),
             _ => throw new InvalidOperationException()
         };
     }
@@ -109,8 +109,9 @@ public class GitHubController : Controller
         return response switch
         {
             (_, ProviderLinked message) => SignInWithGitHub(
-                message.UserId,
-                cookieResult.Principal.GetClaim(ClaimTypes.Name) ?? message.Username,
+                userId: message.UserId,
+                username: cookieResult.Principal.GetClaim(ClaimTypes.Name) ?? message.Username,
+                avatarUrl: null,
                 redirectUri),
             (_, AccountAlreadyRegistered) => Fail(
                 error: "link_github_error",
@@ -120,14 +121,13 @@ public class GitHubController : Controller
         };
     }
 
-    private SignInResult SignInWithGitHub(Guid userId, string username, Uri redirectUri)
+    private SignInResult SignInWithGitHub(Guid userId, string username, string? avatarUrl, Uri redirectUri)
     {
-        var identity = new ClaimsIdentity(
-            [
-                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                new Claim(ClaimTypes.Name, username),
-            ],
-            authenticationType: "GitHub");
+        var identity = new ClaimsIdentity(authenticationType: "GitHub");
+
+        identity.SetClaim(ClaimTypes.NameIdentifier, userId.ToString());
+        identity.SetClaim(ClaimTypes.Name, username);
+        identity.SetClaim(OpenIddictConstants.Claims.Picture, avatarUrl);
 
         var properties = new AuthenticationProperties
         {

@@ -313,10 +313,11 @@ public class AuthorizeController : Controller
 
         var identity = new ClaimsIdentity(
             authenticationType: TokenValidationParameters.DefaultAuthenticationType,
-            nameType: Claims.Username,
+            nameType: Claims.Name,
             roleType: Claims.Role);
 
-        identity.SetClaim(Claims.Username, User.GetClaim(ClaimTypes.Name));
+        identity.SetClaim(Claims.Name, User.GetClaim(ClaimTypes.Name));
+        identity.SetClaim(Claims.Picture, User.GetClaim(Claims.Picture));
 
         identity.SetClaim(Claims.Subject, userId.ToString());
         identity.SetClaim(Claims.ClientId, application.ClientId);
@@ -332,7 +333,9 @@ public class AuthorizeController : Controller
         identity.SetDestinations(static claim => claim.Type switch
         {
             Claims.Subject => [Destinations.IdentityToken, Destinations.AccessToken],
-            Claims.Username => [Destinations.IdentityToken, Destinations.AccessToken],
+            Claims.Name => [Destinations.IdentityToken, Destinations.AccessToken],
+            Claims.Picture => [Destinations.IdentityToken],
+            
             Claims.Role => [Destinations.IdentityToken],
 
             _ => [Destinations.AccessToken]
