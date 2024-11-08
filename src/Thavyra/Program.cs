@@ -7,6 +7,7 @@ using Thavyra.Data.Configuration;
 using Thavyra.Oidc.Configuration;
 using Thavyra.Rest.Configuration;
 using Thavyra.Rest.Security;
+using Thavyra.Storage.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,6 +53,9 @@ foreach (var section in builder.Configuration.GetChildren())
     {
         case "Data":
             builder.Services.AddEntityFramework(section);
+            break;
+        case "Storage":
+            builder.Services.AddCloudStorage(section);
             break;
         case "Oidc":
             builder.Services.AddOidcAuthorizationServer(section);

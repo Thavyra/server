@@ -28,7 +28,6 @@ public class DiceBearIconService : IIconService
     {
         var query = new QueryBuilder(new Dictionary<string, string>
         {
-            ["radius"] = "50",
             ["size"] = size.ToString(),
         });
 
