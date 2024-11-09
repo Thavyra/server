@@ -153,6 +153,7 @@ public class AuthorizeController : Controller
 
             _ => View(new AuthorizeViewModel
             {
+                UserId = userId,
                 Username = username,
                 Client = application,
                 Scopes = scopes.AsReadOnly(),
