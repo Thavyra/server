@@ -40,7 +40,9 @@ public class TransactionConsumer :
     
     public async Task Consume(ConsumeContext<Transaction_Create> context)
     {
-        var subject = await _dbContext.Users.FindAsync([context.Message.SubjectId], context.CancellationToken);
+        var subject = await _dbContext.Users
+            .Where(x => !x.DeletedAt.HasValue)
+            .FirstOrDefaultAsync(x => x.Id == context.Message.SubjectId, context.CancellationToken);
 
         if (subject is null)
         {
