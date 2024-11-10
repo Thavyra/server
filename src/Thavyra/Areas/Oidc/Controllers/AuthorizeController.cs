@@ -263,7 +263,7 @@ public class AuthorizeController : Controller
         return await AuthorizeAsync(
             user.Id,
             application,
-            scopes: [..scopes.Select(x => x.Name!)],
+            scopes: scopeNames,
             authorization: permanentAuthorizations.LastOrDefault(),
             type: AuthorizationTypes.Permanent,
             cancellationToken);
