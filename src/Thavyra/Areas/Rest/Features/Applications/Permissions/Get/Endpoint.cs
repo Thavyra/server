@@ -7,7 +7,7 @@ using Thavyra.Rest.Security;
 
 namespace Thavyra.Rest.Features.Applications.Permissions.Get;
 
-public class Endpoint : Endpoint<ApplicationRequest, List<PermissionResponse>>
+public class Endpoint : Endpoint<ApplicationRequest, List<string>>
 {
     private readonly IAuthorizationService _authorizationService;
     private readonly IRequestClient<Permission_GetByApplication> _getPermissions;
@@ -47,11 +47,8 @@ public class Endpoint : Endpoint<ApplicationRequest, List<PermissionResponse>>
             ApplicationId = application.Id
         }, ct);
 
-        await SendAsync(response.Message.Items.Select(x => new PermissionResponse
-        {
-            Id = x.Id.ToString(),
-            Name = x.Name,
-            DisplayName = x.DisplayName
-        }).ToList(), cancellation: ct);
+        await SendAsync(response.Message.Items
+            .Select(x => x.Name)
+            .ToList(), cancellation: ct);
     }
 }
