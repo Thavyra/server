@@ -35,7 +35,7 @@ public class Endpoint : Endpoint<Request, ObjectiveResponse>
             Id = req.Id
         }, ct);
 
-        if (getResponse.Is(out Response<NotFound> _))
+        if (getResponse.Is(out Response<NotFound>? _))
         {
             await SendNotFoundAsync(ct);
             return;

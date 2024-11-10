@@ -192,7 +192,7 @@ public class ScoreboardConsumer :
     public async Task Consume(ConsumeContext<Score_GetById> context)
     {
         var score = await _dbContext.Scores
-            .Where(x => !x.Objective.DeletedAt.HasValue)
+            .Where(x => !x.Objective!.DeletedAt.HasValue)
             .FirstOrDefaultAsync(x => x.Id == context.Message.Id, context.CancellationToken);
 
         if (score is null)
@@ -207,7 +207,7 @@ public class ScoreboardConsumer :
     public async Task Consume(ConsumeContext<Score_GetByUser> context)
     {
         var scores = await _dbContext.Scores
-            .Where(x => !x.Objective.DeletedAt.HasValue)
+            .Where(x => !x.Objective!.DeletedAt.HasValue)
             .Where(x => x.UserId == context.Message.UserId)
             .ToListAsync(context.CancellationToken);
 

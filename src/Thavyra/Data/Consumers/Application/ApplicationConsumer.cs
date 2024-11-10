@@ -213,7 +213,7 @@ public class ApplicationConsumer :
     {
         var applications = await _dbContext.Redirects
             .Where(x => x.Uri == context.Message.Uri)
-            .Select(x => x.Application)
+            .Select(x => x.Application!)
             .Where(x => !x.DeletedAt.HasValue)
             .ToListAsync(context.CancellationToken);
 
@@ -319,7 +319,7 @@ public class ApplicationConsumer :
     public async Task Consume(ConsumeContext<Redirect_Delete> context)
     {
         await _dbContext.Redirects
-            .Where(x => !x.Application.DeletedAt.HasValue)
+            .Where(x => !x.Application!.DeletedAt.HasValue)
             .Where(x => x.ApplicationId == context.Message.ApplicationId)
             .Where(x => x.Id == context.Message.Id)
             .ExecuteDeleteAsync(context.CancellationToken);
@@ -330,7 +330,7 @@ public class ApplicationConsumer :
     public async Task Consume(ConsumeContext<Redirect_GetByApplication> context)
     {
         var redirects = await _dbContext.Redirects
-            .Where(x => !x.Application.DeletedAt.HasValue)
+            .Where(x => !x.Application!.DeletedAt.HasValue)
             .Where(x => x.ApplicationId == context.Message.ApplicationId)
             .ToListAsync(context.CancellationToken);
 
@@ -348,7 +348,7 @@ public class ApplicationConsumer :
     public async Task Consume(ConsumeContext<Redirect_GetById> context)
     {
         var redirect = await _dbContext.Redirects
-            .Where(x => !x.Application.DeletedAt.HasValue)
+            .Where(x => !x.Application!.DeletedAt.HasValue)
             .Where(x => x.ApplicationId == context.Message.ApplicationId)
             .Where(x => x.Id == context.Message.Id)
             .FirstOrDefaultAsync(context.CancellationToken);

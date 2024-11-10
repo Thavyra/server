@@ -35,7 +35,7 @@ public class Endpoint : Endpoint<Request, ScoreResponse>
             Id = req.ObjectiveId
         }, ct);
 
-        if (objectiveResponse.Is(out Response<NotFound> _))
+        if (objectiveResponse.Is(out Response<NotFound>? _))
         {
             await SendNotFoundAsync(ct);
             return;

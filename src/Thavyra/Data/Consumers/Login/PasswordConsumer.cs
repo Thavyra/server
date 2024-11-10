@@ -63,7 +63,7 @@ public class PasswordConsumer :
     public async Task Consume(ConsumeContext<PasswordLogin> context)
     {
         var login = await _dbContext.Logins
-            .Where(x => x.User.Username == context.Message.Username && !x.User.DeletedAt.HasValue)
+            .Where(x => x.User!.Username == context.Message.Username && !x.User.DeletedAt.HasValue)
             .Where(x => x.Type == Constants.LoginTypes.Password)
             .Include(x => x.User)
             .FirstOrDefaultAsync(context.CancellationToken);
@@ -134,7 +134,7 @@ public class PasswordConsumer :
     {
         var login = await _dbContext.Logins
             .Where(x => x.Type == Constants.LoginTypes.Password)
-            .Where(x => x.UserId == context.Message.UserId && !x.User.DeletedAt.HasValue)
+            .Where(x => x.UserId == context.Message.UserId && !x.User!.DeletedAt.HasValue)
             .FirstOrDefaultAsync(context.CancellationToken);
 
         var now = DateTime.UtcNow;

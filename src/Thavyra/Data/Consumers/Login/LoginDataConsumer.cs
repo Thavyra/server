@@ -21,7 +21,7 @@ public class LoginDataConsumer :
     {
         var query = _dbContext.Logins
             .Where(x => x.UserId == context.Message.UserId)
-            .Where(x => !x.User.DeletedAt.HasValue);
+            .Where(x => !x.User!.DeletedAt.HasValue);
         
         var attempts = await query
             .Select(x => x.Attempts
@@ -55,7 +55,7 @@ public class LoginDataConsumer :
     {
         var login = await _dbContext.Logins
             .Where(x => x.Id == context.Message.LoginId)
-            .Where(x => !x.User.DeletedAt.HasValue)
+            .Where(x => !x.User!.DeletedAt.HasValue)
             .FirstOrDefaultAsync(context.CancellationToken);
 
         if (login is null)

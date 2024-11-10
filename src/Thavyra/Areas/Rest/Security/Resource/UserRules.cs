@@ -39,7 +39,7 @@ public class AdminCanManageUserRoles : FluentAuthorizationHandler<ManageUserRole
             RoleName = Constants.Roles.Admin
         });
 
-        if (response.Is(out Response<Correct> _))
+        if (response.Is(out Response<Correct>? _))
         {
             context.Succeed(requirement);
         }

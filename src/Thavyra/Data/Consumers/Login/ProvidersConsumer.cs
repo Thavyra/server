@@ -32,7 +32,7 @@ public class ProvidersConsumer :
         var login = await _dbContext.Logins
             .Where(x => x.Type == context.Message.Provider)
             .Where(x => x.ProviderAccountId == context.Message.AccountId)
-            .Where(x => !x.User.DeletedAt.HasValue)
+            .Where(x => !x.User!.DeletedAt.HasValue)
             .Include(x => x.User)
             .FirstOrDefaultAsync(context.CancellationToken);
         
@@ -50,7 +50,7 @@ public class ProvidersConsumer :
         await context.RespondAsync(new LoginSucceeded
         {
             UserId = login.UserId,
-            Username = login.User.Username ?? login.ProviderUsername
+            Username = login.User!.Username
         });
 
         var attempt = new LoginAttemptDto
@@ -108,7 +108,7 @@ public class ProvidersConsumer :
         var login = await _dbContext.Logins
             .Where(x => x.Type == context.Message.Provider)
             .Where(x => x.ProviderAccountId == context.Message.AccountId)
-            .Where(x => !x.User.DeletedAt.HasValue)
+            .Where(x => !x.User!.DeletedAt.HasValue)
             .FirstOrDefaultAsync(context.CancellationToken);
 
         if (login is not null)
