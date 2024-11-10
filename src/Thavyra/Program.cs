@@ -12,6 +12,7 @@ using Thavyra.Storage.Configuration;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddJsonFile("appsettings.Secret.json");
+builder.Configuration.AddJsonFile("usernames.json");
 builder.Configuration.AddEnvironmentVariables();
 
 // Add services to the container.

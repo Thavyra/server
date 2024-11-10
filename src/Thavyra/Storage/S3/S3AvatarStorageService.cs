@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Mime;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Microsoft.Extensions.Options;
@@ -11,15 +12,31 @@ namespace Thavyra.Storage.S3;
 public class S3AvatarStorageService : IAvatarStorageService
 {
     private readonly IAmazonS3 _s3;
+    private readonly HttpClient _httpClient;
     private readonly StorageOptions _options;
 
-    public S3AvatarStorageService(IAmazonS3 s3, IOptions<StorageOptions> options)
+    public S3AvatarStorageService(IAmazonS3 s3, HttpClient httpClient, IOptions<StorageOptions> options)
     {
         _s3 = s3;
+        _httpClient = httpClient;
         _options = options.Value;
     }
-    
-    public async Task<UploadFileResult> UploadAvatarAsync(AvatarType type, Guid ownerId, IFormFile file, CancellationToken cancellationToken)
+
+    public async Task<UploadFileResult> UploadAvatarAsync(AvatarType type, Guid ownerId, string url, CancellationToken cancellationToken)
+    {
+        var response = await _httpClient.GetAsync(url, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return new UploadFileFailedResult();
+        }
+        
+        var content = await response.Content.ReadAsStreamAsync(cancellationToken);
+
+        return await UploadAvatarAsync(type, ownerId, content, cancellationToken);
+    }
+
+    public async Task<UploadFileResult> UploadAvatarAsync(AvatarType type, Guid ownerId, Stream fileStream, CancellationToken cancellationToken)
     {
         var prefix = type switch
         {
@@ -29,17 +46,36 @@ public class S3AvatarStorageService : IAvatarStorageService
         };
 
         using var stream = new MemoryStream();
-        using (var image = await Image.LoadAsync(file.OpenReadStream(), cancellationToken))
+
+        try
         {
+            using var image = await Image.LoadAsync(fileStream, cancellationToken);
+            
             image.Mutate(x => x.Resize(500, 500));
             await image.SaveAsPngAsync(stream, cancellationToken);
+        }
+        catch (NotSupportedException)
+        {
+            return new InvalidFileFormatResult();
+        }
+        catch (InvalidImageContentException)
+        {
+            return new InvalidFileFormatResult();
+        }
+        catch (UnknownImageFormatException)
+        {
+            return new InvalidFileFormatResult();
+        }
+        catch (ImageProcessingException)
+        {
+            return new UploadFileFailedResult();
         }
         
         var request = new PutObjectRequest
         {
             BucketName = _options.Avatars.Bucket,
             Key = $"{prefix}/{ownerId}",
-            ContentType = file.ContentType,
+            ContentType = "image/png",
             InputStream = stream
         };
 

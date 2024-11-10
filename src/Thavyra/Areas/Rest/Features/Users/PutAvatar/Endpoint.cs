@@ -36,7 +36,7 @@ public class Endpoint : Endpoint<Request>
             return;
         }
         
-        var result = await _storage.UploadAvatarAsync(AvatarType.User, user.Id, req.Avatar, ct);
+        var result = await _storage.UploadAvatarAsync(AvatarType.User, user.Id, req.Avatar.OpenReadStream(), ct);
 
         if (result is not UploadFileSucceededResult)
         {

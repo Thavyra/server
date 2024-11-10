@@ -5,6 +5,7 @@ using Thavyra.Contracts;
 using Thavyra.Contracts.User;
 using Thavyra.Data.Contexts;
 using Thavyra.Data.Models;
+using Thavyra.Data.Services;
 
 namespace Thavyra.Data.Consumers.User;
 
@@ -18,13 +19,16 @@ public class UserConsumer :
 {
     private readonly ThavyraDbContext _dbContext;
     private readonly IMemoryCache _cache;
+    private readonly IFallbackUsernameService _fallbackUsername;
 
     public UserConsumer(
         ThavyraDbContext dbContext, 
-        IMemoryCache cache)
+        IMemoryCache cache,
+        IFallbackUsernameService fallbackUsername)
     {
         _dbContext = dbContext;
         _cache = cache;
+        _fallbackUsername = fallbackUsername;
     }
 
     private static Contracts.User.User Map(UserDto user)
@@ -41,9 +45,11 @@ public class UserConsumer :
     
     public async Task Consume(ConsumeContext<CreateUser> context)
     {
+        var username = context.Message.Username ?? await _fallbackUsername.GenerateFallbackUsernameAsync();
+        
         var user = new UserDto
         {
-            Username = context.Message.Username,
+            Username = username,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -54,6 +60,7 @@ public class UserConsumer :
         var message = new UserCreated
         {
             UserId = user.Id,
+            Username = user.Username,
             Timestamp = user.CreatedAt
         };
         

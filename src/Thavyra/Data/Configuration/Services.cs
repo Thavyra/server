@@ -6,6 +6,7 @@ using Thavyra.Data.Consumers.Login;
 using Thavyra.Data.Consumers.User;
 using Thavyra.Data.Contexts;
 using Thavyra.Data.Security.Hashing;
+using Thavyra.Data.Services;
 
 namespace Thavyra.Data.Configuration;
 
@@ -18,6 +19,7 @@ public static class Services
             {
                 case "Users":
                     services.Configure<UserOptions>(section);
+                    services.AddSingleton<IFallbackUsernameService, FallbackUsernameService>();
                     break;
                 
                 case "Applications":

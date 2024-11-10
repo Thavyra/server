@@ -8,10 +8,10 @@ public class UserDto
 {
     [Column("id")]
     public Guid Id { get; set; }
+
+    [Column("username"), MaxLength(40)] 
+    public string Username { get; set; } = null!;
     
-    [Column("username")]
-    [MaxLength(40)]
-    public string? Username { get; set; }
     [Column("description")]
     [MaxLength(400)]
     public string? Description { get; set; }

@@ -5,6 +5,7 @@ using Thavyra.Contracts.Login.Providers;
 using Thavyra.Contracts.User;
 using Thavyra.Data.Contexts;
 using Thavyra.Data.Models;
+using Thavyra.Storage;
 
 namespace Thavyra.Data.Consumers.Login;
 
@@ -14,13 +15,16 @@ public class ProvidersConsumer :
 {
     private readonly ThavyraDbContext _dbContext;
     private readonly IRequestClient<CreateUser> _createUser;
+    private readonly IAvatarStorageService _avatarStorageService;
 
     public ProvidersConsumer(
         ThavyraDbContext dbContext,
-        IRequestClient<CreateUser> createUser)
+        IRequestClient<CreateUser> createUser,
+        IAvatarStorageService avatarStorageService)
     {
         _dbContext = dbContext;
         _createUser = createUser;
+        _avatarStorageService = avatarStorageService;
     }
     
     public async Task Consume(ConsumeContext<ProviderLogin> context)
@@ -34,30 +38,8 @@ public class ProvidersConsumer :
         
         if (login is null)
         {
-            var user = await _createUser.GetResponse<UserCreated>(new CreateUser(), context.CancellationToken);
-
-            login = new LoginDto
-            {
-                UserId = user.Message.UserId,
-                Type = context.Message.Provider,
-
-                ProviderAccountId = context.Message.AccountId,
-                ProviderUsername = context.Message.Username,
-                ProviderAvatarUrl = context.Message.AvatarUrl,
-
-                CreatedAt = user.Message.Timestamp,
-                UpdatedAt = user.Message.Timestamp
-            };
-
-            _dbContext.Logins.Add(login);
-            
-            await _dbContext.SaveChangesAsync(context.CancellationToken);
-
-            await context.RespondAsync(new UserRegistered
-            {
-                UserId = login.UserId,
-                Username = login.ProviderUsername
-            });
+            var message = await CreateUser(context.Message, context.CancellationToken);
+            await context.RespondAsync(message);
             
             return;
         }
@@ -81,6 +63,44 @@ public class ProvidersConsumer :
         _dbContext.LoginAttempts.Add(attempt);
         
         await _dbContext.SaveChangesAsync(context.CancellationToken);
+    }
+
+    private async Task<UserRegistered> CreateUser(ProviderLogin message, CancellationToken cancellationToken)
+    {
+        var user = await _createUser.GetResponse<UserCreated>(new CreateUser(), cancellationToken);
+
+        try
+        {
+            await _avatarStorageService.UploadAvatarAsync(AvatarType.User, user.Message.UserId,
+                message.AvatarUrl, cancellationToken);
+        }
+        catch (Exception)
+        {
+            // this is allowed to fail silently
+        }
+
+        var login = new LoginDto
+        {
+            UserId = user.Message.UserId,
+            Type = message.Provider,
+
+            ProviderAccountId = message.AccountId,
+            ProviderUsername = message.Username,
+            ProviderAvatarUrl = message.AvatarUrl,
+
+            CreatedAt = user.Message.Timestamp,
+            UpdatedAt = user.Message.Timestamp
+        };
+
+        _dbContext.Logins.Add(login);
+            
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return new UserRegistered
+        {
+            UserId = login.UserId,
+            Username = user.Message.Username
+        };
     }
 
     public async Task Consume(ConsumeContext<LinkProvider> context)
