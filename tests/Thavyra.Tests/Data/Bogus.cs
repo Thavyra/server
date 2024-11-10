@@ -18,16 +18,6 @@ public static class Bogus
             .Generate(count);
     }
 
-    public static List<PasswordLoginDto> Password(int count = 1, Guid? id = null, Guid? userId = null)
-    {
-        return new Faker<PasswordLoginDto>()
-            .RuleFor(p => p.Id, f => id ?? f.Random.Guid())
-            .RuleFor(p => p.UserId, f => userId ?? f.Random.Guid())
-            .RuleFor(p => p.PasswordHash, f => BC.HashPassword(f.Internet.Password()))
-            .RuleFor(p => p.CreatedAt, _ => DateTime.UtcNow)
-            .Generate(count);
-    }
-
     public static List<ApplicationDto> Application(
         int count = 1, 
         UserDto? owner = null,
