@@ -32,13 +32,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <AdditionalFiles Include="Areas\Shared\Views\Home\Index.cshtml" />
-      <AdditionalFiles Include="Areas\Shared\Views\Home\Privacy.cshtml" />
-      <AdditionalFiles Include="Areas\Shared\Views\Shared\Error.cshtml" />
-      <AdditionalFiles Include="Areas\Shared\Views\Shared\_Layout.cshtml" />
-      <AdditionalFiles Include="Areas\Shared\Views\Shared\_ValidationScriptsPartial.cshtml" />
-      <AdditionalFiles Include="Areas\Shared\Views\_ViewImports.cshtml" />
-      <AdditionalFiles Include="Areas\Shared\Views\_ViewStart.cshtml" />
+      <None Include="wwwroot\accounts\css\tailwind.css" />
     </ItemGroup>
 
 </Project>

@@ -4,7 +4,7 @@
     "tailwindcss": "^3.4.4"
   },
   "scripts": {
-    "tailwind:watch": "cross-env NODE_ENV=development ./node_modules/tailwindcss/lib/cli.js -i ./Areas/Shared/Styles/tailwind.css -o ./wwwroot/css/app.css --watch",
-    "tailwind:build": "cross-env ./node_modules/tailwindcss/lib/cli.js -i ./Areas/Shared/Styles/tailwind.css -o ./wwwroot/css/app.css --minify"
+    "tailwind:watch": "cross-env NODE_ENV=development ./node_modules/tailwindcss/lib/cli.js -i ./wwwroot/accounts/css/tailwind.css -o ./wwwroot/accounts/css/app.css --watch",
+    "tailwind:build": "cross-env ./node_modules/tailwindcss/lib/cli.js -i ./wwwroot/accounts/css/tailwind.css -o ./wwwroot/accounts/css/app.css --minify"
   }
 }
