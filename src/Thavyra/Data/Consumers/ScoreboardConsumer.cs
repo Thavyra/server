@@ -76,7 +76,9 @@ public class ScoreboardConsumer :
     {
         await _dbContext.Objectives
             .Where(x => x.Id == context.Message.Id)
-            .ExecuteDeleteAsync(context.CancellationToken);
+            .Where(x => !x.DeletedAt.HasValue)
+            .ExecuteUpdateAsync(x => 
+                x.SetProperty(o => o.DeletedAt, DateTime.UtcNow), context.CancellationToken);
 
         if (context.IsResponseAccepted<Success>())
             await context.RespondAsync(new Success());
@@ -84,7 +86,9 @@ public class ScoreboardConsumer :
     
     public async Task Consume(ConsumeContext<Objective_ExistsByName> context)
     {
-        bool exists = await _dbContext.Objectives.AnyAsync(x => x.Name == context.Message.Name, context.CancellationToken);
+        bool exists = await _dbContext.Objectives
+            .Where(x => !x.DeletedAt.HasValue)
+            .AnyAsync(x => x.Name == context.Message.Name, context.CancellationToken);
 
         await context.RespondAsync(exists ? new ObjectiveExists() : new NotFound());
     }
@@ -102,6 +106,7 @@ public class ScoreboardConsumer :
     public async Task Consume(ConsumeContext<Objective_GetById> context)
     {
         var objective = await _dbContext.Objectives
+            .Where(x => !x.DeletedAt.HasValue)
             .Include(x => x.Scores)
             .FirstOrDefaultAsync(x => x.Id == context.Message.Id, context.CancellationToken);
 
@@ -119,6 +124,7 @@ public class ScoreboardConsumer :
     public async Task Consume(ConsumeContext<Objective_GetByName> context)
     {
         var objective = await _dbContext.Objectives
+            .Where(x => !x.DeletedAt.HasValue)
             .Include(x => x.Scores)
             .FirstOrDefaultAsync(x => x.Name == context.Message.Name, context.CancellationToken);
 
@@ -135,7 +141,9 @@ public class ScoreboardConsumer :
 
     public async Task Consume(ConsumeContext<Objective_Update> context)
     {
-        var objective = await _dbContext.Objectives.FindAsync(context.Message.Id, context.CancellationToken);
+        var objective = await _dbContext.Objectives
+            .Where(x => !x.DeletedAt.HasValue)
+            .FirstOrDefaultAsync(x => x.Id == context.Message.Id, context.CancellationToken);
 
         if (objective is null)
         {
@@ -181,6 +189,7 @@ public class ScoreboardConsumer :
     public async Task Consume(ConsumeContext<Score_GetById> context)
     {
         var score = await _dbContext.Scores
+            .Where(x => !x.Objective.DeletedAt.HasValue)
             .FirstOrDefaultAsync(x => x.Id == context.Message.Id, context.CancellationToken);
 
         if (score is null)
@@ -195,6 +204,7 @@ public class ScoreboardConsumer :
     public async Task Consume(ConsumeContext<Score_GetByUser> context)
     {
         var scores = await _dbContext.Scores
+            .Where(x => !x.Objective.DeletedAt.HasValue)
             .Where(x => x.UserId == context.Message.UserId)
             .ToListAsync(context.CancellationToken);
 

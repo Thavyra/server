@@ -18,6 +18,9 @@ public class ObjectiveDto
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
+    
+    [Column("deleted_at")] 
+    public DateTime? DeletedAt { get; set; }
 
     public ApplicationDto Application { get; set; } = default!;
     public ICollection<ScoreDto> Scores { get; set; } = default!;
