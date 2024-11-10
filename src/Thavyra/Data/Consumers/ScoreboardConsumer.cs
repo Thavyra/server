@@ -36,7 +36,10 @@ public class ScoreboardConsumer :
 
             Name = objective.Name,
             DisplayName = objective.DisplayName,
-            Scores = objective.Scores?.Select(MapScore).ToList() ?? [],
+            Scores = objective.Scores?
+                .Select(MapScore)
+                .OrderByDescending(x => x.Value)
+                .ToList() ?? [],
 
             CreatedAt = objective.CreatedAt
         };
