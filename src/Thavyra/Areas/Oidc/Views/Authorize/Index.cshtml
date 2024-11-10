@@ -3,7 +3,7 @@
 @model Thavyra.Oidc.Models.View.AuthorizeViewModel
 
 @{
-    ViewData["Title"] = $"Connect to {Model.Client.DisplayName}";
+    ViewData["Title"] = $"Connect to {Model.Client.DisplayName} · Thavyra";
 }
 
 <div class="flex flex-row justify-center items-center mb-5">
@@ -23,14 +23,14 @@
 
 <p class="text-center">A third party application wants to access your account.</p>
 
-<div class="my-3">
-    <p class="text-center text-lg mb-1">
+<div class="my-3 text-center">
+    <p class="text-lg mb-1">
         Signed in as
         <span class="text-bright font-bold">@Model.Username</span>
     </p>
 
-    <a class="block link text-center" asp-controller="Login" asp-action="Logout" asp-route-ReturnUrl="@Model.ReturnUrl">
-        Switch Account
+    <a class="link" asp-controller="Login" asp-action="Logout" asp-route-ReturnUrl="@Model.ReturnUrl">
+        Change Account
     </a>
 </div>
 
