@@ -139,6 +139,7 @@ public class AuthorizationConsumer :
     {
         var authorizations = await _dbContext.Authorizations
             .Where(x => x.Subject == context.Message.Subject)
+            .Where(x => x.Type == OpenIddictConstants.AuthorizationTypes.Permanent)
             .Where(x => x.Status == OpenIddictConstants.Statuses.Valid)
             .Include(x => x.Scopes)
             .ToListAsync(context.CancellationToken);

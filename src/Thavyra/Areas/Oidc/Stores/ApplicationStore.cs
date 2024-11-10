@@ -148,7 +148,11 @@ public class ApplicationStore : BaseApplicationStore
     {
         var permissions = await GetPermissionsAsync(application, cancellationToken);
 
-        return permissions.FirstOrDefault(x => x.StartsWith(Constants.Permissions.Prefixes.ConsentType));
+        return permissions.FirstOrDefault(x => x.StartsWith(Constants.Permissions.Prefixes.ConsentType)) switch
+        {
+            Constants.Permissions.ConsentTypes.Implicit => OpenIddictConstants.ConsentTypes.Implicit,
+            _ => OpenIddictConstants.ConsentTypes.Explicit
+        };
     }
 
     public override async ValueTask<ImmutableArray<string>> GetPermissionsAsync(ApplicationModel application, CancellationToken cancellationToken)
