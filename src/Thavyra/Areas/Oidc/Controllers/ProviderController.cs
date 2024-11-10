@@ -14,6 +14,7 @@ using Thavyra.Oidc.Models.Internal;
 
 namespace Thavyra.Oidc.Controllers;
 
+[Area("Oidc"), Route("/accounts")]
 public class ProviderController : Controller
 {
     private readonly IRequestClient<ProviderLogin> _providerLogin;
@@ -27,7 +28,7 @@ public class ProviderController : Controller
         _linkProvider = linkProvider;
     }
     
-    [HttpPost("/login/{provider}"), ValidateAntiForgeryToken]
+    [HttpPost("login/{provider}"), ValidateAntiForgeryToken]
     public IActionResult Login(string provider, string returnUrl)
     {
         var properties = new AuthenticationProperties
@@ -45,7 +46,7 @@ public class ProviderController : Controller
         };
     }
 
-    [HttpGet("/callback/{provider}")]
+    [HttpGet("callback/{provider}")]
     public async Task<IActionResult> CallbackAsync(string provider, CancellationToken cancellationToken)
     {
         var result = await HttpContext.AuthenticateAsync(OpenIddictClientAspNetCoreDefaults.AuthenticationScheme);
@@ -103,7 +104,7 @@ public class ProviderController : Controller
         return SignIn(new ClaimsPrincipal(identity), properties, CookieAuthenticationDefaults.AuthenticationScheme);
     }
 
-    [HttpGet("/callback/{provider}/link")]
+    [HttpGet("callback/{provider}/link")]
     public async Task<IActionResult> LinkCallbackAsync(string provider, CancellationToken cancellationToken)
     {
         var cookieResult = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);

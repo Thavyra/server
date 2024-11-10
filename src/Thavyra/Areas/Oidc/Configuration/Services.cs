@@ -50,10 +50,9 @@ public static class Services
                     builder.AddServer(options =>
                     {
                         options
-                            .SetAuthorizationEndpointUris("oauth/authorize")
-                            .SetTokenEndpointUris("oauth/token")
-                            .SetLogoutEndpointUris("connect/logout")
-                            .SetUserinfoEndpointUris("connect/userinfo")
+                            .SetAuthorizationEndpointUris("accounts/connect")
+                            .SetTokenEndpointUris("accounts/token")
+                            .SetUserinfoEndpointUris("accounts/@me")
                             .SetIssuer(section["Issuer"] ??
                                        throw new Exception("OIDC issuer not provided."));
 
@@ -116,7 +115,7 @@ public static class Services
                                         // ReSharper disable once AccessToModifiedClosure
                                         .SetClientSecret(discordClientSecret)
                                         
-                                        .SetRedirectUri($"callback/{Constants.Providers.Discord}")
+                                        .SetRedirectUri($"accounts/callback/{Constants.Providers.Discord}")
                                         
                                         // ReSharper disable once AccessToModifiedClosure
                                         .AddScopes(discordScopes));
@@ -129,7 +128,7 @@ public static class Services
                                         // ReSharper disable once AccessToModifiedClosure
                                         .SetClientSecret(discordClientSecret)
                                         
-                                        .SetRedirectUri($"callback/{Constants.Providers.Discord}/link")
+                                        .SetRedirectUri($"accounts/callback/{Constants.Providers.Discord}/link")
                                         
                                         // ReSharper disable once AccessToModifiedClosure
                                         .AddScopes(discordScopes)
@@ -155,7 +154,7 @@ public static class Services
                                         
                                         // ReSharper disable once AccessToModifiedClosure
                                         .SetClientSecret(githubClientSecret)
-                                        .SetRedirectUri($"callback/{Constants.Providers.GitHub}")
+                                        .SetRedirectUri($"accounts/callback/{Constants.Providers.GitHub}")
                                         
                                         // ReSharper disable once AccessToModifiedClosure
                                         .AddScopes(githubScopes));
@@ -167,7 +166,7 @@ public static class Services
                                         
                                         // ReSharper disable once AccessToModifiedClosure
                                         .SetClientSecret(githubClientSecret)
-                                        .SetRedirectUri($"callback/{Constants.Providers.GitHub}/link")
+                                        .SetRedirectUri($"accounts/callback/{Constants.Providers.GitHub}/link")
                                         
                                         // ReSharper disable once AccessToModifiedClosure
                                         .AddScopes(githubScopes)
@@ -187,7 +186,7 @@ public static class Services
     {
         builder.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
         {
-            options.LoginPath = "/login";
+            options.LoginPath = "/accounts/login";
             options.SlidingExpiration = false;
         });
 

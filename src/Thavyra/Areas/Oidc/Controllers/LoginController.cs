@@ -12,7 +12,7 @@ using Thavyra.Oidc.Models.View;
 
 namespace Thavyra.Oidc.Controllers;
 
-[Area("Oidc")]
+[Area("Oidc"), Route("/accounts")]
 public class LoginController : Controller
 {
     private readonly IUserManager _userManager;
@@ -36,7 +36,7 @@ public class LoginController : Controller
         set => _returnUrl = value;
     }
 
-    [HttpGet("/login")]
+    [HttpGet("login")]
     public IActionResult Login()
     {
         return View(new LoginViewModel
@@ -45,7 +45,7 @@ public class LoginController : Controller
         });
     }
 
-    [HttpPost("/login"), ValidateAntiForgeryToken]
+    [HttpPost("login"), ValidateAntiForgeryToken]
     public async Task<IActionResult> LoginAsync(
         LoginViewModel model,
         [FromServices] IValidator<LoginViewModel> validator,
@@ -95,7 +95,7 @@ public class LoginController : Controller
         return View(model);
     }
 
-    [HttpGet("/register")]
+    [HttpGet("register")]
     public IActionResult Register()
     {
         return View(new RegisterViewModel
@@ -104,7 +104,7 @@ public class LoginController : Controller
         });
     }
 
-    [HttpPost("/register"), ValidateAntiForgeryToken]
+    [HttpPost("register"), ValidateAntiForgeryToken]
     public async Task<IActionResult> RegisterAsync(
         RegisterViewModel model,
         [FromServices] IValidator<RegisterViewModel> validator,
@@ -142,7 +142,7 @@ public class LoginController : Controller
         return View(model);
     }
 
-    [HttpPost("/register/check-username")]
+    [HttpPost("register/check-username")]
     public async Task<IActionResult> CheckUsernameAsync(RegisterViewModel model, CancellationToken cancellationToken)
     {
         bool valid = model.Username is not null
@@ -151,7 +151,7 @@ public class LoginController : Controller
         return new JsonResult(valid);
     }
 
-    [HttpGet("/logout")]
+    [HttpGet("logout")]
     public IActionResult Logout()
     {
         return SignOut(new AuthenticationProperties

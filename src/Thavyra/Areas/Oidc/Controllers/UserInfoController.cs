@@ -10,7 +10,7 @@ using Thavyra.Contracts.User;
 namespace Thavyra.Oidc.Controllers;
 
 [Authorize(AuthenticationSchemes = OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)]
-[Route("/connect/userinfo")]
+[Route("/accounts/@me")]
 public class UserInfoController : Controller
 {
     private readonly IRequestClient<User_GetById> _getUser;

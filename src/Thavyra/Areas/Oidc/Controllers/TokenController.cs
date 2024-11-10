@@ -10,7 +10,7 @@ using Thavyra.Contracts.Application;
 
 namespace Thavyra.Oidc.Controllers;
 
-[Route("/oauth/token")]
+[Route("/accounts/token")]
 public class TokenController : Controller
 {
     private readonly IAuthenticationService _authenticationService;

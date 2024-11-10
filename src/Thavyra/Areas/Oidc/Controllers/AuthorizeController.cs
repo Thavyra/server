@@ -21,7 +21,7 @@ using static OpenIddict.Abstractions.OpenIddictConstants;
 namespace Thavyra.Oidc.Controllers;
 
 [Area("Oidc")]
-[Route("/oauth/authorize")]
+[Route("/accounts/connect")]
 public class AuthorizeController : Controller
 {
     private readonly IUserManager _userManager;
