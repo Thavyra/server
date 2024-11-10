@@ -4,7 +4,7 @@ namespace Thavyra.Rest.Processors;
 
 public class EndpointResponseLogger : IGlobalPostProcessor
 {
-    public async Task PostProcessAsync(IPostProcessorContext context, CancellationToken ct)
+    public Task PostProcessAsync(IPostProcessorContext context, CancellationToken ct)
     {
         var logger = context.HttpContext.Resolve<ILogger<EndpointResponseLogger>>();
         
@@ -28,5 +28,7 @@ public class EndpointResponseLogger : IGlobalPostProcessor
         {
             logger.LogCritical("Exception Occurred: {Exception}", context.ExceptionDispatchInfo.SourceException.Message);
         }
+
+        return Task.CompletedTask;
     }
 }
