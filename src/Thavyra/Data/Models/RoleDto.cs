@@ -1,5 +1,6 @@
-using System.Collections;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using MassTransit;
 
 namespace Thavyra.Data.Models;
 
@@ -7,12 +8,12 @@ namespace Thavyra.Data.Models;
 public class RoleDto
 {
     [Column("id")]
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = NewId.NextGuid();
     
-    [Column("name")]
+    [Column("name"), MaxLength(40)]
     public string Name { get; set; } = null!;
     
-    [Column("display_name")]
+    [Column("display_name"), MaxLength(40)]
     public string DisplayName { get; set; } = null!;
 
     public ICollection<UserDto> Users { get; set; } = [];

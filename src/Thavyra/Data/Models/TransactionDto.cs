@@ -1,4 +1,6 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using MassTransit;
 
 namespace Thavyra.Data.Models;
 
@@ -6,23 +8,27 @@ namespace Thavyra.Data.Models;
 public class TransactionDto
 {
     [Column("id")]
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = NewId.NextGuid();
+    
     [Column("application_id")]
     public Guid ApplicationId { get; set; }
+    
     [Column("subject_id")]
     public Guid SubjectId { get; set; }
+    
     [Column("recipient_id")]
     public Guid? RecipientId { get; set; }
 
-    [Column("description")]
+    [Column("description"), MaxLength(400)]
     public string? Description { get; set; }
+    
     [Column("amount")]
     public double Amount { get; set; }
 
     [Column("created_at")]
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public ApplicationDto Application { get; set; } = default!;
-    public UserDto Subject { get; set; } = default!;
-    public UserDto? Recipient { get; set; } = default!;
+    public ApplicationDto? Application { get; set; }
+    public UserDto? Subject { get; set; }
+    public UserDto? Recipient { get; set; }
 }

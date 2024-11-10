@@ -1,4 +1,6 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using MassTransit;
 
 namespace Thavyra.Data.Models;
 
@@ -6,15 +8,18 @@ namespace Thavyra.Data.Models;
 public class ScopeDto
 {
     [Column("id")]
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = NewId.NextGuid();
     
-    [Column("name")]
+    [Column("name"), MaxLength(40)]
     public string Name { get; set; } = default!;
-    [Column("display_name")]
+    
+    [Column("display_name"), MaxLength(40)]
     public string DisplayName { get; set; } = default!;
-    [Column("description")]
+    
+    [Column("description"), MaxLength(400)]
     public string Description { get; set; } = default!;
 
-    public PermissionDto Permission { get; set; } = null!;
+
+    public PermissionDto? Permission { get; set; }
     public ICollection<AuthorizationDto> Authorizations { get; set; } = [];
 }
