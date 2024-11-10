@@ -7,7 +7,7 @@ namespace Thavyra.Data.Models;
 [Table("redirects")]
 public class RedirectDto
 {
-    [Column("id")]
+    [Column("id"), DatabaseGenerated(DatabaseGeneratedOption.None)]
     public Guid Id { get; set; } = NewId.NextGuid();
 
     [Column("application_id")]
