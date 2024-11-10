@@ -30,7 +30,7 @@ public class
         RuleFor(x => x.Context.User)
             .MustAsync(async (x, ct) =>
             {
-                var response = await hasRole.GetResponse<Correct, Incorrect>(new User_HasRole
+                var response = await hasRole.GetResponse<Correct, Incorrect, NotFound>(new User_HasRole
                 {
                     UserId = x.GetSubject(),
                     RoleName = Constants.Roles.Admin
