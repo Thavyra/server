@@ -17,9 +17,9 @@ public partial class Validator : Validator<Request>
             RuleFor(user => user.Username.Value)
                 .NotEmpty()
                 .Length(1, 40)
-                .Must(x => x.All(c => char.IsLetterOrDigit(c) || "_-'.".Contains(c)))
-                    .WithMessage("Invalid special character in username.")
-                .MustAsync(userService.IsUsernameUniqueAsync).WithMessage("Username already taken.");
+                .NotEqual("me").WithMessage("Not available.")
+                .Matches(@"^[a-zA-Z0-9_\-\'\.]+$").WithMessage("Contains invalid character.")
+                .MustAsync(userService.IsUsernameUniqueAsync).WithMessage("Not available.");
         });
 
         When(x => x.Description.HasValue, () =>
