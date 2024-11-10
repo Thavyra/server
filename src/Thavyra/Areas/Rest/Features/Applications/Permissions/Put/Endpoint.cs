@@ -8,7 +8,7 @@ using Thavyra.Rest.Security;
 
 namespace Thavyra.Rest.Features.Applications.Permissions.Put;
 
-public class Endpoint : Endpoint<Request>
+public class Endpoint : Endpoint<Request, List<string>>
 {
     private readonly IAuthorizationService _authorizationService;
     private readonly IRequestClient<Permission_GetByNames> _getPermissions;
@@ -53,8 +53,6 @@ public class Endpoint : Endpoint<Request>
         {
             Names = req.Grant
         }, ct);
-
-        bool authorized = true;
         
         foreach (var permission in grantPermissions.Message.Items)
         {
@@ -67,8 +65,7 @@ public class Endpoint : Endpoint<Request>
                 continue;
             }
             
-            authorized = false;
-            AddError(x => x.Grant, $"Not authorised to grant permission {permission.Name}");
+            AddError(x => $"{permission.Name}", "Not authorized to grant permission.");
         }
         
         var denyPermissions = await _getPermissions.GetResponse<Multiple<Permission>>(new Permission_GetByNames
@@ -87,15 +84,10 @@ public class Endpoint : Endpoint<Request>
                 continue;
             }
             
-            authorized = false;
-            AddError(x => x.Deny, $"Not authorised to deny permission {permission.Name}");
+            AddError(x => $"{permission.Name}", "Not authorized to deny permission.");
         }
 
-        if (!authorized)
-        {
-            await SendErrorsAsync(403, ct);
-            return;
-        }
+        ThrowIfAnyErrors(statusCode: 403);
 
         var response = await _modifyPermissions.GetResponse<PermissionsChanged>(new Application_ModifyPermissions
         {
@@ -104,21 +96,8 @@ public class Endpoint : Endpoint<Request>
             Deny = denyPermissions.Message.Items.Select(x => x.Id).ToList()
         }, ct);
 
-        await SendAsync(new Response
-        {
-            Granted = response.Message.Granted.Select(x => new PermissionResponse
-            {
-                Id = x.Id.ToString(),
-                Name = x.Name,
-                DisplayName = x.DisplayName
-            }).ToList(),
-
-            Denied = response.Message.Denied.Select(x => new PermissionResponse
-            {
-                Id = x.Id.ToString(),
-                Name = x.Name,
-                DisplayName = x.DisplayName
-            }).ToList()
-        }, cancellation: ct);
+        await SendAsync(response.Message.CurrentPermissions
+            .Select(x => x.Name)
+            .ToList(), cancellation: ct);
     }
 }

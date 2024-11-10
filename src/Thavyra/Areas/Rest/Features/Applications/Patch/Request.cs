@@ -6,5 +6,4 @@ public class Request : ApplicationRequest
 {
     public JsonOptional<string> Name { get; set; }
     public JsonOptional<string?> Description { get; set; }
-    public JsonOptional<Permissions.Put.Request> Permissions { get; set; }
 }
