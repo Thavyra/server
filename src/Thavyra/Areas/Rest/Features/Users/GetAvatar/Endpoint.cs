@@ -35,8 +35,8 @@ public class Endpoint : Endpoint<Request>
             GetFileSucceededResult file => file.Stream,
 
             _ => await _iconService.GetDefaultIconAsync(
-                style: "avataaars-neutral",
-                seed: user.Username,
+                style: "glass",
+                seed: user.Id.ToString(),
                 size: req.Size ?? 500,
                 cancellationToken: ct)
         };
