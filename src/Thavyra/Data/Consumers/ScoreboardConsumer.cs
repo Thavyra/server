@@ -99,6 +99,7 @@ public class ScoreboardConsumer :
     public async Task Consume(ConsumeContext<Objective_GetByApplication> context)
     {
         var objectives = await _dbContext.Objectives
+            .Where(x => !x.DeletedAt.HasValue)
             .Where(x => x.ApplicationId == context.Message.ApplicationId)
             .Include(x => x.Scores)
             .ToListAsync(context.CancellationToken);
