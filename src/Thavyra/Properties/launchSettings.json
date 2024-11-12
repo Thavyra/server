@@ -27,6 +27,14 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
+    "client-gen": {
+      "commandName": "Project",
+      "commandLineArgs": "--generateclients true",
+      "dotnetRunMessages": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production"
+      }
+    },
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,

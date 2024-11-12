@@ -1,3 +1,5 @@
+using FastEndpoints.ClientGen.Kiota;
+using Kiota.Builder;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Net.Http.Headers;
@@ -100,6 +102,15 @@ if (app.Environment.IsDevelopment())
 {
     _ = app.RunTailwind("tailwind:watch");
 }
+
+await app.GenerateApiClientsAndExitAsync(c =>
+{
+    c.SwaggerDocumentName = "v1";
+    c.Language = GenerationLanguage.CSharp;
+    c.OutputPath = Path.Combine(app.Environment.WebRootPath, "Clients", "dotnet");
+    c.ClientNamespaceName = "Thavyra.Rest.Core";
+    c.ClientClassName = "CoreRestClient";
+});
 
 app.Run();
 

@@ -93,6 +93,7 @@ public static class Services
                         }));
                 };
                 o.ExcludeNonFastEndpoints = true;
+                o.RemoveEmptyRequestSchema = true;
             });
 
         foreach (var section in configuration.GetChildren())
