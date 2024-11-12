@@ -19,6 +19,10 @@ public class Endpoint : Endpoint<UserRequest>
     public override void Configure()
     {
         Delete("/users/{User}/avatar");
+        Summary(x =>
+        {
+            x.Summary = "Delete Avatar";
+        });
     }
 
     public override async Task HandleAsync(UserRequest req, CancellationToken ct)

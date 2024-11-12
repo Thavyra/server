@@ -1,4 +1,5 @@
 using FastEndpoints;
+using FastEndpoints.Swagger;
 using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using Thavyra.Contracts;
@@ -23,6 +24,13 @@ public class Endpoint : Endpoint<Request>
     public override void Configure()
     {
         Delete("/objectives/{Id}");
+        
+        Description(x => x.AutoTagOverride("Scoreboard"));
+        
+        Summary(x =>
+        {
+            x.Summary = "Delete Objective";
+        });
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)

@@ -22,6 +22,15 @@ public class Endpoint : Endpoint<Request, ApplicationResponse>
     public override void Configure()
     {
         Patch("/applications/{Application}");
+        
+        Description(x => x
+            .ProducesProblemDetails()
+            .ProducesProblemDetails(403));
+        
+        Summary(x =>
+        {
+            x.Summary = "Update Application";
+        });
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)

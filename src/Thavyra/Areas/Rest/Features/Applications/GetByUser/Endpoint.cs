@@ -22,6 +22,14 @@ public class Endpoint : Endpoint<UserRequest, List<ApplicationResponse>>
     public override void Configure()
     {
         Get("/users/{User}/applications");
+        
+        Description(x => x
+            .ProducesProblemDetails(403));
+        
+        Summary(x =>
+        {
+            x.Summary = "Get User Applications";
+        });
     }
 
     public override async Task HandleAsync(UserRequest req, CancellationToken ct)

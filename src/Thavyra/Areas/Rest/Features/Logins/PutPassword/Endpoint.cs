@@ -26,6 +26,11 @@ public class Endpoint : Endpoint<Request, LoginResponse>
     public override void Configure()
     {
         Put("/users/{User}/logins/@password");
+        
+        Summary(x =>
+        {
+            x.Summary = "Set Password";
+        });
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)

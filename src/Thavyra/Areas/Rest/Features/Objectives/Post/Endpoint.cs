@@ -1,4 +1,5 @@
 using FastEndpoints;
+using FastEndpoints.Swagger;
 using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using Thavyra.Contracts.Scoreboard;
@@ -20,6 +21,13 @@ public class Endpoint : Endpoint<Request, ObjectiveResponse>
     public override void Configure()
     {
         Post("/applications/{Application}/objectives");
+        
+        Description(x => x.AutoTagOverride("Scoreboard"));
+        
+        Summary(x =>
+        {
+            x.Summary = "Create Objective";
+        });
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)

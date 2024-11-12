@@ -19,6 +19,10 @@ public class Endpoint : Endpoint<Request>
     {
         Get("/users/{User}/avatar.png");
         AllowAnonymous();
+        Summary(x =>
+        {
+            x.Summary = "Get User Avatar";
+        });
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)

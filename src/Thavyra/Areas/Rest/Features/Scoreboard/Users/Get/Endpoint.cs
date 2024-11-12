@@ -19,6 +19,11 @@ public class Endpoint : Endpoint<RequestWithAuthentication, List<ScoreResponse>>
     public override void Configure()
     {
         Get("/scoreboard/users");
+        
+        Summary(x =>
+        {
+            x.Summary = "Get Scoreboard by Users";
+        });
     }
 
     public override async Task HandleAsync(RequestWithAuthentication req, CancellationToken ct)

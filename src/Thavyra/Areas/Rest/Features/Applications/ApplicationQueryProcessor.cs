@@ -5,11 +5,11 @@ using Thavyra.Contracts.Application;
 
 namespace Thavyra.Rest.Features.Applications;
 
-public class ApplicationSlugParser : GlobalPreProcessor<AuthenticationState>
+public class ApplicationQueryProcessor : GlobalPreProcessor<AuthenticationState>
 {
     private readonly IServiceScopeFactory _scopeFactory;
     
-    public ApplicationSlugParser(IServiceScopeFactory scopeFactory)
+    public ApplicationQueryProcessor(IServiceScopeFactory scopeFactory)
     {
         _scopeFactory = scopeFactory;
     }
@@ -27,26 +27,29 @@ public class ApplicationSlugParser : GlobalPreProcessor<AuthenticationState>
         
         Response? applicationResponse = null;
 
-        if (Guid.TryParse(request.Application, out var id))
+        switch (request.Application)
         {
-            applicationResponse = await client.GetResponse<Application, NotFound>(new Application_GetById
-            {
-                Id = id
-            }, ct);
-        }
-        
-        if (request.Application == "@me")
-        {
-            if (request.ApplicationId == default)
-            {
-                await context.HttpContext.Response.SendUnauthorizedAsync(ct);
-                return;
-            }
+            case ApplicationIdQuery q:
+                applicationResponse = await client.GetResponse<Application, NotFound>(new Application_GetById
+                {
+                    Id = q.ApplicationId
+                }, ct);
+                
+                break;
             
-            applicationResponse = await client.GetResponse<Application, NotFound>(new Application_GetById
-            {
-                Id = request.ApplicationId
-            }, ct);
+            case SelfQuery:
+                if (request.ApplicationId == default)
+                {
+                    await context.HttpContext.Response.SendUnauthorizedAsync(ct);
+                    return;
+                }
+
+                applicationResponse = await client.GetResponse<Application, NotFound>(new Application_GetById
+                {
+                    Id = request.ApplicationId
+                }, ct);
+                
+                break;
         }
         
         switch (applicationResponse)

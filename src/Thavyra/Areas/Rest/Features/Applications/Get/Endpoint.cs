@@ -18,6 +18,11 @@ public class Endpoint : Endpoint<ApplicationRequest, ApplicationResponse>
     {
         Get("/applications/{Application}");
         AllowAnonymous();
+        
+        Summary(x =>
+        {
+            x.Summary = "Get Application";
+        });
     }
 
     public override async Task HandleAsync(ApplicationRequest req, CancellationToken ct)

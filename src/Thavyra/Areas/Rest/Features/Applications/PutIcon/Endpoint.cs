@@ -20,6 +20,11 @@ public class Endpoint : Endpoint<Request>
     {
         Put("/applications/{Application}/icon");
         AllowFileUploads();
+        
+        Summary(x =>
+        {
+            x.Summary = "Upload Icon";
+        });
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)

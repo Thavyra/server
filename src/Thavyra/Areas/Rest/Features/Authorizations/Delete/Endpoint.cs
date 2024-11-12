@@ -1,4 +1,5 @@
 using FastEndpoints;
+using FastEndpoints.Swagger;
 using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using OpenIddict.Abstractions;
@@ -27,6 +28,13 @@ public class Endpoint : Endpoint<Request>
     public override void Configure()
     {
         Delete("/authorizations/{Id}");
+        
+        Description(x => x.AutoTagOverride("Connections"));
+        
+        Summary(x =>
+        {
+            x.Summary = "Revoke Connection";
+        });
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)

@@ -21,6 +21,11 @@ public class Endpoint : Endpoint<Request>
     public override void Configure()
     {
         Delete("/applications/{Application}/redirects/{Id}");
+        
+        Summary(x =>
+        {
+            x.Summary = "Delete Redirect";
+        });
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)

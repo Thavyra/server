@@ -27,6 +27,15 @@ public class Endpoint : Endpoint<Request, List<string>>
     public override void Configure()
     {
         Put("/applications/{Application}/permissions");
+        
+        Description(x => x
+            .ProducesProblemDetails()
+            .ProducesProblemDetails(403));
+        
+        Summary(x =>
+        {
+            x.Summary = "Update Application Permissions";
+        });
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)

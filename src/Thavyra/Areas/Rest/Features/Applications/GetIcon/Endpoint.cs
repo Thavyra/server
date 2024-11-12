@@ -19,6 +19,11 @@ public class Endpoint : Endpoint<Request>
     {
         Get("/applications/{Application}/icon.png");
         AllowAnonymous();
+        
+        Summary(x =>
+        {
+            x.Summary = "Get Icon";
+        });
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)

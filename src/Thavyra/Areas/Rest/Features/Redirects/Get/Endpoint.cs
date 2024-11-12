@@ -21,6 +21,11 @@ public class Endpoint : Endpoint<Request, RedirectResponse>
     public override void Configure()
     {
         Get("/applications/{Application}/redirects/{Id}");
+        
+        Summary(x =>
+        {
+            x.Summary = "Get Redirect";
+        });
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)

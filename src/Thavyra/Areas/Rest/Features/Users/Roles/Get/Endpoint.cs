@@ -1,4 +1,5 @@
 using FastEndpoints;
+using FastEndpoints.Swagger;
 using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using Thavyra.Contracts;
@@ -21,6 +22,11 @@ public class Endpoint : Endpoint<UserRequest, List<Response>>
     public override void Configure()
     {
         Get("/users/{User}/roles");
+        Summary(x =>
+        {
+            x.Summary = "Get User Roles";
+        });
+        Description(x => x.AutoTagOverride("Roles"));
     }
 
     public override async Task HandleAsync(UserRequest req, CancellationToken ct)

@@ -22,6 +22,11 @@ public class Endpoint : Endpoint<UserRequest, List<LoginResponse>>
     public override void Configure()
     {
         Get("/users/{User}/logins");
+        
+        Summary(x =>
+        {
+            x.Summary = "Get User Logins";
+        });
     }
 
     public override async Task HandleAsync(UserRequest req, CancellationToken ct)

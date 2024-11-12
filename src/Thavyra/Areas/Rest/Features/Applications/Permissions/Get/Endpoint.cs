@@ -21,6 +21,13 @@ public class Endpoint : Endpoint<ApplicationRequest, List<string>>
     public override void Configure()
     {
         Get("/applications/{Application}/permissions");
+        
+        Description(x => x.ProducesProblemDetails(403));
+        
+        Summary(x =>
+        {
+            x.Summary = "Get Application Permissions";
+        });
     }
 
     public override async Task HandleAsync(ApplicationRequest req, CancellationToken ct)

@@ -8,5 +8,5 @@ public class UserRequest : RequestWithAuthentication
     /// <summary>
     /// User slug retrieved from request fields.
     /// </summary>
-    public string? User { get; set; }
+    public UserQuery? User { get; set; }
 }

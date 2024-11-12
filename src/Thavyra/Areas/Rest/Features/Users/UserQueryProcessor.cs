@@ -5,11 +5,11 @@ using Thavyra.Contracts.User;
 
 namespace Thavyra.Rest.Features.Users;
 
-public class UserSlugParser : GlobalPreProcessor<AuthenticationState>
+public class UserQueryProcessor : GlobalPreProcessor<AuthenticationState>
 {
     private readonly IServiceScopeFactory _scopeFactory;
 
-    public UserSlugParser(IServiceScopeFactory scopeFactory)
+    public UserQueryProcessor(IServiceScopeFactory scopeFactory)
     {
         _scopeFactory = scopeFactory;
     }
@@ -30,15 +30,15 @@ public class UserSlugParser : GlobalPreProcessor<AuthenticationState>
 
         switch (request.User)
         {
-            case { } guid when Guid.TryParse(guid, out var id):
+            case UserIdQuery q:
                 userResponse = await idClient.GetResponse<User, NotFound>(new User_GetById
                 {
-                    Id = id
+                    Id = q.UserId
                 }, ct);
                 
                 break;
             
-            case "@me":
+            case SelfQuery:
                 if (request.Subject == default)
                 {
                     await context.HttpContext.Response.SendUnauthorizedAsync(ct);
@@ -52,10 +52,10 @@ public class UserSlugParser : GlobalPreProcessor<AuthenticationState>
                 
                 break;
             
-            case { } username when username.StartsWith('@'):
+            case UsernameQuery q:
                 userResponse = await usernameClient.GetResponse<User, NotFound>(new User_GetByUsername
                 {
-                    Username = request.User[1..]
+                    Username = q.Username
                 }, ct);
                 
                 break;
@@ -63,7 +63,7 @@ public class UserSlugParser : GlobalPreProcessor<AuthenticationState>
         
         switch (userResponse)
         {
-            case (_, NotFound):
+            case null or (_, NotFound):
                 await context.HttpContext.Response.SendNotFoundAsync(cancellation: ct);
                 return;
             case (_, User user):

@@ -27,6 +27,11 @@ public class Endpoint : Endpoint<Request, ScoreResponse>
     public override void Configure()
     {
         Post("/scoreboard/objectives/@{Name}");
+        
+        Summary(x =>
+        {
+            x.Summary = "Create Score";
+        });
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)

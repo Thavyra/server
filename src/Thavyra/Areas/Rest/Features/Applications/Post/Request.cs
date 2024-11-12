@@ -1,9 +1,9 @@
-using Thavyra.Rest.Features.Users;
 using Thavyra.Rest.Json;
+using Thavyra.Rest.Security;
 
 namespace Thavyra.Rest.Features.Applications.Post;
 
-public class Request : UserRequest
+public class Request : RequestWithAuthentication
 {
     public JsonOptional<Guid> OwnerId { get; set; }
     

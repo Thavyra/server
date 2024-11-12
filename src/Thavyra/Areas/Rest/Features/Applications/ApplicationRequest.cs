@@ -7,5 +7,5 @@ public class ApplicationRequest : RequestWithAuthentication
     /// <summary>
     /// Application slug retrieved from request fields.
     /// </summary>
-    public string? Application { get; set; }
+    public ApplicationQuery? Application { get; set; }
 }

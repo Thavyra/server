@@ -1,4 +1,5 @@
 using FastEndpoints;
+using FastEndpoints.Swagger;
 using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using Thavyra.Contracts;
@@ -22,6 +23,13 @@ public class Endpoint : Endpoint<Request, AuthorizationResponse>
     public override void Configure()
     {
         Get("/authorizations/{Id}");
+        
+        Description(x => x.AutoTagOverride("Connections"));
+        
+        Summary(x =>
+        {
+            x.Summary = "Get Connection";
+        });
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)

@@ -1,4 +1,5 @@
 using FastEndpoints;
+using FastEndpoints.Swagger;
 using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using Thavyra.Contracts;
@@ -21,6 +22,11 @@ public class Endpoint : Endpoint<Request>
     public override void Configure()
     {
         Delete("/users/{User}/roles/{Id}");
+        Summary(x =>
+        {
+            x.Summary = "Revoke User Role";
+        });
+        Description(x => x.AutoTagOverride("Roles"));
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)

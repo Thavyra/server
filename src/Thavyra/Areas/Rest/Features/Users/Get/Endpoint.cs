@@ -19,6 +19,15 @@ public class Endpoint : Endpoint<UserRequest, UserResponse>
     {
         Get("/users/{User}");
         AllowAnonymous();
+        Summary(x =>
+        {
+            x.Summary = "Get User";
+            x.RequestParam(r => r.User, "&lt;guid&gt; or '@me' or '@&lt;username&gt;'");
+        });
+        Description(x =>
+        {
+            x.Produces(404);
+        });
     }
 
     public override async Task HandleAsync(UserRequest req, CancellationToken ct)

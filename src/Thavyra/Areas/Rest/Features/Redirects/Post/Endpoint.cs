@@ -20,6 +20,11 @@ public class Endpoint : Endpoint<Request, RedirectResponse>
     public override void Configure()
     {
         Post("/applications/{Application}/redirects");
+        
+        Summary(x =>
+        {
+            x.Summary = "Create Redirect";
+        });
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)

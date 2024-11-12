@@ -20,6 +20,11 @@ public class Endpoint : Endpoint<ApplicationRequest, Response>
     public override void Configure()
     {
         Put("/applications/{Application}/client_secret");
+        
+        Summary(x =>
+        {
+            x.Summary = "Reset Client Secret";
+        });
     }
 
     public override async Task HandleAsync(ApplicationRequest req, CancellationToken ct)

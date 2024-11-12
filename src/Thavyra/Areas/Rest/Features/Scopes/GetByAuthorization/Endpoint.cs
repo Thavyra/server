@@ -27,6 +27,11 @@ public class Endpoint : Endpoint<Request, List<ScopeResponse>>
     public override void Configure()
     {
         Get("/authorizations/{AuthorizationId}/scopes");
+        
+        Summary(x =>
+        {
+            x.Summary = "Get Authorization Scopes";
+        });
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)
