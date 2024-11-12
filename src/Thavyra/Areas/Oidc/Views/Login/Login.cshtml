@@ -1,0 +1,72 @@
+@using Thavyra
+@model Thavyra.Oidc.Models.View.LoginViewModel
+
+@{
+    ViewData["Title"] = "Log In · Thavyra";
+}
+
+<h2 class="text-3xl font-light text-center">Log In</h2>
+
+<hr class="border-dark-700 my-5"/>
+
+<div>
+    <form method="post">
+
+        @if (Model.Message is not null)
+        {
+            <div class="text-negative mb-3">
+                @Model.Message
+            </div>
+        }
+
+        <div class="my-3">
+            <label class="block text-md mb-1.5"
+                   asp-for="Username">
+                Username
+            </label>
+            <input class="form-control"
+                   type="text" asp-for="Username"/>
+            <span class="text-sm text-negative"
+                  asp-validation-for="Username">
+            </span>
+        </div>
+
+        <div class="my-3">
+            <label class="block text-md mb-1.5"
+                   asp-for="Password">
+                Password
+            </label>
+            <input class="form-control"
+                   type="password" asp-for="Password"/>
+            <span class="text-sm text-negative" asp-validation-for="Password"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary my-3 w-full text-bright">Log In</button>
+    </form>
+
+    <div class="flex py-3 items-center">
+        <div class="flex-grow border-t border-dark-700"></div>
+        <span class="flex-shrink mx-3">or sign in with</span>
+        <div class="flex-grow border-t border-dark-700"></div>
+    </div>
+
+    <form asp-controller="Provider" asp-action="Login" asp-route-provider="@Constants.Providers.Discord" asp-route-returnUrl="@Model.ReturnUrl">
+        <button type="submit" class="btn btn-discord my-3 w-full text-center">
+            <img src="/accounts/img/discord-logo-blue.png" alt="Discord" class="inline" style="height: 1.3rem;"/>
+        </button>
+    </form>
+
+    <form asp-controller="Provider" asp-action="Login" asp-route-provider="@Constants.Providers.GitHub" asp-route-returnUrl="@Model.ReturnUrl">
+        <button type="submit" class="btn btn-github my-3 w-full text-center">
+            <img src="/accounts/img/github-mark-white.png" alt="GitHub Logo" class="inline" style="height: 1.5rem;"/>
+            <img src="/accounts/img/GitHub_Logo_White.png" alt="GitHub" class="inline" style="height: 1.4rem;"/>
+        </button>
+    </form>
+
+    <p>Don't have an account? <a class="link" asp-controller="Login" asp-action="Register" asp-route-ReturnUrl="@Model.ReturnUrl">Register</a></p>
+</div>
+
+@section Scripts
+{
+    <partial name="_ValidationScripts"/>
+}

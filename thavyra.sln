@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D3C953A9-A3EC-4C26-AA60-A4B2B9C51FDB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thavyra", "src\Thavyra\Thavyra.csproj", "{41E04158-B758-4276-881A-A178D1DB109A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{BC94E915-E120-4A97-B620-5068A2D89C37}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thavyra.Tests", "tests\Thavyra.Tests\Thavyra.Tests.csproj", "{99ADB8AE-5D59-4F77-B0BB-5FD79F2081BB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "util", "util", "{4BEEBC2D-B18C-4C97-A483-D8808C6F1E7C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BCrypt", "util\BCrypt\BCrypt.csproj", "{95887CFF-887B-4566-AD73-5EA73AC45796}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Migrations", "util\Migrations\Migrations.csproj", "{77EFA877-AE2F-4CFE-AEC5-12D072F00C92}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{41E04158-B758-4276-881A-A178D1DB109A} = {D3C953A9-A3EC-4C26-AA60-A4B2B9C51FDB}
+		{99ADB8AE-5D59-4F77-B0BB-5FD79F2081BB} = {BC94E915-E120-4A97-B620-5068A2D89C37}
+		{95887CFF-887B-4566-AD73-5EA73AC45796} = {4BEEBC2D-B18C-4C97-A483-D8808C6F1E7C}
+		{77EFA877-AE2F-4CFE-AEC5-12D072F00C92} = {4BEEBC2D-B18C-4C97-A483-D8808C6F1E7C}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{41E04158-B758-4276-881A-A178D1DB109A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41E04158-B758-4276-881A-A178D1DB109A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41E04158-B758-4276-881A-A178D1DB109A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41E04158-B758-4276-881A-A178D1DB109A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99ADB8AE-5D59-4F77-B0BB-5FD79F2081BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99ADB8AE-5D59-4F77-B0BB-5FD79F2081BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99ADB8AE-5D59-4F77-B0BB-5FD79F2081BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99ADB8AE-5D59-4F77-B0BB-5FD79F2081BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95887CFF-887B-4566-AD73-5EA73AC45796}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95887CFF-887B-4566-AD73-5EA73AC45796}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95887CFF-887B-4566-AD73-5EA73AC45796}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95887CFF-887B-4566-AD73-5EA73AC45796}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77EFA877-AE2F-4CFE-AEC5-12D072F00C92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77EFA877-AE2F-4CFE-AEC5-12D072F00C92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77EFA877-AE2F-4CFE-AEC5-12D072F00C92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77EFA877-AE2F-4CFE-AEC5-12D072F00C92}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

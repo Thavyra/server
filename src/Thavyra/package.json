@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "tailwindcss": "^3.4.4"
+  },
+  "scripts": {
+    "tailwind:watch": "cross-env NODE_ENV=development ./node_modules/tailwindcss/lib/cli.js -i ./wwwroot/accounts/css/tailwind.css -o ./wwwroot/accounts/css/app.css --watch",
+    "tailwind:build": "cross-env ./node_modules/tailwindcss/lib/cli.js -i ./wwwroot/accounts/css/tailwind.css -o ./wwwroot/accounts/css/app.css --minify"
+  }
+}

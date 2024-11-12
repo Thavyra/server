@@ -1,0 +1,48 @@
+@model Thavyra.Oidc.Models.View.RegisterViewModel
+
+@{
+ViewData["Title"] = "Register · Thavyra";
+}
+
+<h2 class="text-3xl font-light text-center">Register</h2>
+
+<hr class="border-dark-700 my-5"/>
+
+<form method="post">
+
+    @if (Model.Message is not null)
+    {
+        <div class="text-negative mb-3">
+            @Model.Message
+        </div>
+    }
+
+    <div class="my-3">
+        <label class="block text-md mb-1.5" asp-for="Username">Username</label>
+        <input class="form-control show-valid" type="text" asp-for="Username"
+               data-val-remote-additionalfields="__RequestVerificationToken"/>
+        <span class="text-sm" asp-validation-for="Username"></span>
+    </div>
+
+    <div class="my-3">
+        <label class="block text-md mb-1.5" asp-for="Password">Password</label>
+        <input class="form-control" type="password" asp-for="Password"/>
+        <span class="text-sm text-negative" asp-validation-for="Password"></span>
+    </div>
+
+    <div class="my-3">
+        <label class="block text-md mb-1.5" asp-for="ConfirmPassword">Confirm Password</label>
+        <input class="form-control" type="password" asp-for="ConfirmPassword"/>
+        <span class="text-sm text-negative" asp-validation-for="ConfirmPassword"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary my-3 w-full">Register</button>
+
+    <p>Already have an account? <a class="link" asp-controller="Login" asp-action="Login" asp-route-ReturnUrl="@Model.ReturnUrl">Log in</a></p>
+
+</form>
+
+@section Scripts
+{
+    <partial name="_ValidationScripts"/>
+}

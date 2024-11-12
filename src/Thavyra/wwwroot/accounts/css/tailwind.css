@@ -1,0 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.font-logo {
+    font-family: "Outfit", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    background: linear-gradient(-45deg, hsl(0, 100%, 17%), hsl(225, 100%, 17%));
+    background-size: 400% 400%;
+    animation: gradient 50s ease infinite;
+    @apply h-screen flex items-center justify-center
+}
+
+@keyframes gradient {
+
+    0% {
+        background-position: 0 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0 50%;
+    }
+}
+
+.form-control {
+    @apply appearance-none;
+    
+    @apply w-full;
+    @apply py-1.5;
+    @apply px-3;
+
+    @apply rounded;
+
+    @apply text-lg;
+    @apply text-light;
+
+    @apply bg-dark-900;
+
+    @apply transition;
+    @apply shadow-md;
+
+    @apply focus:outline-none;
+    @apply focus:bg-dark-950;
+    @apply focus:shadow-none;
+}
+
+.input-validation-error {
+    @apply border;
+    @apply border-negative;
+}
+
+.show-valid.valid {
+    @apply border;
+    @apply border-positive;
+}
+
+.field-validation-error {
+    @apply text-negative;
+}
+
+.field-validation-valid {
+    @apply text-positive;
+}
+
+.btn {
+    @apply block;
+    
+    @apply transition;
+    @apply appearance-none;
+
+    @apply py-1.5;
+    @apply px-3;
+
+    @apply rounded;
+
+    @apply text-lg;
+
+    @apply border;
+    @apply hover:shadow-lg;
+    @apply active:bg-dark-750;
+}
+
+.btn-primary {
+    @apply text-bright;
+    
+    @apply border-dark-700;
+    @apply hover:border-light;
+}
+
+.btn-discord {
+    @apply border-discord-hover;
+    @apply hover:border-discord;
+}
+
+.btn-github {
+    @apply border-dark-700;
+    @apply hover:border-light;
+}
+
+.link {
+    @apply transition;
+    @apply text-link;
+    @apply hover:text-link-hover;
+    @apply hover:underline;
+}

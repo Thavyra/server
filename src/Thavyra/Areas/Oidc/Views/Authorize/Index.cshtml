@@ -1,0 +1,73 @@
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.Extensions.Primitives
+@model Thavyra.Oidc.Models.View.AuthorizeViewModel
+
+@{
+    ViewData["Title"] = $"Connect to {Model.Client.DisplayName} · Thavyra";
+}
+
+<div class="flex flex-row justify-center items-center mb-5">
+    <img src="/api/applications/@Model.Client.Id/icon.png" alt="@Model.Client.DisplayName Icon" width="64" height="64"
+         class="rounded-full"/>
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-10 mx-3">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+    </svg>
+    <img src="/api/users/@Model.UserId/avatar.png" alt="Avatar" width="64" height="64"
+         class="rounded-full"/>
+</div>
+
+<h2 class="mb-1.5 text-bright text-3xl font-light text-center">
+    Connect to
+    <span class="font-bold">@Model.Client.DisplayName</span>
+</h2>
+
+<p class="text-center">A third party application wants to access your account.</p>
+
+<div class="my-3 text-center">
+    <p class="text-lg mb-1">
+        Signed in as
+        <span class="text-bright font-bold">@Model.Username</span>
+    </p>
+
+    <a class="link" asp-controller="Login" asp-action="Logout" asp-route-ReturnUrl="@Model.ReturnUrl">
+        Change Account
+    </a>
+</div>
+
+<hr class="border-dark-700"/>
+
+<p class="my-3 text-center text-lg">
+    This will allow
+    <span class="font-bold">@Model.Client.DisplayName</span>
+    to:
+</p>
+
+<div class="p-3 mb-5 bg-dark-900 shadow-md rounded-lg">
+    <ul class="flex flex-col gap-1 list-disc list-outside ml-4">
+        @foreach (var scope in Model.Scopes)
+        {
+            <li>@scope.Description</li>
+        }
+    </ul>
+</div>
+
+<form method="post">
+    @foreach (var parameter in Context.Request.HasFormContentType ? (IEnumerable<KeyValuePair<string, StringValues>>) Context.Request.Form : Context.Request.Query)
+    {
+        <input type="hidden" name="@parameter.Key" value="@parameter.Value"/>
+    }
+
+    <div class="md:flex md:justify-between">
+
+        <button class="btn btn-primary px-1.5 text-md w-full md:w-auto"
+                name="submit.Accept" type="submit" value="Yes">
+            Authorize
+        </button>
+
+        <button class="block link mt-3 md:m-0 py-1.5 px-3 w-full md:w-auto text-center text-lg"
+                name="submit.Cancel" type="submit" value="No">
+            Cancel
+        </button>
+
+    </div>
+</form>
