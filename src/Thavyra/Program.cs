@@ -23,11 +23,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddMassTransit(x =>
 {
     x.AddDataConsumers();
-    
-    x.UsingInMemory((context, cfg) =>
-    {
-        cfg.ConfigureEndpoints(context);
-    });
+
+    x.UsingInMemory((context, cfg) => { cfg.ConfigureEndpoints(context); });
 });
 
 var authenticationBuilder = builder.Services
@@ -61,7 +58,8 @@ foreach (var section in builder.Configuration.GetChildren())
             builder.Services.AddCloudStorage(section);
             break;
         case "Oidc":
-            builder.Services.AddOidcAuthorizationServer(section);
+            builder.Services.AddOidcAuthorizationServer(section,
+                useDevelopmentCertificates: false);
             authenticationBuilder.AddOidcAuthentication(section);
             break;
         case "Rest":
