@@ -1,3 +1,4 @@
+using System.Net;
 using FastEndpoints.ClientGen.Kiota;
 using Kiota.Builder;
 using MassTransit;
@@ -23,6 +24,9 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.ForwardedHeaders = ForwardedHeaders.XForwardedHost |
                                ForwardedHeaders.XForwardedFor |
                                ForwardedHeaders.XForwardedProto;
+    
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
 });
 
 // Add services to the container.
@@ -81,17 +85,14 @@ builder.Services.AddAuthorizationBuilder()
 
 var app = builder.Build();
 
+app.UseForwardedHeaders();
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/accounts/error");
-    app.UseForwardedHeaders();
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
-}
-else
-{
-    app.UseForwardedHeaders();
 }
 
 app.UseHttpsRedirection();
