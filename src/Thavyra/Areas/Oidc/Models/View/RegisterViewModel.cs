@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
@@ -10,12 +11,21 @@ public partial class RegisterViewModel
     public required string ReturnUrl { get; set; }
     public string? Message { get; set; }
 
+    [Required(ErrorMessage = "Required")]
+    [Length(1, 40, ErrorMessage = "Too long!")]
+    [RegularExpression(@"^[a-zA-Z0-9_\-\'\.]+$", ErrorMessage = "Invalid character!")]
     [Remote("CheckUsername", "Login",
         ErrorMessage = "Username not available!",
         HttpMethod = "post")]
     public string? Username { get; set; }
 
+    [Required(ErrorMessage = "Required")]
+    [MinLength(8, ErrorMessage = "Must have at least 8 characters!")]
+    [MaxLength(50, ErrorMessage = "Too long!")]
     public string? Password { get; set; }
+    
+    [Required(ErrorMessage = "Required")]
+    [Compare(nameof(Password), ErrorMessage = "Passwords do not match!")]
     public string? ConfirmPassword { get; set; }
 
     public partial class Validator : AbstractValidator<RegisterViewModel>
