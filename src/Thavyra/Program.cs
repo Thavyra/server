@@ -2,6 +2,7 @@ using FastEndpoints.ClientGen.Kiota;
 using Kiota.Builder;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Net.Http.Headers;
 using OpenIddict.Validation.AspNetCore;
 using Tailwind;
@@ -16,6 +17,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.Secret.json", optional: true);
 builder.Configuration.AddJsonFile("usernames.json");
 builder.Configuration.AddEnvironmentVariables();
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedHost |
+                               ForwardedHeaders.XForwardedFor |
+                               ForwardedHeaders.XForwardedProto;
+});
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -77,8 +85,13 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/accounts/error");
+    app.UseForwardedHeaders();
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+}
+else
+{
+    app.UseForwardedHeaders();
 }
 
 app.UseHttpsRedirection();
