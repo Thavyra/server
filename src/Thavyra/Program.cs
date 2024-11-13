@@ -13,7 +13,7 @@ using Thavyra.Storage.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddJsonFile("appsettings.Secret.json");
+builder.Configuration.AddJsonFile("appsettings.Secret.json", optional: true);
 builder.Configuration.AddJsonFile("usernames.json");
 builder.Configuration.AddEnvironmentVariables();
 
