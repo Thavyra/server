@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Abstractions;
 using OpenIddict.Client.AspNetCore;
 using OpenIddict.Client.WebIntegration;
-using OpenIddict.Server.AspNetCore;
 using Thavyra.Contracts.Login;
 using Thavyra.Contracts.Login.Providers;
 using Thavyra.Oidc.Models.Internal;
@@ -125,31 +124,27 @@ public class ProviderController : Controller
 
         if (!Uri.TryCreate(providerResult.Properties?.RedirectUri, UriKind.Absolute, out var redirectUri))
         {
-            return Forbid(
-                authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
-                properties: new AuthenticationProperties(new Dictionary<string, string?>
-                {
-                    [OpenIddictConstants.Parameters.Error] = OpenIddictConstants.Errors.ServerError,
-                    [OpenIddictConstants.Parameters.ErrorDescription] = "Redirect URI was invalid."
-                }));
+            return BadRequest(new Dictionary<string, string>
+            {
+                [OpenIddictConstants.Parameters.Error] = OpenIddictConstants.Errors.ServerError,
+                [OpenIddictConstants.Parameters.ErrorDescription] = "Redirect URI was invalid."
+            });
         }
 
         var login = provider switch
         {
-            Constants.Providers.Discord => GetDiscordLogin(cookieResult.Principal),
-            Constants.Providers.GitHub => GetGitHubLogin(cookieResult.Principal),
+            Constants.Providers.Discord => GetDiscordLogin(providerResult.Principal),
+            Constants.Providers.GitHub => GetGitHubLogin(providerResult.Principal),
             _ => new InvalidProviderLoginModel()
         };
 
         if (login is InvalidProviderLoginModel)
         {
-            return Forbid(
-                authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
-                properties: new AuthenticationProperties(new Dictionary<string, string?>
-                {
-                    [OpenIddictConstants.Parameters.Error] = OpenIddictConstants.Errors.InvalidRequest,
-                    [OpenIddictConstants.Parameters.ErrorDescription] = "Provider was invalid."
-                }));
+            return BadRequest(new Dictionary<string, string>
+            {
+                [OpenIddictConstants.Parameters.Error] = OpenIddictConstants.Errors.InvalidRequest,
+                [OpenIddictConstants.Parameters.ErrorDescription] = "Provider was invalid."
+            });
         }
 
         Response response = await _linkProvider.GetResponse<ProviderLinked, AccountAlreadyRegistered>(new LinkProvider
