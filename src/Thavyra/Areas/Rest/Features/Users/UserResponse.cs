@@ -13,4 +13,6 @@ public class UserResponse
     public JsonOptional<string?> Description { get; set; }
     
     public JsonOptional<double> Balance { get; set; }
+
+    public required DateTime CreatedAt { get; set; }
 }
