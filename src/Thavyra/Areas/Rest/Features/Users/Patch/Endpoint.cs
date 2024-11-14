@@ -40,28 +40,13 @@ public class Endpoint : Endpoint<Request, UserResponse>
             throw new InvalidOperationException("Could not retrieve user.");
         }
 
-        if (req.Username.HasValue)
+        var authorizationResult =
+            await _authorizationService.AuthorizeAsync(User, user, Security.Policies.Operation.User.UpdateProfile);
+
+        if (!authorizationResult.Succeeded)
         {
-            var authorizationResult =
-                await _authorizationService.AuthorizeAsync(User, user, Security.Policies.Operation.User.ChangeUsername);
-
-            if (!authorizationResult.Succeeded)
-            {
-                await this.SendAuthorizationFailureAsync(authorizationResult.Failure, ct);
-                return;
-            }
-        }
-
-        if (req.Description.HasValue)
-        {
-            var authorizationResult =
-                await _authorizationService.AuthorizeAsync(User, user, Security.Policies.Operation.User.UpdateProfile);
-
-            if (!authorizationResult.Succeeded)
-            {
-                await this.SendAuthorizationFailureAsync(authorizationResult.Failure, ct);
-                return;
-            }
+            await this.SendAuthorizationFailureAsync(authorizationResult.Failure, ct);
+            return;
         }
 
         var updateRequest = new User_Update

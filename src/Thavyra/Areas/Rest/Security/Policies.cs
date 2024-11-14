@@ -37,7 +37,6 @@ public static class Policies
             public const string ReadLogins = "operation.user.logins.read";
             public const string ReadTransactions = "operation.user.transactions.read";
             public const string UpdateProfile = "operation.user.update";
-            public const string ChangeUsername = "operation.user.username";
             public const string Delete = "operation.user.delete";
         }
         

@@ -35,9 +35,6 @@ public static class RegisterPolicies
             .AddPolicy(Policies.Operation.User.UpdateProfile, policy =>
                 policy.AddRequirements(new UpdateUserProfileRequirement()))
 
-            .AddPolicy(Policies.Operation.User.ChangeUsername, policy =>
-                policy.AddRequirements(new ChangeUsernameRequirement()))
-
             .AddPolicy(Policies.Operation.User.Delete, policy =>
                 policy.AddRequirements(new DeleteUserRequirement()))
             
