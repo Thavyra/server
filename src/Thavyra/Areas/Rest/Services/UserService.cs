@@ -62,15 +62,10 @@ public class UserService : IUserService
         var response = new UserResponse
         {
             Id = user.Id.ToString(),
-            Username = user.Username
+            Username = user.Username,
+            Description = user.Description,
+            CreatedAt = user.CreatedAt
         };
-        
-        var profileAuthorizationResult = await _authorizationService.AuthorizeAsync(httpContext.User, user, Policies.Operation.User.ReadProfile);
-
-        if (profileAuthorizationResult.Succeeded)
-        {
-            response.Description = user.Description;
-        }
 
         var balanceAuthorizationResult =
             await _authorizationService.AuthorizeAsync(httpContext.User, user, Policies.Operation.User.ReadBalance);

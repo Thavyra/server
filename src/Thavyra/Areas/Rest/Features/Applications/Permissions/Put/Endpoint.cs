@@ -1,4 +1,5 @@
 using FastEndpoints;
+using FluentValidation.Results;
 using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using Thavyra.Contracts;
@@ -74,7 +75,7 @@ public class Endpoint : Endpoint<Request, List<string>>
                 continue;
             }
             
-            AddError(x => $"{permission.Name}", "Not authorized to grant permission.");
+            AddError(new ValidationFailure(permission.Name, "Not authorized to grant permission."));
         }
         
         var denyPermissions = await _getPermissions.GetResponse<Multiple<Permission>>(new Permission_GetByNames
@@ -93,7 +94,7 @@ public class Endpoint : Endpoint<Request, List<string>>
                 continue;
             }
             
-            AddError(x => $"{permission.Name}", "Not authorized to deny permission.");
+            AddError(new ValidationFailure(permission.Name, "Not authorized to deny permission."));
         }
 
         ThrowIfAnyErrors(statusCode: 403);

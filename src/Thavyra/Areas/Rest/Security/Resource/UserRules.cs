@@ -15,7 +15,6 @@ public class ReadUserAuthorizationsRequirement : IOperationAuthorizationRequirem
 public class ReadUserLoginsRequirement : IOperationAuthorizationRequirement;
 public class ReadUserTransactionsRequirement : IOperationAuthorizationRequirement;
 public class UpdateUserProfileRequirement : IOperationAuthorizationRequirement;
-public class ChangeUsernameRequirement : IOperationAuthorizationRequirement;
 public class DeleteUserRequirement : IOperationAuthorizationRequirement;
 
 
