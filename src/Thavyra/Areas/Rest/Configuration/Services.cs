@@ -6,6 +6,7 @@ using NJsonSchema;
 using NJsonSchema.Generation.TypeMappers;
 using NSwag;
 using OpenIddict.Validation.AspNetCore;
+using Thavyra.Rest.Documentation;
 using Thavyra.Rest.Features.Applications;
 using Thavyra.Rest.Features.Users;
 using Thavyra.Rest.Json;
@@ -35,6 +36,10 @@ public static class Services
                         Type = OpenApiSecuritySchemeType.OpenIdConnect,
                         OpenIdConnectUrl = "/.well-known/openid-configuration",
                     });
+                    
+                    s.SchemaSettings.SchemaNameGenerator =
+                        new AttributeSchemaNameGenerator(s.SchemaSettings.SchemaNameGenerator);
+                    
                     s.SchemaSettings.TypeMappers.Add(new PrimitiveTypeMapper(
                         typeof(UserQuery),
                         schema =>
