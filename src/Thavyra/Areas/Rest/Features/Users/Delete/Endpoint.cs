@@ -23,10 +23,6 @@ public class Endpoint : Endpoint<UserRequest>
     public override void Configure()
     {
         Delete("/users/{User}");
-        Summary(x =>
-        {
-            x.Summary = "Delete User";
-        });
     }
 
     public override async Task HandleAsync(UserRequest req, CancellationToken ct)

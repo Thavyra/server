@@ -26,11 +26,6 @@ public class Endpoint : Endpoint<Request, LoginResponse>
     public override void Configure()
     {
         Put("/users/{User}/logins/@password");
-        
-        Summary(x =>
-        {
-            x.Summary = "Set Password";
-        });
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)
@@ -77,7 +72,7 @@ public class Endpoint : Endpoint<Request, LoginResponse>
 
                 await SendAsync(new LoginResponse
                 {
-                    Id = success.LoginId.ToString(),
+                    Id = success.LoginId,
                     Type = Constants.LoginTypes.Password,
 
                     ChangedAt = success.Timestamp,

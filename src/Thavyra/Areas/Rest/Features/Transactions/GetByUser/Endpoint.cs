@@ -24,10 +24,6 @@ public class Endpoint : Endpoint<UserRequest, List<TransactionResponse>>
     public override void Configure()
     {
         Get("/users/{User}/transactions");
-        Summary(x =>
-        {
-            x.Summary = "Get User Transactions";
-        });
         Description(x => x.AutoTagOverride("Transactions"));
     }
 

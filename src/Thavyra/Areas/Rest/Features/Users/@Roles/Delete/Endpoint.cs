@@ -22,10 +22,6 @@ public class Endpoint : Endpoint<Request>
     public override void Configure()
     {
         Delete("/users/{User}/roles/{Id}");
-        Summary(x =>
-        {
-            x.Summary = "Revoke User Role";
-        });
         Description(x => x.AutoTagOverride("Roles"));
     }
 

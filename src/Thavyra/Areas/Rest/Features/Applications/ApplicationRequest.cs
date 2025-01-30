@@ -5,7 +5,7 @@ namespace Thavyra.Rest.Features.Applications;
 public class ApplicationRequest : RequestWithAuthentication
 {
     /// <summary>
-    /// Application slug retrieved from request fields.
+    /// Application id or `@me` to reference the current client.
     /// </summary>
     public ApplicationQuery? Application { get; set; }
 }

@@ -20,10 +20,6 @@ public class Endpoint : Endpoint<Request>
     {
         Put("/users/{User}/avatar");
         AllowFileUploads();
-        Summary(x =>
-        {
-            x.Summary = "Upload User Avatar";
-        });
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)

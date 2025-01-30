@@ -23,10 +23,6 @@ public class Endpoint : Endpoint<Request, TransactionResponse>
     public override void Configure()
     {
         Get("/transactions/{Id}");
-        Summary(x =>
-        {
-            x.Summary = "Get Transaction";
-        });
         Description(x => x.AutoTagOverride("Transactions"));
     }
 

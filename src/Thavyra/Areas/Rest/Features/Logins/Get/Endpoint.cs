@@ -22,11 +22,6 @@ public class Endpoint : Endpoint<UserRequest, List<LoginResponse>>
     public override void Configure()
     {
         Get("/users/{User}/logins");
-        
-        Summary(x =>
-        {
-            x.Summary = "Get User Logins";
-        });
     }
 
     public override async Task HandleAsync(UserRequest req, CancellationToken ct)
@@ -52,7 +47,7 @@ public class Endpoint : Endpoint<UserRequest, List<LoginResponse>>
 
         await SendAsync(response.Message.Logins.Select(login => new LoginResponse
         {
-            Id = login.Id.ToString(),
+            Id = login.Id,
             Type = login.Type,
 
             ProviderUsername = login.ProviderUsername ?? default(JsonOptional<string>),

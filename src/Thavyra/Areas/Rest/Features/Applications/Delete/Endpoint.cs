@@ -21,15 +21,6 @@ public class Endpoint : Endpoint<ApplicationRequest>
     public override void Configure()
     {
         Delete("/applications/{Application}");
-        
-        Description(x => x
-            .ProducesProblemDetails()
-            .ProducesProblemDetails(403));
-        
-        Summary(x =>
-        {
-            x.Summary = "Delete Application";
-        });
     }
 
     public override async Task HandleAsync(ApplicationRequest req, CancellationToken ct)

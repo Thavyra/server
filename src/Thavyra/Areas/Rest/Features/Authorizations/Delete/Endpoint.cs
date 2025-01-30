@@ -30,11 +30,6 @@ public class Endpoint : Endpoint<Request>
         Delete("/authorizations/{Id}");
         
         Description(x => x.AutoTagOverride("Connections"));
-        
-        Summary(x =>
-        {
-            x.Summary = "Revoke Connection";
-        });
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)

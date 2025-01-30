@@ -22,15 +22,6 @@ public class Endpoint : Endpoint<Request, ApplicationResponse>
     public override void Configure()
     {
         Patch("/applications/{Application}");
-        
-        Description(x => x
-            .ProducesProblemDetails()
-            .ProducesProblemDetails(403));
-        
-        Summary(x =>
-        {
-            x.Summary = "Update Application";
-        });
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)
@@ -56,8 +47,8 @@ public class Endpoint : Endpoint<Request, ApplicationResponse>
 
         var response = new ApplicationResponse
         {
-            Id = application.Id.ToString(),
-            OwnerId = application.OwnerId.ToString(),
+            Id = application.Id,
+            OwnerId = application.OwnerId,
 
             Name = updated.Name,
             Description = updated.Description,

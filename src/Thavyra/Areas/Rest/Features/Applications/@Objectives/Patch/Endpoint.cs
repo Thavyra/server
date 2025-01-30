@@ -28,7 +28,7 @@ public class Endpoint : Endpoint<Request, ObjectiveResponse>
     {
         Patch("/applications/{Application}/objectives/{Id}");
         
-        Description(x => x.AutoTagOverride("Applications"));
+        Description(x => x.AutoTagOverride("Scoreboard"));
         
         Summary(x =>
         {

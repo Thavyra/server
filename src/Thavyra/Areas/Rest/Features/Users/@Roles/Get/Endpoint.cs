@@ -22,10 +22,6 @@ public class Endpoint : Endpoint<UserRequest, List<Response>>
     public override void Configure()
     {
         Get("/users/{User}/roles");
-        Summary(x =>
-        {
-            x.Summary = "Get User Roles";
-        });
         Description(x => x.AutoTagOverride("Roles"));
     }
 

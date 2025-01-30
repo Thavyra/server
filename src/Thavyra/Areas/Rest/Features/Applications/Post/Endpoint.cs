@@ -63,8 +63,8 @@ public class Endpoint : Endpoint<Request, Response>
 
         await SendCreatedAtAsync<Get.Endpoint>(new { Application = application.Id.ToString() }, new Response
         {
-            Id = application.Id.ToString(),
-            OwnerId = application.OwnerId.ToString(),
+            Id = application.Id,
+            OwnerId = application.OwnerId,
 
             Name = application.Name,
             Description = application.Description,
