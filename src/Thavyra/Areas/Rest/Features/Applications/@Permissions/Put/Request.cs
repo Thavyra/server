@@ -1,5 +1,8 @@
+using Thavyra.Rest.Documentation;
+
 namespace Thavyra.Rest.Features.Applications.Permissions.Put;
 
+[SchemaName("UpdatePermissionsRequest")]
 public class Request : ApplicationRequest
 {
     /// <summary>

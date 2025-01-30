@@ -1,5 +1,8 @@
+using Thavyra.Rest.Documentation;
+
 namespace Thavyra.Rest.Features.Applications.ClientSecret.Put;
 
+[SchemaName("ClientSecretResponse")]
 public class Response
 {
     /// <summary>

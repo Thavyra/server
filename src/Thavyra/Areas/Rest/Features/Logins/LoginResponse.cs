@@ -1,7 +1,9 @@
+using Thavyra.Rest.Documentation;
 using Thavyra.Rest.Json;
 
 namespace Thavyra.Rest.Features.Logins;
 
+[SchemaName("Login")]
 public class LoginResponse
 {
     /// <summary>

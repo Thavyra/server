@@ -1,8 +1,9 @@
+using Thavyra.Rest.Documentation;
 using Thavyra.Rest.Json;
-using Thavyra.Rest.Security;
 
 namespace Thavyra.Rest.Features.Users.Patch;
 
+[SchemaName("UpdateUserRequest")]
 public class Request : UserRequest
 {
     /// <summary>

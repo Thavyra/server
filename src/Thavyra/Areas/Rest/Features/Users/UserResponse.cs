@@ -1,7 +1,9 @@
+using Thavyra.Rest.Documentation;
 using Thavyra.Rest.Json;
 
 namespace Thavyra.Rest.Features.Users;
 
+[SchemaName("User")]
 public class UserResponse
 {
     /// <summary>

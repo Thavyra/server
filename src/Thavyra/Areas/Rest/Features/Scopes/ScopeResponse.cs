@@ -1,5 +1,8 @@
+using Thavyra.Rest.Documentation;
+
 namespace Thavyra.Rest.Features.Scopes;
 
+[SchemaName("Scope")]
 public class ScopeResponse
 {
     /// <summary>

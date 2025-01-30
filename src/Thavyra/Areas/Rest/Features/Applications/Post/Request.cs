@@ -1,8 +1,10 @@
+using Thavyra.Rest.Documentation;
 using Thavyra.Rest.Json;
 using Thavyra.Rest.Security;
 
 namespace Thavyra.Rest.Features.Applications.Post;
 
+[SchemaName("CreateApplicationRequest")]
 public class Request : RequestWithAuthentication
 {
     /// <summary>

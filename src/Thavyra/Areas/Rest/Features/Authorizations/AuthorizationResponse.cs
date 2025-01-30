@@ -1,7 +1,9 @@
+using Thavyra.Rest.Documentation;
 using Thavyra.Rest.Json;
 
 namespace Thavyra.Rest.Features.Authorizations;
 
+[SchemaName("Authorization")]
 public class AuthorizationResponse
 {
     /// <summary>

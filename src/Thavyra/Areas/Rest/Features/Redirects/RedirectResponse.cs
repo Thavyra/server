@@ -1,5 +1,8 @@
+using Thavyra.Rest.Documentation;
+
 namespace Thavyra.Rest.Features.Redirects;
 
+[SchemaName("Redirect")]
 public class RedirectResponse
 {
     /// <summary>

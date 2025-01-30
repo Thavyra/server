@@ -1,7 +1,9 @@
+using Thavyra.Rest.Documentation;
 using Thavyra.Rest.Json;
 
 namespace Thavyra.Rest.Features.Applications;
 
+[SchemaName("Application")]
 public class ApplicationResponse
 {
     /// <summary>

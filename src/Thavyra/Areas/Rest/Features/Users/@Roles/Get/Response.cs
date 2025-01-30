@@ -1,5 +1,8 @@
+using Thavyra.Rest.Documentation;
+
 namespace Thavyra.Rest.Features.Users.Roles.Get;
 
+[SchemaName("Role")]
 public class Response
 {
     /// <summary>
