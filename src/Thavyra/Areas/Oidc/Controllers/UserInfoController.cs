@@ -19,7 +19,7 @@ public class UserInfoController : Controller
     {
         _getUser = getUser;
     }
-    
+
     [HttpGet, HttpPost]
     public async Task<IActionResult> IndexAsync(CancellationToken cancellationToken)
     {
@@ -35,12 +35,8 @@ public class UserInfoController : Controller
 
         return response switch
         {
-            (_, User user) => Ok(new Dictionary<string, object?>
-                {
-                    [OpenIddictConstants.Claims.Subject] = user.Id.ToString(),
-                    [OpenIddictConstants.Claims.Username] = user.Username ?? User.GetClaim(OpenIddictConstants.Claims.Username)
-                }),
-            
+            (_, User user) => Claims(user),
+
             (_, Contracts.NotFound) => Challenge(
                 authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
                 properties: new AuthenticationProperties(new Dictionary<string, string?>
@@ -48,8 +44,37 @@ public class UserInfoController : Controller
                     [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidToken,
                     [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "User does not exist."
                 })),
-            
+
             _ => throw new InvalidOperationException()
         };
+    }
+
+    private IActionResult Claims(User user)
+    {
+        var host = new UriBuilder(
+            HttpContext.Request.Scheme,
+            HttpContext.Request.Host.Host,
+            HttpContext.Request.Host.Port ?? 80
+        );
+        
+        var claims = new Dictionary<string, object?>
+        {
+            [OpenIddictConstants.Claims.Subject] = user.Id.ToString(),
+            [OpenIddictConstants.Claims.Issuer] = User.GetClaim(OpenIddictConstants.Claims.Issuer),
+            [OpenIddictConstants.Claims.Audience] = User.GetClaim(OpenIddictConstants.Claims.ClientId),
+
+            [OpenIddictConstants.Claims.Name] = user.Username,
+            [OpenIddictConstants.Claims.Email] = $"{user.Username.ToLower()}@users.{host}"
+        };
+
+        if (User.GetScopes().Any(x => x.StartsWith(Constants.Scopes.Account.All)))
+        {
+            claims[OpenIddictConstants.Claims.Nickname] = user.Username;
+            claims[OpenIddictConstants.Claims.PreferredUsername] = user.Username;
+            claims[OpenIddictConstants.Claims.Profile] = host + $"@{user.Username}";
+            claims[OpenIddictConstants.Claims.Picture] = host + $"api/users/{user.Id}/avatar.png";
+        }
+
+        return Ok(claims);
     }
 }

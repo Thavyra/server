@@ -146,7 +146,7 @@ public class AuthorizeController : Controller
         return request.HasPrompt(Prompts.Consent) switch
         {
             false when permanentAuthorizations.Any() => await AuthorizeAsync(
-                user.Id,
+                user,
                 application,
                 scopeNames,
                 authorization: permanentAuthorizations.LastOrDefault(),
@@ -154,7 +154,7 @@ public class AuthorizeController : Controller
                 cancellationToken),
 
             false when consentType == ConsentTypes.Implicit => await AuthorizeAsync(
-                user.Id,
+                user,
                 application,
                 scopeNames,
                 authorization: null,
@@ -261,7 +261,7 @@ public class AuthorizeController : Controller
             cancellationToken);
 
         return await AuthorizeAsync(
-            user.Id,
+            user,
             application,
             scopes: scopeNames,
             authorization: permanentAuthorizations.LastOrDefault(),
@@ -339,24 +339,38 @@ public class AuthorizeController : Controller
     }
 
     private async Task<IActionResult> AuthorizeAsync(
-        Guid userId,
+        User user,
         ApplicationModel application,
         ImmutableArray<string> scopes,
         AuthorizationModel? authorization,
         string type,
         CancellationToken ct)
     {
-        var roles = await _userManager.GetRolesAsync(userId, ct);
+        var roles = await _userManager.GetRolesAsync(user.Id, ct);
 
         var identity = new ClaimsIdentity(
             authenticationType: TokenValidationParameters.DefaultAuthenticationType,
             nameType: Claims.Name,
             roleType: Claims.Role);
 
-        identity.SetClaim(Claims.Name, User.GetClaim(ClaimTypes.Name));
-        identity.SetClaim(Claims.Picture, User.GetClaim(Claims.Picture));
+        var host = new UriBuilder(
+            HttpContext.Request.Scheme,
+            HttpContext.Request.Host.Host,
+            HttpContext.Request.Host.Port ?? 80
+        );
+        
+        identity.SetClaim(Claims.Subject, user.Id.ToString());
+        identity.SetClaim(Claims.Email, $"{user.Username.ToLower()}@users.{host}");
+        identity.SetClaim(Claims.Name, user.Username);
 
-        identity.SetClaim(Claims.Subject, userId.ToString());
+        if (scopes.Any(x => x.StartsWith(Constants.Scopes.Account.All)))
+        {
+            identity.SetClaim(Claims.Nickname, user.Username);
+            identity.SetClaim(Claims.PreferredUsername, user.Username);
+            identity.SetClaim(Claims.Profile, host + $"@{user.Username}");
+            identity.SetClaim(Claims.Picture, host + $"api/users/{user.Id}/avatar.png");
+        }
+
         identity.SetClaim(Claims.ClientId, application.ClientId);
         identity.SetClaim(Constants.Claims.ApplicationId, application.Id.ToString());
 
@@ -370,9 +384,13 @@ public class AuthorizeController : Controller
         identity.SetDestinations(static claim => claim.Type switch
         {
             Claims.Subject => [Destinations.IdentityToken, Destinations.AccessToken],
-            Claims.Name => [Destinations.IdentityToken, Destinations.AccessToken],
-            Claims.Picture => [Destinations.IdentityToken],
 
+            Claims.Email => [Destinations.IdentityToken],
+            Claims.Name => [Destinations.IdentityToken],
+            Claims.Nickname => [Destinations.IdentityToken],
+            Claims.PreferredUsername => [Destinations.IdentityToken],
+            Claims.Profile => [Destinations.IdentityToken],
+            Claims.Picture => [Destinations.IdentityToken],
             Claims.Role => [Destinations.IdentityToken],
 
             _ => [Destinations.AccessToken]
@@ -382,7 +400,7 @@ public class AuthorizeController : Controller
         {
             authorization = await _authorizationManager.CreateAsync(
                 identity: identity,
-                subject: userId.ToString(),
+                subject: user.Id.ToString(),
                 client: application.Id.ToString(),
                 type: type,
                 scopes: scopes,
