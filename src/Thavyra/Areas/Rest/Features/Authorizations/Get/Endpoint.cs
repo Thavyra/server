@@ -25,11 +25,6 @@ public class Endpoint : Endpoint<Request, AuthorizationResponse>
         Get("/authorizations/{Id}");
         
         Description(x => x.AutoTagOverride("Connections"));
-        
-        Summary(x =>
-        {
-            x.Summary = "Get Connection";
-        });
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)

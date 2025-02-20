@@ -4,5 +4,8 @@ namespace Thavyra.Rest.Features.Redirects.Delete;
 
 public class Request : ApplicationRequest
 {
+    /// <summary>
+    /// Redirect id
+    /// </summary>
     public Guid Id { get; set; }
 }

@@ -7,6 +7,11 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
+    
+    <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>CS1591</NoWarn>
+    </PropertyGroup>
 
     <ItemGroup>
       <Content Include="..\..\.dockerignore">
@@ -17,6 +22,7 @@
     <ItemGroup>
       <PackageReference Include="AWSSDK.S3" Version="3.7.405.9" />
       <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+      <PackageReference Include="Bogus" Version="35.6.1" />
       <PackageReference Include="FastEndpoints" Version="5.31.0" />
       <PackageReference Include="FastEndpoints.ClientGen.Kiota" Version="5.31.0" />
       <PackageReference Include="FastEndpoints.Swagger" Version="5.31.0" />

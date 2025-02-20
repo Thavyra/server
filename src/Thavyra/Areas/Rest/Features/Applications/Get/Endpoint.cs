@@ -41,8 +41,8 @@ public class Endpoint : Endpoint<ApplicationRequest, ApplicationResponse>
         
         await SendAsync(new ApplicationResponse
         {
-            Id = application.Id.ToString(),
-            OwnerId = application.OwnerId.ToString(),
+            Id = application.Id,
+            OwnerId = application.OwnerId,
 
             Name = application.Name,
             Description = application.Description,

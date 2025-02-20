@@ -1,4 +1,5 @@
 using FastEndpoints;
+using FastEndpoints.Swagger;
 using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using Thavyra.Contracts;
@@ -28,10 +29,7 @@ public class Endpoint : Endpoint<Request, List<ScopeResponse>>
     {
         Get("/authorizations/{AuthorizationId}/scopes");
         
-        Summary(x =>
-        {
-            x.Summary = "Get Authorization Scopes";
-        });
+        Description(x => x.AutoTagOverride("Connections"));
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)

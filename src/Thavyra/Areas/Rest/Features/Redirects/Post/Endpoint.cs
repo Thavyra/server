@@ -1,4 +1,5 @@
 using FastEndpoints;
+using FastEndpoints.Swagger;
 using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using Thavyra.Contracts.Application;
@@ -21,10 +22,7 @@ public class Endpoint : Endpoint<Request, RedirectResponse>
     {
         Post("/applications/{Application}/redirects");
         
-        Summary(x =>
-        {
-            x.Summary = "Create Redirect";
-        });
+        Description(x => x.AutoTagOverride("OpenID Connect"));
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)

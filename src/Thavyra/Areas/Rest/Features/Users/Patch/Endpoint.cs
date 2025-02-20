@@ -25,10 +25,6 @@ public class Endpoint : Endpoint<Request, UserResponse>
     public override void Configure()
     {
         Patch("/users/{User}");
-        Summary(x =>
-        {
-            x.Summary = "Modify User";
-        });
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)

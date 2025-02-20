@@ -23,6 +23,7 @@ public readonly struct JsonNullable<T> where T : notnull
     }
 
     public bool IsNull => _isNull;
+    public T? Value => _value;
 
     public static implicit operator JsonNullable<T>(T? value) => value is null ? Null() : new(value);
     public static implicit operator T?(JsonNullable<T> value) => value._value;

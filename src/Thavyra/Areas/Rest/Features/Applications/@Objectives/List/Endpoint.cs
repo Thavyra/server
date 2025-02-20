@@ -23,7 +23,7 @@ public class Endpoint : Endpoint<ApplicationRequest, List<ObjectiveResponse>>
     {
         Get("/applications/{Application}/objectives");
         
-        Description(x => x.AutoTagOverride("Applications"));
+        Description(x => x.AutoTagOverride("Scoreboard"));
         
         Summary(x =>
         {

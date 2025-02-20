@@ -61,7 +61,7 @@ public class UserService : IUserService
     {
         var response = new UserResponse
         {
-            Id = user.Id.ToString(),
+            Id = user.Id,
             Username = user.Username,
             Description = user.Description,
             CreatedAt = user.CreatedAt

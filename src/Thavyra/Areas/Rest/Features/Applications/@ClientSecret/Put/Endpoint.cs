@@ -1,4 +1,5 @@
 using FastEndpoints;
+using FastEndpoints.Swagger;
 using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using Thavyra.Contracts.Application;
@@ -21,10 +22,10 @@ public class Endpoint : Endpoint<ApplicationRequest, Response>
     {
         Put("/applications/{Application}/client_secret");
         
-        Summary(x =>
-        {
-            x.Summary = "Reset Client Secret";
-        });
+        Description(x => x
+            .ClearDefaultAccepts()
+            .AutoTagOverride("OpenID Connect")
+        );
     }
 
     public override async Task HandleAsync(ApplicationRequest req, CancellationToken ct)

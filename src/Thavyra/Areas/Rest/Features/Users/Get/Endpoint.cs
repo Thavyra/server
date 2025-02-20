@@ -14,16 +14,11 @@ public class Endpoint : Endpoint<UserRequest, UserResponse>
     {
         _userService = userService;
     }
-
+    
     public override void Configure()
     {
         Get("/users/{User}");
         AllowAnonymous();
-        Summary(x =>
-        {
-            x.Summary = "Get User";
-            x.RequestParam(r => r.User, "&lt;guid&gt; or '@me' or '@&lt;username&gt;'");
-        });
         Description(x =>
         {
             x.Produces(404);

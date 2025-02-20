@@ -1,4 +1,5 @@
 using FastEndpoints;
+using FastEndpoints.Swagger;
 using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using Thavyra.Contracts;
@@ -23,13 +24,7 @@ public class Endpoint : Endpoint<UserRequest, List<ApplicationResponse>>
     {
         Get("/users/{User}/applications");
         
-        Description(x => x
-            .ProducesProblemDetails(403));
-        
-        Summary(x =>
-        {
-            x.Summary = "Get User Applications";
-        });
+        Description(x => x.AutoTagOverride("Applications"));
     }
 
     public override async Task HandleAsync(UserRequest req, CancellationToken ct)
@@ -60,8 +55,8 @@ public class Endpoint : Endpoint<UserRequest, List<ApplicationResponse>>
         await SendAsync(applicationResponse.Message.Items.Select(application =>
             new ApplicationResponse
             {
-                Id = application.Id.ToString(),
-                OwnerId = application.OwnerId.ToString(),
+                Id = application.Id,
+                OwnerId = application.OwnerId,
 
                 Name = application.Name,
                 Description = application.Description,

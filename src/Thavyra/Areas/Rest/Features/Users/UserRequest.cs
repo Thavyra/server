@@ -6,7 +6,7 @@ namespace Thavyra.Rest.Features.Users;
 public class UserRequest : RequestWithAuthentication
 {
     /// <summary>
-    /// User slug retrieved from request fields.
+    /// User id, `@me` to reference the current subject, or `@&lt;username&gt;` to find by username.
     /// </summary>
     public UserQuery? User { get; set; }
 }

@@ -22,10 +22,6 @@ public class Endpoint : Endpoint<Request>
     public override void Configure()
     {
         Post("/users/{User}/roles/{Id}");
-        Summary(x =>
-        {
-            x.Summary = "Grant Role";
-        });
         Description(x => x.AutoTagOverride("Roles"));
     }
 

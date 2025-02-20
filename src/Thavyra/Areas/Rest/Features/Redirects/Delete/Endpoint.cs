@@ -1,4 +1,5 @@
 using FastEndpoints;
+using FastEndpoints.Swagger;
 using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using Thavyra.Contracts;
@@ -22,10 +23,7 @@ public class Endpoint : Endpoint<Request>
     {
         Delete("/applications/{Application}/redirects/{Id}");
         
-        Summary(x =>
-        {
-            x.Summary = "Delete Redirect";
-        });
+        Description(x => x.AutoTagOverride("OpenID Connect"));
     }
 
     public override async Task HandleAsync(Request req, CancellationToken ct)
